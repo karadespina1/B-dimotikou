@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Το 0 και το 1 – Μάθημα 11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F5ECEC; --panel:#FFFFFF; --ink:#2E2226; --muted:#6B5A5F;
+  --accent:#A03A3A; --accent-ink:#FFFFFF; --rose:#E8C4C7; --rose-soft:#F6E3E4;
+  --on:#FFC93C; --ray:#F0A000; --off:#BFC5CC; --line:#4A3F43; --current:#FF9F1C;
+  --ok:#2E8B57; --ok-soft:#DDF3E6; --bad:#C0392B; --bad-soft:#FBE1DE;
+  --shadow:0 3px 0 rgba(160,58,58,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#211819; --panel:#33262A; --ink:#F7ECEC; --muted:#C9B4B8;
+    --accent:#E58B8B; --accent-ink:#2A1416; --rose:#5A3A40; --rose-soft:#3F2B2F;
+    --on:#FFD24D; --ray:#FFB020; --off:#6E757D; --line:#E9DDDF; --current:#FFB347;
+    --ok:#6FD39A; --ok-soft:#1F3B2C; --bad:#FF8A7A; --bad-soft:#4A2521;
+    --shadow:0 3px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#211819; --panel:#33262A; --ink:#F7ECEC; --muted:#C9B4B8;
+  --accent:#E58B8B; --accent-ink:#2A1416; --rose:#5A3A40; --rose-soft:#3F2B2F;
+  --on:#FFD24D; --ray:#FFB020; --off:#6E757D; --line:#E9DDDF; --current:#FFB347;
+  --ok:#6FD39A; --ok-soft:#1F3B2C; --bad:#FF8A7A; --bad-soft:#4A2521;
+  --shadow:0 3px 0 rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:19px;line-height:1.5;
+}
+h1,h2,.digit,.big{font-family:"Comfortaa","Noto Sans",system-ui,Arial,sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:16px 14px 40px}
+header{padding:8px 4px 12px}
+h1{margin:0;font-size:clamp(28px,7vw,42px);line-height:1.1;color:var(--accent)}
+.sub{margin:6px 0 0;color:var(--muted);font-size:17px}
+
+.tabs{display:flex;gap:8px;margin:10px 0 14px}
+.tab{
+  flex:1 1 0;min-width:0;font:inherit;font-weight:700;font-size:17px;cursor:pointer;
+  padding:12px 10px;border-radius:14px;border:3px solid var(--rose);
+  background:var(--panel);color:var(--ink);min-height:52px;
+}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab .star{display:none}
+.tab.done .star{display:inline}
+
+button{font-family:inherit}
+:focus-visible{outline:4px solid var(--current);outline-offset:3px}
+
+.panel{background:var(--panel);border:3px solid var(--rose);border-radius:22px;padding:18px 16px 22px}
+.panel[hidden]{display:none}
+h2{margin:0 0 6px;font-size:clamp(22px,5.5vw,28px);color:var(--accent)}
+.instr{display:flex;gap:10px;align-items:flex-start;margin:0 0 14px}
+.instr p{margin:0;flex:1}
+.say{
+  flex:none;width:48px;height:48px;border-radius:50%;border:3px solid var(--rose);
+  background:var(--rose-soft);font-size:22px;cursor:pointer;color:var(--ink)
+}
+
+.btn{
+  font:inherit;font-weight:700;font-size:20px;cursor:pointer;
+  padding:14px 22px;min-height:56px;border-radius:16px;border:0;
+  background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);
+}
+.btn.alt{background:var(--rose-soft);color:var(--ink);border:3px solid var(--rose);box-shadow:none}
+.btn:active{transform:translateY(2px)}
+.btn[disabled]{opacity:.45;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+
+.msg{
+  margin:14px 0 0;padding:12px 14px;border-radius:14px;font-weight:700;
+  background:var(--rose-soft);min-height:52px;display:flex;align-items:center
+}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+
+.remember{margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--rose-soft);border-left:8px solid var(--accent)}
+.remember b{color:var(--accent)}
+
+/* lamps */
+.lamp{display:block;width:100%;height:auto}
+.lamp .glow{fill:var(--on);opacity:0;transition:opacity .3s}
+.lamp .rays line{stroke:var(--ray);stroke-width:5;stroke-linecap:round}
+.lamp .rays{opacity:0;transition:opacity .3s}
+.lamp .glass{fill:var(--off);stroke:var(--line);stroke-width:4;transition:fill .3s}
+.lamp .fil{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round;opacity:.7}
+.lamp .base{fill:var(--off);stroke:var(--line);stroke-width:4}
+.lamp .baseline{stroke:var(--line);stroke-width:3}
+.on .lamp .glow,.lamp.on .glow{opacity:.35}
+.on .lamp .rays,.lamp.on .rays{opacity:1}
+.on .lamp .glass,.lamp.on .glass{fill:var(--on)}
+
+/* activity A */
+.stage{background:var(--rose-soft);border-radius:18px;padding:8px}
+.stage svg{display:block;width:100%;height:auto}
+.wire{fill:none;stroke:var(--line);stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.flow{fill:none;stroke:var(--current);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2 16;opacity:0;animation:flow .7s linear infinite}
+.stage.on .flow{opacity:1}
+@keyframes flow{to{stroke-dashoffset:-18}}
+.lever{stroke:var(--line);stroke-width:9;stroke-linecap:round;transform-box:view-box;transform-origin:220px 130px;transform:rotate(-30deg);transition:transform .25s}
+.stage.on .lever{transform:rotate(0deg)}
+.term{fill:var(--accent)}
+.batt{fill:var(--panel);stroke:var(--line);stroke-width:5}
+.stage text{fill:var(--ink);font-family:"Noto Sans",system-ui,Arial,sans-serif;font-size:22px;font-weight:700;text-anchor:middle}
+.readout{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-top:12px}
+.digitbox{
+  width:104px;height:104px;border-radius:20px;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font-size:72px;font-weight:700;line-height:1;box-shadow:var(--shadow)
+}
+.readout .lbl{margin:0;font-size:17px;color:var(--muted)}
+.readout .st{margin:2px 0 0;font-weight:700}
+.goal{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.goal .grp{display:flex;align-items:center;gap:6px}
+.dot{width:22px;height:22px;border-radius:50%;border:3px solid var(--rose);background:transparent}
+.dot.fill{background:var(--ok);border-color:var(--ok)}
+
+/* activity B */
+.roundinfo{font-size:16px;color:var(--muted);margin:0 0 10px}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:6px}
+.col{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px 4px;border-radius:16px;border:3px solid transparent}
+.col.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .35s}
+.col.right{border-color:var(--ok);background:var(--ok-soft)}
+.digit{
+  width:100%;max-width:92px;aspect-ratio:1;border-radius:16px;background:var(--rose-soft);border:3px solid var(--rose);
+  display:grid;place-items:center;font-size:clamp(38px,11vw,56px);font-weight:700;color:var(--accent);line-height:1
+}
+.digit.empty{color:var(--muted);opacity:.6}
+.lampbtn{width:100%;max-width:112px;padding:4px;background:transparent;border:3px dashed var(--rose);border-radius:16px;cursor:pointer;color:inherit}
+.lampfix{width:100%;max-width:112px;padding:4px}
+.choices{display:flex;gap:6px;width:100%;justify-content:center}
+.choice{
+  flex:1;max-width:52px;min-height:52px;font-size:26px;font-weight:700;border-radius:12px;
+  border:3px solid var(--rose);background:var(--panel);color:var(--ink);cursor:pointer;font-family:"Comfortaa","Noto Sans",Arial,sans-serif
+}
+.choice[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* activity C */
+.pool{margin:8px 0 16px}
+.progress{font-size:16px;color:var(--muted);margin:0 0 6px}
+.card{
+  display:flex;gap:14px;align-items:center;text-align:left;font-weight:700;font-size:22px;line-height:1.3;
+  padding:18px 16px;min-height:96px;border-radius:18px;border:4px solid var(--accent);background:var(--panel);color:var(--ink)
+}
+.card .ic{font-size:44px;flex:none}
+.card.shake{animation:shake .35s;border-color:var(--bad);background:var(--bad-soft)}
+.buckets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bucket{
+  font:inherit;text-align:center;border-radius:18px;border:4px dashed var(--accent);background:var(--rose-soft);color:var(--ink);
+  padding:10px 8px 12px;cursor:pointer;min-height:170px
+}
+.bucket .big{display:block;font-size:56px;font-weight:700;color:var(--accent);line-height:1.1}
+.bucket .cap{display:block;font-weight:700;margin-bottom:8px}
+.bucket .placed{display:flex;flex-direction:column;gap:6px;text-align:left}
+.bucket .chip{background:var(--ok-soft);color:var(--ink);border-radius:10px;padding:6px 8px;font-size:15px;font-weight:700;line-height:1.25}
+.pool:empty{display:none}
+.bucket .pic{display:block;width:64px;margin:0 auto 2px}
+.cardrow{display:flex;gap:10px;align-items:center}
+.cardrow .card{flex:1}
+
+.banner{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:20px}
+.banner[hidden]{display:none}
+
+@media (max-width:480px){
+  body{font-size:18px}
+  .tab{font-size:14px;padding:10px 4px}
+  .digitbox{width:88px;height:88px;font-size:60px}
+  .buckets{gap:8px}
+  .bucket .big{font-size:46px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Το 0 και το 1</h1>
+    <p class="sub">Μάθημα 11: Ο υπολογιστής είναι ψηφιακή συσκευή</p>
+  </header>
+
+  <p class="banner" id="all" hidden>Τα έκανες όλα! Ο υπολογιστής μιλάει με 0 και 1, και τώρα το ξέρεις κι εσύ.</p>
+
+  <div class="tabs" role="tablist" aria-label="Δραστηριότητες">
+    <button class="tab" role="tab" id="tab0" aria-controls="p0" aria-selected="true">Α. Διακόπτης <span class="star" aria-hidden="true">⭐</span></button>
+    <button class="tab" role="tab" id="tab1" aria-controls="p1" aria-selected="false">Β. Λάμπες <span class="star" aria-hidden="true">⭐</span></button>
+    <button class="tab" role="tab" id="tab2" aria-controls="p2" aria-selected="false">Γ. Αναμμένο ή σβηστό; <span class="star" aria-hidden="true">⭐</span></button>
+  </div>
+
+  <!-- Δραστηριότητα Α -->
+  <section class="panel" id="p0" role="tabpanel" aria-labelledby="tab0">
+    <h2>Πάτα τον διακόπτη</h2>
+    <div class="instr">
+      <p id="i0">Πάτα τον διακόπτη και δες τι γράφει ο υπολογιστής.</p>
+      <button class="say" data-say="i0" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+
+    <div class="stage" id="stage">
+      <svg viewBox="0 0 600 280" role="img" aria-label="Κύκλωμα με μπαταρία, διακόπτη και λάμπα">
+        <g id="wires">
+          <path class="wire" d="M100 130 H220"/>
+          <path class="wire" d="M320 130 H380 V210 H510 V150"/>
+          <path class="wire" d="M62 180 V250 H530 V150"/>
+          <path class="flow" d="M100 130 H220"/>
+          <path class="flow" d="M320 130 H380 V210 H510 V150"/>
+          <path class="flow" d="M62 180 V250 H530 V150"/>
+        </g>
+        <rect class="batt" x="24" y="100" width="76" height="80" rx="10"/>
+        <text x="62" y="147">Ρεύμα</text>
+        <line class="lever" x1="220" y1="130" x2="320" y2="130"/>
+        <circle class="term" cx="220" cy="130" r="9"/>
+        <circle class="term" cx="320" cy="130" r="9"/>
+        <text x="270" y="172">Διακόπτης</text>
+        <g class="lampg lamp" transform="translate(460,28)"></g>
+      </svg>
+    </div>
+
+    <div class="readout">
+      <div class="digitbox" id="digitA" aria-live="polite">0</div>
+      <div>
+        <p class="lbl">Ο υπολογιστής γράφει ένα δυαδικό ψηφίο:</p>
+        <p class="st" id="stA">Δεν περνάει ηλεκτρικό ρεύμα. Η λάμπα είναι σβηστή.</p>
+      </div>
+    </div>
+
+    <div class="row"><button class="btn" id="toggleA">Πάτα τον διακόπτη</button></div>
+
+    <div class="goal" aria-label="Στόχος">
+      <span>Άναψε 2 φορές:</span>
+      <span class="grp" id="dotsOn"><span class="dot"></span><span class="dot"></span></span>
+      <span>Σβήσε 2 φορές:</span>
+      <span class="grp" id="dotsOff"><span class="dot"></span><span class="dot"></span></span>
+    </div>
+    <div class="msg" id="msgA">Ξεκίνα! Πάτα το κουμπί.</div>
+
+    <div class="remember">
+      <b>Θυμάμαι:</b> Ο υπολογιστής είναι ψηφιακή συσκευή. Γράφει τα ηλεκτρικά σήματα με ψηφία 0 και 1.
+      Κάθε 0 ή 1 λέγεται <b>δυαδικό ψηφίο</b> (bit).
+    </div>
+  </section>
+
+  <!-- Δραστηριότητα Β -->
+  <section class="panel" id="p1" role="tabpanel" aria-labelledby="tab1" hidden>
+    <h2>Λάμπες και ψηφία</h2>
+    <p class="roundinfo" id="roundInfo"></p>
+    <div class="instr">
+      <p id="i1"></p>
+      <button class="say" data-say="i1" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+    <div class="cols" id="colsB"></div>
+    <div class="msg" id="msgB"></div>
+    <div class="row">
+      <button class="btn" id="checkB">Έλεγχος</button>
+      <button class="btn alt" id="nextB" hidden>Επόμενο</button>
+      <button class="btn alt" id="againB" hidden>Ξανά από την αρχή</button>
+    </div>
+    <div class="remember"><b>Θυμάμαι:</b> αναμμένη λάμπα = <b>1</b>, σβηστή λάμπα = <b>0</b>.</div>
+  </section>
+
+  <!-- Δραστηριότητα Γ -->
+  <section class="panel" id="p2" role="tabpanel" aria-labelledby="tab2" hidden>
+    <h2>Αναμμένο ή σβηστό;</h2>
+    <div class="instr">
+      <p id="i2">Διάβασε την κάρτα. Αν είναι αναμμένο, πάτα το 1. Αν είναι σβηστό, πάτα το 0.</p>
+      <button class="say" data-say="i2" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+    <p class="progress" id="progC"></p>
+    <div class="pool" id="pool"></div>
+    <div class="buckets">
+      <button class="bucket" id="b1" aria-label="Στήλη 1, αναμμένο"><span class="pic" data-lamp="on"></span><span class="big">1</span><span class="cap">αναμμένο</span><span class="placed" id="pl1"></span></button>
+      <button class="bucket" id="b0" aria-label="Στήλη 0, σβηστό"><span class="pic" data-lamp="off"></span><span class="big">0</span><span class="cap">σβηστό</span><span class="placed" id="pl0"></span></button>
+    </div>
+    <div class="msg" id="msgC">Πού ταιριάζει αυτή η κάρτα;</div>
+    <div class="row"><button class="btn alt" id="againC" hidden>Ξανά από την αρχή</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Κοινά ---------- */
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  function lampInner(){
+    var rays = "";
+    for (var i = 0; i < 8; i++){
+      var a = i * Math.PI / 4;
+      rays += '<line x1="' + (60 + Math.cos(a)*44).toFixed(1) + '" y1="' + (58 + Math.sin(a)*44).toFixed(1) +
+              '" x2="' + (60 + Math.cos(a)*55).toFixed(1) + '" y2="' + (58 + Math.sin(a)*55).toFixed(1) + '"/>';
+    }
+    return '<circle class="glow" cx="60" cy="58" r="56"/>' +
+           '<g class="rays">' + rays + '</g>' +
+           '<rect class="base" x="44" y="88" width="32" height="32" rx="6"/>' +
+           '<line class="baseline" x1="44" y1="100" x2="76" y2="100"/>' +
+           '<line class="baseline" x1="44" y1="110" x2="76" y2="110"/>' +
+           '<circle class="glass" cx="60" cy="58" r="36"/>' +
+           '<path class="fil" d="M46 60 q7 -16 14 0 t14 0"/>';
+  }
+  function lampSVG(on){
+    return '<svg class="lamp' + (on ? ' on' : '') + '" viewBox="0 0 120 124" aria-hidden="true">' + lampInner() + '</svg>';
+  }
+
+  var done = [false, false, false];
+  function markDone(i){
+    if (done[i]) return;
+    done[i] = true;
+    $("#tab" + i).classList.add("done");
+    if (done[0] && done[1] && done[2]) $("#all").hidden = false;
+  }
+
+  /* Ανάγνωση οδηγιών φωναχτά (αν το υποστηρίζει η συσκευή) */
+  var canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  $$(".say").forEach(function(b){
+    if (!canSpeak){ b.hidden = true; return; }
+    b.addEventListener("click", function(){
+      var el = document.getElementById(b.getAttribute("data-say"));
+      try{
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(el.textContent);
+        u.lang = "el-GR"; u.rate = 0.9;
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    });
+  });
+
+  /* Καρτέλες */
+  var tabs = $$(".tab"), panels = $$(".panel");
+  function showTab(n){
+    tabs.forEach(function(t, i){ t.setAttribute("aria-selected", i === n ? "true" : "false"); });
+    panels.forEach(function(p, i){ p.hidden = i !== n; });
+    if (canSpeak) try{ window.speechSynthesis.cancel(); }catch(e){}
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener("click", function(){ showTab(i); });
+    t.addEventListener("keydown", function(e){
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft"){
+        var n = (i + (e.key === "ArrowRight" ? 1 : 2)) % 3;
+        showTab(n); tabs[n].focus();
+      }
+    });
+  });
+
+  /* ---------- Δραστηριότητα Α ---------- */
+  (function(){
+    var stage = $("#stage");
+    $(".lampg", stage).innerHTML = lampInner();
+    var isOn = false, onCount = 0, offCount = 0;
+    var digit = $("#digitA"), st = $("#stA"), msg = $("#msgA");
+
+    function dots(id, n){
+      $$(".dot", $(id)).forEach(function(d, i){ d.classList.toggle("fill", i < n); });
+    }
+    $("#toggleA").addEventListener("click", function(){
+      isOn = !isOn;
+      stage.classList.toggle("on", isOn);
+      digit.textContent = isOn ? "1" : "0";
+      st.textContent = isOn
+        ? "Περνάει ηλεκτρικό ρεύμα. Η λάμπα είναι αναμμένη."
+        : "Δεν περνάει ηλεκτρικό ρεύμα. Η λάμπα είναι σβηστή.";
+      if (isOn) onCount++; else offCount++;
+      dots("#dotsOn", Math.min(onCount, 2));
+      dots("#dotsOff", Math.min(offCount, 2));
+      msg.classList.remove("ok");
+      if (onCount >= 2 && offCount >= 2){
+        msg.textContent = "Μπράβο! Αναμμένη λάμπα = 1. Σβηστή λάμπα = 0.";
+        msg.classList.add("ok");
+        markDone(0);
+      } else if (isOn){
+        msg.textContent = "Άναψε! Ο υπολογιστής γράφει 1.";
+      } else {
+        msg.textContent = "Έσβησε! Ο υπολογιστής γράφει 0.";
+      }
+    });
+  })();
+
+  /* ---------- Δραστηριότητα Β ---------- */
+  (function(){
+    var rounds = [
+      {mode:"lamps",  code:[1,0,0,1]},
+      {mode:"digits", code:[1,1,0,1]},
+      {mode:"lamps",  code:[0,1,1,1]},
+      {mode:"digits", code:[0,0,1,0]},
+      {mode:"lamps",  code:[1,0,1,1]},
+      {mode:"digits", code:[0,1,0,0]}
+    ];
+    var r = 0, user = [], solved = false, firstTry = 0, triedThis = false;
+    var cols = $("#colsB"), msg = $("#msgB");
+    var check = $("#checkB"), next = $("#nextB"), again = $("#againB");
+    var info = $("#roundInfo"), instr = $("#i1");
+
+    function setMsg(t, cls){ msg.textContent = t; msg.className = "msg" + (cls ? " " + cls : ""); }
+
+    function start(n){
+      r = n; solved = false; triedThis = false;
+      var R = rounds[r];
+      user = R.mode === "lamps" ? [0,0,0,0] : [null,null,null,null];
+      info.textContent = "Άσκηση " + (r + 1) + " από " + rounds.length;
+      instr.textContent = R.mode === "lamps"
+        ? "Ο υπολογιστής έστειλε αυτά τα ψηφία. Πάτα τις λάμπες: άναψε τη λάμπα όπου βλέπεις 1."
+        : "Κοίταξε τις λάμπες. Διάλεξε 0 ή 1 για κάθε λάμπα.";
+      setMsg(R.mode === "lamps" ? "Άναψε τις σωστές λάμπες και πάτα «Έλεγχος»." : "Διάλεξε ψηφία και πάτα «Έλεγχος».");
+      check.hidden = false; check.disabled = false;
+      next.hidden = true; again.hidden = true;
+      render();
+    }
+
+    function render(){
+      var R = rounds[r], html = "";
+      for (var i = 0; i < 4; i++){
+        html += '<div class="col" data-i="' + i + '">';
+        if (R.mode === "lamps"){
+          html += '<div class="digit">' + R.code[i] + '</div>' +
+                  '<button class="lampbtn" data-i="' + i + '" aria-pressed="' + (user[i] ? "true" : "false") + '" aria-label="Λάμπα ' + (i+1) + '">' + lampSVG(!!user[i]) + '</button>';
+        } else {
+          html += '<div class="digit' + (user[i] === null ? ' empty' : '') + '">' + (user[i] === null ? "?" : user[i]) + '</div>' +
+                  '<div class="lampfix">' + lampSVG(R.code[i] === 1) + '</div>' +
+                  '<div class="choices">' +
+                    '<button class="choice" data-i="' + i + '" data-v="0" aria-pressed="' + (user[i] === 0) + '" aria-label="Λάμπα ' + (i+1) + ': 0">0</button>' +
+                    '<button class="choice" data-i="' + i + '" data-v="1" aria-pressed="' + (user[i] === 1) + '" aria-label="Λάμπα ' + (i+1) + ': 1">1</button>' +
+                  '</div>';
+        }
+        html += '</div>';
+      }
+      cols.innerHTML = html;
+    }
+
+    cols.addEventListener("click", function(e){
+      if (solved) return;
+      var lb = e.target.closest(".lampbtn"), ch = e.target.closest(".choice");
+      var R = rounds[r];
+      if (lb){
+        var i = +lb.getAttribute("data-i");
+        user[i] = user[i] ? 0 : 1;
+        render(); clearMarks();
+      } else if (ch){
+        var j = +ch.getAttribute("data-i");
+        user[j] = +ch.getAttribute("data-v");
+        render(); clearMarks();
+      }
+    });
+    function clearMarks(){ $$(".col", cols).forEach(function(c){ c.classList.remove("wrong"); }); }
+
+    check.addEventListener("click", function(){
+      var R = rounds[r];
+      if (R.mode === "digits" && user.indexOf(null) !== -1){
+        setMsg("Διάλεξε ψηφίο για κάθε λάμπα.", "bad"); return;
+      }
+      var bad = [];
+      for (var i = 0; i < 4; i++){ if (user[i] !== R.code[i]) bad.push(i); }
+      if (bad.length === 0){
+        solved = true;
+        if (!triedThis) firstTry++;
+        $$(".col", cols).forEach(function(c){ c.classList.add("right"); });
+        $$("button", cols).forEach(function(b){ b.disabled = true; });
+        check.hidden = true;
+        if (r < rounds.length - 1){
+          setMsg("Σωστά! Μπράβο!", "ok");
+          next.hidden = false; next.focus();
+        } else {
+          setMsg("Τέλειωσες! Σωστά με την πρώτη: " + firstTry + " από " + rounds.length + ". Μπράβο!", "ok");
+          again.hidden = false;
+          markDone(1);
+        }
+      } else {
+        triedThis = true;
+        clearMarks();
+        var cs = $$(".col", cols);
+        bad.forEach(function(i){ cs[i].classList.add("wrong"); });
+        setMsg("Σχεδόν! Κοίταξε τις στήλες με το κόκκινο. Θυμήσου: αναμμένη = 1, σβηστή = 0.", "bad");
+      }
+    });
+    next.addEventListener("click", function(){ start(r + 1); });
+    again.addEventListener("click", function(){ firstTry = 0; start(0); });
+    start(0);
+  })();
+
+  /* ---------- Δραστηριότητα Γ ---------- */
+  (function(){
+    $$(".bucket .pic").forEach(function(el){ el.innerHTML = lampSVG(el.getAttribute("data-lamp") === "on"); });
+    var cards = [
+      {id:"a", ic:"💡", t:"Η λάμπα είναι αναμμένη", ans:1},
+      {id:"b", ic:"💡", t:"Η λάμπα είναι σβηστή", ans:0},
+      {id:"c", ic:"🔦", t:"Ο φακός είναι αναμμένος", ans:1},
+      {id:"d", ic:"🔦", t:"Ο φακός είναι σβηστός", ans:0},
+      {id:"e", ic:"📺", t:"Η τηλεόραση είναι αναμμένη", ans:1},
+      {id:"f", ic:"📺", t:"Η τηλεόραση είναι σβηστή", ans:0}
+    ];
+    var pool = $("#pool"), msg = $("#msgC"), again = $("#againC"), prog = $("#progC");
+    var remaining = [], mistakes = 0;
+
+    function shuffle(a){
+      a = a.slice();
+      for (var i = a.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+    function setMsg(t, cls){ msg.textContent = t; msg.className = "msg" + (cls ? " " + cls : ""); }
+
+    function reset(){
+      mistakes = 0;
+      remaining = shuffle(cards);
+      $("#pl0").innerHTML = ""; $("#pl1").innerHTML = "";
+      again.hidden = true;
+      $("#b0").disabled = false; $("#b1").disabled = false;
+      setMsg("Πού ταιριάζει αυτή η κάρτα; Πάτα το 1 ή το 0.");
+      draw();
+    }
+    function draw(){
+      if (remaining.length === 0){ pool.innerHTML = ""; prog.textContent = ""; return; }
+      var c = remaining[0];
+      prog.textContent = "Κάρτα " + (cards.length - remaining.length + 1) + " από " + cards.length;
+      pool.innerHTML = '<div class="cardrow"><div class="card" id="curCard"><span class="ic" aria-hidden="true">' + c.ic + '</span><span id="curText">' + c.t + '</span></div>' +
+        (canSpeak ? '<button class="say" id="sayC" aria-label="Άκουσε την κάρτα">🔊</button>' : '') + '</div>';
+      var sb = $("#sayC");
+      if (sb) sb.addEventListener("click", function(){
+        try{ window.speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(c.t); u.lang = "el-GR"; u.rate = 0.9; window.speechSynthesis.speak(u); }catch(e){}
+      });
+    }
+    function place(v){
+      if (remaining.length === 0) return;
+      var c = remaining[0];
+      if (c.ans === v){
+        var chip = document.createElement("span");
+        chip.className = "chip"; chip.textContent = c.t;
+        $("#pl" + v).appendChild(chip);
+        remaining.shift();
+        draw();
+        if (remaining.length === 0){
+          setMsg("Μπράβο! Έβαλες όλες τις κάρτες σωστά" + (mistakes ? " (λάθη: " + mistakes + ")." : " χωρίς κανένα λάθος!"), "ok");
+          again.hidden = false; $("#b0").disabled = true; $("#b1").disabled = true; markDone(2);
+        } else {
+          setMsg("Σωστά! Πάμε στην επόμενη κάρτα.", "ok");
+        }
+      } else {
+        mistakes++;
+        var el = $("#curCard");
+        if (el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+        setMsg("Όχι ακόμα. Θυμήσου: αναμμένο = 1, σβηστό = 0. Δοκίμασε την άλλη στήλη.", "bad");
+      }
+    }
+    $("#b1").addEventListener("click", function(){ place(1); });
+    $("#b0").addEventListener("click", function(){ place(0); });
+    again.addEventListener("click", reset);
+    reset();
+  })();
+})();
+</script>
+</body>
+</html>
