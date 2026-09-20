@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Είσοδος, Επεξεργασία, Έξοδος – Μάθημα 11</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@500;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F5ECEC; --panel:#FFFFFF; --ink:#2E2226; --muted:#6B5A5F;
+  --accent:#A03A3A; --accent-ink:#FFFFFF; --rose:#E8C4C7; --rose-soft:#F6E3E4;
+  --line:#4A3F43; --focus:#E58A00;
+  --ok:#2E8B57; --ok-soft:#DDF3E6; --bad:#C0392B; --bad-soft:#FBE1DE;
+  --in:#2A6F97; --proc:#A65F00; --out:#2E7D4F; --tag-ink:#FFFFFF;
+  --in-soft:#E1EFF7; --proc-soft:#FBEBCF; --out-soft:#DDF1E4;
+  --shadow:0 3px 0 rgba(160,58,58,.25);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#211819; --panel:#33262A; --ink:#F7ECEC; --muted:#C9B4B8;
+    --accent:#E58B8B; --accent-ink:#2A1416; --rose:#5A3A40; --rose-soft:#3F2B2F;
+    --line:#E9DDDF; --focus:#FFB347;
+    --ok:#6FD39A; --ok-soft:#1F3B2C; --bad:#FF8A7A; --bad-soft:#4A2521;
+    --in:#7CC0E6; --proc:#F0B45A; --out:#7BD19B; --tag-ink:#1E1416;
+    --in-soft:#20343F; --proc-soft:#41331E; --out-soft:#1F3B2C;
+    --shadow:0 3px 0 rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#211819; --panel:#33262A; --ink:#F7ECEC; --muted:#C9B4B8;
+  --accent:#E58B8B; --accent-ink:#2A1416; --rose:#5A3A40; --rose-soft:#3F2B2F;
+  --line:#E9DDDF; --focus:#FFB347;
+  --ok:#6FD39A; --ok-soft:#1F3B2C; --bad:#FF8A7A; --bad-soft:#4A2521;
+  --in:#7CC0E6; --proc:#F0B45A; --out:#7BD19B; --tag-ink:#1E1416;
+  --in-soft:#20343F; --proc-soft:#41331E; --out-soft:#1F3B2C;
+  --shadow:0 3px 0 rgba(0,0,0,.35);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Noto Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:19px;line-height:1.5;
+}
+h1,h2,.big{font-family:"Comfortaa","Noto Sans",system-ui,Arial,sans-serif}
+.wrap{max-width:780px;margin:0 auto;padding:16px 14px 40px}
+header{padding:8px 4px 12px}
+h1{margin:0;font-size:clamp(26px,6.5vw,40px);line-height:1.12;color:var(--accent)}
+.sub{margin:6px 0 0;color:var(--muted);font-size:17px}
+
+.tabs{display:flex;gap:8px;margin:10px 0 14px}
+.tab{
+  flex:1 1 0;min-width:0;font:inherit;font-weight:700;font-size:17px;cursor:pointer;
+  padding:12px 6px;border-radius:14px;border:3px solid var(--rose);
+  background:var(--panel);color:var(--ink);min-height:52px;
+}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tab .star{display:none}
+.tab.done .star{display:inline}
+
+button,input{font-family:inherit}
+:focus-visible{outline:4px solid var(--focus);outline-offset:3px}
+
+.panel{background:var(--panel);border:3px solid var(--rose);border-radius:22px;padding:18px 16px 22px}
+.panel[hidden]{display:none}
+h2{margin:0 0 6px;font-size:clamp(22px,5.5vw,28px);color:var(--accent)}
+.instr{display:flex;gap:10px;align-items:flex-start;margin:0 0 14px}
+.instr p{margin:0;flex:1}
+.say{
+  flex:none;width:48px;height:48px;border-radius:50%;border:3px solid var(--rose);
+  background:var(--rose-soft);font-size:22px;cursor:pointer;color:var(--ink)
+}
+.btn{
+  font:inherit;font-weight:700;font-size:20px;cursor:pointer;
+  padding:14px 22px;min-height:56px;border-radius:16px;border:0;
+  background:var(--accent);color:var(--accent-ink);box-shadow:var(--shadow);
+}
+.btn.alt{background:var(--rose-soft);color:var(--ink);border:3px solid var(--rose);box-shadow:none}
+.btn:active{transform:translateY(2px)}
+.btn[disabled]{opacity:.45;cursor:default}
+.row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.msg{
+  margin:14px 0 0;padding:12px 14px;border-radius:14px;font-weight:700;
+  background:var(--rose-soft);min-height:52px;display:flex;align-items:center
+}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}
+.msg.bad{background:var(--bad-soft);color:var(--bad)}
+.remember{margin-top:18px;padding:14px 16px;border-radius:16px;background:var(--rose-soft);border-left:8px solid var(--accent)}
+.remember b{color:var(--accent)}
+.banner{margin:0 0 12px;padding:14px 16px;border-radius:16px;background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:20px}
+.banner[hidden]{display:none}
+.roundinfo{font-size:16px;color:var(--muted);margin:0 0 10px}
+
+/* ετικέτες σταδίου */
+.tag{display:inline-block;font-weight:700;font-size:16px;line-height:1.2;padding:5px 12px;border-radius:999px;color:var(--tag-ink)}
+.tag.in{background:var(--in)} .tag.proc{background:var(--proc)} .tag.out{background:var(--out)}
+
+/* Α: μηχανή */
+.picker{display:flex;gap:10px;margin-bottom:12px}
+.pick{
+  flex:1;font:inherit;font-weight:700;font-size:18px;padding:10px 6px;min-height:56px;border-radius:14px;
+  border:3px solid var(--rose);background:var(--panel);color:var(--ink);cursor:pointer
+}
+.pick[aria-pressed="true"]{background:var(--rose-soft);border-color:var(--accent)}
+.flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:4px;align-items:stretch}
+.box{border-radius:16px;padding:8px 4px 10px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:170px;border:3px solid transparent}
+.box.in{background:var(--in-soft)} .box.proc{background:var(--proc-soft)} .box.out{background:var(--out-soft)}
+.box.active{border-color:var(--line)}
+.box .ic{font-size:clamp(34px,10vw,56px);line-height:1.1;min-height:1.2em;display:block}
+.box .cap{font-size:15px;font-weight:700;line-height:1.25;padding:0 2px}
+.box .ic.empty{opacity:.3}
+.arrow{align-self:center;font-size:26px;color:var(--muted);font-weight:700}
+.gear{display:inline-block}
+.working .gear{animation:spin 1s linear infinite}
+.working .box.proc{animation:shake .3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.items{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.item{
+  font:inherit;min-width:96px;min-height:92px;border-radius:16px;border:3px solid var(--rose);background:var(--panel);color:var(--ink);
+  cursor:pointer;padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:700;font-size:15px
+}
+.item .ic{font-size:38px;line-height:1.1}
+.item[aria-pressed="true"]{border-color:var(--accent);background:var(--rose-soft);box-shadow:0 0 0 4px var(--focus)}
+.item[disabled]{opacity:.5;cursor:default}
+.goal{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.dot{width:22px;height:22px;border-radius:50%;border:3px solid var(--rose);display:inline-block}
+.dot.fill{background:var(--ok);border-color:var(--ok)}
+
+/* Β: σειρά */
+.slots{display:flex;flex-direction:column;gap:10px;margin:6px 0 14px}
+.slot{
+  display:grid;grid-template-columns:118px 1fr;gap:10px;align-items:center;text-align:left;font:inherit;width:100%;
+  padding:8px 10px;min-height:66px;border-radius:14px;border:3px dashed var(--rose);background:var(--panel);color:var(--ink);cursor:pointer
+}
+.slot.filled{border-style:solid;border-color:var(--line)}
+.slot.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .3s}
+.slot.right{border-color:var(--ok);background:var(--ok-soft)}
+.slot .txt{font-weight:700;font-size:18px;line-height:1.3}
+.slot .txt.ph{color:var(--muted);font-weight:400}
+.pool{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.pcard{
+  font:inherit;font-weight:700;font-size:18px;text-align:left;padding:12px 14px;min-height:60px;border-radius:14px;
+  border:3px solid var(--accent);background:var(--panel);color:var(--ink);cursor:pointer
+}
+.pcard:active{transform:translateY(2px)}
+.pool:empty{display:none}
+.machineTitle{display:flex;gap:10px;align-items:center;font-weight:700;font-size:22px;margin:0 0 10px}
+.machineTitle .ic{font-size:40px}
+
+/* Γ: δεδομένα */
+.step{margin:0 0 16px;padding:12px;border-radius:16px}
+.step.in{background:var(--in-soft)} .step.proc{background:var(--proc-soft)} .step.out{background:var(--out-soft)}
+.step h3{margin:0 0 8px;font-size:18px}
+.field{margin:10px 0 0}
+.field label{display:block;font-weight:700;margin-bottom:4px}
+.field input[type=text]{
+  width:100%;font:inherit;font-size:22px;padding:10px 12px;border-radius:12px;border:3px solid var(--rose);background:var(--panel);color:var(--ink);min-height:56px
+}
+.opts{display:flex;gap:8px;flex-wrap:wrap}
+.opt{
+  font:inherit;font-weight:700;font-size:18px;min-height:52px;min-width:64px;padding:8px 14px;border-radius:12px;
+  border:3px solid var(--rose);background:var(--panel);color:var(--ink);cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center
+}
+.opt[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.sw{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);display:inline-block}
+.infocard{background:var(--panel);border:3px solid var(--out);border-radius:14px;padding:12px 14px}
+.infocard h4{margin:0 0 6px;font-size:18px}
+.infocard p{margin:2px 0}
+.infocard .sentence{margin-top:8px;font-weight:700}
+.quiz{margin-top:6px}
+.quiz .qtitle{font-weight:700;margin:0 0 8px}
+.answers{display:flex;flex-direction:column;gap:10px}
+.ans{
+  font:inherit;font-weight:700;font-size:19px;text-align:left;padding:12px 14px;min-height:60px;border-radius:14px;
+  border:3px solid var(--rose);background:var(--panel);color:var(--ink);cursor:pointer
+}
+.ans.wrong{border-color:var(--bad);background:var(--bad-soft);animation:shake .3s}
+.ans.right{border-color:var(--ok);background:var(--ok-soft)}
+
+@media (max-width:480px){
+  body{font-size:18px}
+  .tab{font-size:14px;padding:10px 4px}
+  .slot{grid-template-columns:1fr;gap:4px}
+  .arrow{font-size:20px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Είσοδος, Επεξεργασία, Έξοδος</h1>
+    <p class="sub">Μάθημα 11 (β΄ μέρος): Πώς δουλεύουν τα μηχανήματα και ο υπολογιστής</p>
+  </header>
+
+  <p class="banner" id="all" hidden>Τα έκανες όλα! Τώρα ξέρεις πώς δουλεύει ένα μηχάνημα και ο υπολογιστής.</p>
+
+  <div class="tabs" role="tablist" aria-label="Δραστηριότητες">
+    <button class="tab" role="tab" id="tab0" aria-controls="p0" aria-selected="true">Α. Μηχανές <span class="star" aria-hidden="true">⭐</span></button>
+    <button class="tab" role="tab" id="tab1" aria-controls="p1" aria-selected="false">Β. Σειρά <span class="star" aria-hidden="true">⭐</span></button>
+    <button class="tab" role="tab" id="tab2" aria-controls="p2" aria-selected="false">Γ. Δεδομένα <span class="star" aria-hidden="true">⭐</span></button>
+  </div>
+
+  <!-- Α -->
+  <section class="panel" id="p0" role="tabpanel" aria-labelledby="tab0">
+    <h2>Δοκίμασε τις μηχανές</h2>
+    <div class="instr">
+      <p id="i0">Διάλεξε μια μηχανή. Βάλε κάτι μέσα και πάτα «Επεξεργασία». Δες τι βγαίνει!</p>
+      <button class="say" data-say="i0" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+    <div class="picker" id="picker">
+      <button class="pick" data-m="juice" aria-pressed="true">🧃 Μηχανή χυμού</button>
+      <button class="pick" data-m="wash" aria-pressed="false">🧺 Πλυντήριο</button>
+    </div>
+    <div id="flowA"></div>
+    <div class="items" id="itemsA"></div>
+    <div class="row"><button class="btn" id="goA" disabled>Επεξεργασία</button><button class="btn alt" id="clearA" hidden>Ξανά</button></div>
+    <div class="goal"><span>Φτιάξε 2 πράγματα:</span><span id="dotsA"><span class="dot"></span> <span class="dot"></span></span></div>
+    <div class="msg" id="msgA"></div>
+    <div class="remember">
+      <b>Θυμάμαι:</b> Τα μηχανήματα παίρνουν κάτι (<b>είσοδος</b>), κάνουν κάποιες ενέργειες (<b>επεξεργασία</b>)
+      και δίνουν κάτι διαφορετικό (<b>έξοδος</b>).
+    </div>
+  </section>
+
+  <!-- Β -->
+  <section class="panel" id="p1" role="tabpanel" aria-labelledby="tab1" hidden>
+    <h2>Βάλε τα βήματα στη σειρά</h2>
+    <p class="roundinfo" id="roundInfo"></p>
+    <div class="machineTitle" id="mTitle"></div>
+    <div class="instr">
+      <p id="i1">Πάτα τις κάρτες με τη σωστή σειρά: πρώτα Είσοδος, μετά Επεξεργασία, στο τέλος Έξοδος.</p>
+      <button class="say" data-say="i1" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+    <div class="slots" id="slots"></div>
+    <div class="pool" id="poolB"></div>
+    <div class="msg" id="msgB"></div>
+    <div class="row">
+      <button class="btn" id="checkB" disabled>Έλεγχος</button>
+      <button class="btn alt" id="nextB" hidden>Επόμενο</button>
+      <button class="btn alt" id="againB" hidden>Ξανά από την αρχή</button>
+    </div>
+    <div class="remember"><b>Θυμάμαι:</b> πρώτα βάζω κάτι, μετά η μηχανή δουλεύει, στο τέλος βγαίνει το αποτέλεσμα.</div>
+  </section>
+
+  <!-- Γ -->
+  <section class="panel" id="p2" role="tabpanel" aria-labelledby="tab2" hidden>
+    <h2>Ο υπολογιστής και τα δεδομένα</h2>
+    <div class="instr">
+      <p id="i2">Δώσε στον υπολογιστή δεδομένα για σένα. Ο υπολογιστής θα τα επεξεργαστεί και θα σου δώσει πληροφορίες.</p>
+      <button class="say" data-say="i2" aria-label="Άκουσε την οδηγία">🔊</button>
+    </div>
+
+    <div class="step in">
+      <h3><span class="tag in">Είσοδος</span> Δεδομένα</h3>
+      <div class="field">
+        <label for="nameIn">Πώς σε λένε; (μόνο το μικρό σου όνομα)</label>
+        <input type="text" id="nameIn" maxlength="20" autocomplete="off" placeholder="Γράψε εδώ">
+      </div>
+      <div class="field">
+        <label id="ageLbl">Πόσων ετών είσαι;</label>
+        <div class="opts" id="ageOpts" role="group" aria-labelledby="ageLbl"></div>
+      </div>
+      <div class="field">
+        <label id="colLbl">Ποιο χρώμα σου αρέσει;</label>
+        <div class="opts" id="colOpts" role="group" aria-labelledby="colLbl"></div>
+      </div>
+    </div>
+
+    <div class="step proc">
+      <h3><span class="tag proc">Επεξεργασία</span> Ο υπολογιστής δουλεύει</h3>
+      <div class="row" style="margin-top:0"><button class="btn" id="goC">⚙️ Επεξεργασία</button></div>
+    </div>
+
+    <div class="step out" id="outStep" aria-live="polite">
+      <h3><span class="tag out">Έξοδος</span> Πληροφορίες</h3>
+      <div id="outC"><p style="margin:0;color:var(--muted)">Οι πληροφορίες θα εμφανιστούν εδώ.</p></div>
+    </div>
+
+    <div class="quiz" id="quiz" hidden>
+      <p class="qtitle">Ερώτηση: Μέσα στον υπολογιστή, τα δεδομένα αποθηκεύονται:</p>
+      <div class="answers">
+        <button class="ans" data-ok="1">με ηλεκτρικά σήματα, 0 και 1</button>
+        <button class="ans" data-ok="0">με γράμματα και αριθμούς</button>
+      </div>
+    </div>
+    <div class="msg" id="msgC">Συμπλήρωσε τα δεδομένα και πάτα «Επεξεργασία».</div>
+    <div class="remember"><b>Θυμάμαι:</b> Ο υπολογιστής παίρνει <b>δεδομένα</b> (κείμενα, αριθμούς, εικόνες, ήχους), τα επεξεργάζεται και δίνει <b>πληροφορίες</b>.
+    Τα αποθηκεύει με δυαδικά ψηφία, 0 και 1. Εδώ δεν αποθηκεύεται τίποτα.</div>
+  </section>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s, r){ return (r||document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  var done = [false,false,false];
+  function markDone(i){
+    if (done[i]) return;
+    done[i] = true;
+    $("#tab" + i).classList.add("done");
+    if (done[0] && done[1] && done[2]) $("#all").hidden = false;
+  }
+  function setMsg(el, t, cls){ el.textContent = t; el.className = "msg" + (cls ? " " + cls : ""); }
+  function shuffle(a){
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  var canSpeak = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+  function speak(text){
+    if (!canSpeak) return;
+    try{
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = "el-GR"; u.rate = 0.9;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  $$(".say").forEach(function(b){
+    if (!canSpeak){ b.hidden = true; return; }
+    b.addEventListener("click", function(){ speak(document.getElementById(b.getAttribute("data-say")).textContent); });
+  });
+
+  var tabs = $$(".tab"), panels = $$(".panel");
+  function showTab(n){
+    tabs.forEach(function(t, i){ t.setAttribute("aria-selected", i === n ? "true" : "false"); });
+    panels.forEach(function(p, i){ p.hidden = i !== n; });
+    if (canSpeak) try{ window.speechSynthesis.cancel(); }catch(e){}
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener("click", function(){ showTab(i); });
+    t.addEventListener("keydown", function(e){
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft"){
+        var n = (i + (e.key === "ArrowRight" ? 1 : 2)) % 3;
+        showTab(n); tabs[n].focus();
+      }
+    });
+  });
+
+  /* ---------- Α: Μηχανές ---------- */
+  (function(){
+    var machines = {
+      juice:{ work:"Η μηχανή στύβει…", gear:"⚙️", inCap:"Βάλε φρούτα", items:[
+        {ic:"🍊", n:"πορτοκάλια", outIc:"🥤🍊", outT:"Χυμός πορτοκάλι"},
+        {ic:"🍎", n:"μήλα",       outIc:"🥤🍎", outT:"Χυμός μήλο"},
+        {ic:"🍓", n:"φράουλες",   outIc:"🥤🍓", outT:"Χυμός φράουλα"}
+      ]},
+      wash:{ work:"Το πλυντήριο πλένει…", gear:"🌀", inCap:"Βάλε ρούχα", items:[
+        {ic:"👕", n:"λερό μπλουζάκι", outIc:"👕✨", outT:"Καθαρό μπλουζάκι"},
+        {ic:"🧦", n:"λερές κάλτσες",  outIc:"🧦✨", outT:"Καθαρές κάλτσες"},
+        {ic:"👖", n:"λερό παντελόνι", outIc:"👖✨", outT:"Καθαρό παντελόνι"}
+      ]}
+    };
+    var cur = "juice", sel = -1, busy = false, finished = false, runs = 0;
+    var flow = $("#flowA"), itemsEl = $("#itemsA"), go = $("#goA"), clear = $("#clearA"), msg = $("#msgA");
+
+    function renderItems(){
+      var M = machines[cur];
+      itemsEl.innerHTML = M.items.map(function(it, i){
+        return '<button class="item" data-i="' + i + '" aria-pressed="' + (sel === i) + '"' + ((busy || finished) ? " disabled" : "") + '>' +
+               '<span class="ic" aria-hidden="true">' + it.ic + '</span><span>' + it.n + '</span></button>';
+      }).join("");
+    }
+    function renderFlow(stage){
+      var M = machines[cur], it = sel >= 0 ? M.items[sel] : null;
+      var inHtml  = it ? it.ic : "❓";
+      var inCap   = it ? it.n : M.inCap;
+      var outHtml = (finished && it) ? it.outIc : "❓";
+      var outCap  = (finished && it) ? it.outT : "Περιμένω…";
+      flow.className = "flow" + (busy ? " working" : "");
+      flow.innerHTML =
+        '<div class="box in' + (stage === "in" ? " active" : "") + '"><span class="tag in">Είσοδος</span><span class="ic' + (it ? "" : " empty") + '" aria-hidden="true">' + inHtml + '</span><span class="cap">' + inCap + '</span></div>' +
+        '<div class="arrow" aria-hidden="true">➜</div>' +
+        '<div class="box proc' + (stage === "proc" ? " active" : "") + '"><span class="tag proc">Επεξεργασία</span><span class="ic"><span class="gear" aria-hidden="true">' + M.gear + '</span></span><span class="cap">' + (busy ? M.work : "Η μηχανή") + '</span></div>' +
+        '<div class="arrow" aria-hidden="true">➜</div>' +
+        '<div class="box out' + (stage === "out" ? " active" : "") + '"><span class="tag out">Έξοδος</span><span class="ic' + (finished ? "" : " empty") + '" aria-hidden="true">' + outHtml + '</span><span class="cap">' + outCap + '</span></div>';
+    }
+    function dots(){ $$(".dot", $("#dotsA")).forEach(function(d, i){ d.classList.toggle("fill", i < runs); }); }
+
+    function reset(){
+      sel = -1; busy = false; finished = false;
+      go.disabled = true; clear.hidden = true;
+      renderFlow("in"); renderItems();
+      setMsg(msg, "Διάλεξε τι θα βάλεις στη μηχανή. Αυτό είναι η Είσοδος.");
+    }
+    $("#picker").addEventListener("click", function(e){
+      var b = e.target.closest(".pick"); if (!b || busy) return;
+      cur = b.getAttribute("data-m");
+      $$(".pick").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      reset();
+    });
+    itemsEl.addEventListener("click", function(e){
+      var b = e.target.closest(".item"); if (!b || busy || finished) return;
+      sel = +b.getAttribute("data-i");
+      go.disabled = false;
+      renderFlow("proc"); renderItems();
+      setMsg(msg, "Τώρα πάτα «Επεξεργασία». Η μηχανή θα κάνει τη δουλειά της.");
+    });
+    go.addEventListener("click", function(){
+      if (sel < 0 || busy) return;
+      busy = true; go.disabled = true;
+      renderFlow("proc"); renderItems();
+      setMsg(msg, machines[cur].work);
+      setTimeout(function(){
+        busy = false; finished = true; runs++;
+        renderFlow("out"); renderItems(); dots();
+        clear.hidden = false;
+        var it = machines[cur].items[sel];
+        if (runs >= 2){
+          setMsg(msg, "Έξοδος: " + it.outT + "! Μπράβο! Κατάλαβες: η μηχανή παίρνει κάτι, το επεξεργάζεται και δίνει κάτι άλλο.", "ok");
+          markDone(0);
+        } else {
+          setMsg(msg, "Έξοδος: " + it.outT + "! Πάτα «Ξανά» και φτιάξε κι άλλο.", "ok");
+        }
+      }, 1400);
+    });
+    clear.addEventListener("click", reset);
+    reset();
+  })();
+
+  /* ---------- Β: Σειρά ---------- */
+  (function(){
+    var rounds = [
+      {ic:"🧃", t:"Μηχανή χυμού", steps:["Βάζω πορτοκάλια","Η μηχανή στύβει","Βγαίνει χυμός"]},
+      {ic:"🧺", t:"Πλυντήριο",    steps:["Βάζω λερά ρούχα","Το πλυντήριο πλένει","Βγαίνουν καθαρά ρούχα"]},
+      {ic:"💻", t:"Υπολογιστής",  steps:["Γράφω 2 + 3","Ο υπολογιστής κάνει την πράξη","Βγαίνει το αποτέλεσμα 5"]}
+    ];
+    var labels = [["in","Είσοδος"],["proc","Επεξεργασία"],["out","Έξοδος"]];
+    var r = 0, slots, poolIdx, solved, firstTry = 0, triedThis;
+    var slotsEl = $("#slots"), poolEl = $("#poolB"), msg = $("#msgB");
+    var check = $("#checkB"), next = $("#nextB"), again = $("#againB");
+
+    function start(n){
+      r = n; solved = false; triedThis = false;
+      slots = [null,null,null];
+      var order;
+      do { order = shuffle([0,1,2]); } while (order[0] === 0 && order[1] === 1);
+      poolIdx = order;
+      $("#roundInfo").textContent = "Μηχανή " + (r + 1) + " από " + rounds.length;
+      $("#mTitle").innerHTML = '<span class="ic" aria-hidden="true">' + rounds[r].ic + '</span><span>' + rounds[r].t + '</span>';
+      check.hidden = false; check.disabled = true; next.hidden = true; again.hidden = true;
+      setMsg(msg, "Πάτα μια κάρτα για να τη βάλεις στη σειρά.");
+      render();
+    }
+    function render(){
+      var S = rounds[r].steps;
+      slotsEl.innerHTML = labels.map(function(l, i){
+        var v = slots[i];
+        return '<button class="slot' + (v !== null ? " filled" : "") + '" data-s="' + i + '" aria-label="' + l[1] + '">' +
+               '<span><span class="tag ' + l[0] + '">' + l[1] + '</span></span>' +
+               '<span class="txt' + (v === null ? " ph" : "") + '">' + (v === null ? "Πάτα μια κάρτα" : S[v]) + '</span></button>';
+      }).join("");
+      poolEl.innerHTML = poolIdx.map(function(v){
+        return '<button class="pcard" data-v="' + v + '">' + S[v] + '</button>';
+      }).join("");
+      check.disabled = slots.indexOf(null) !== -1 || solved;
+    }
+    poolEl.addEventListener("click", function(e){
+      var b = e.target.closest(".pcard"); if (!b || solved) return;
+      var v = +b.getAttribute("data-v"), pos = slots.indexOf(null);
+      if (pos === -1) return;
+      slots[pos] = v;
+      poolIdx = poolIdx.filter(function(x){ return x !== v; });
+      render();
+      setMsg(msg, poolIdx.length ? "Πάτα την επόμενη κάρτα." : "Πάτα «Έλεγχος».");
+    });
+    slotsEl.addEventListener("click", function(e){
+      var b = e.target.closest(".slot"); if (!b || solved) return;
+      var i = +b.getAttribute("data-s");
+      if (slots[i] === null) return;
+      poolIdx.push(slots[i]); slots[i] = null;
+      render();
+      setMsg(msg, "Η κάρτα γύρισε πίσω. Βάλε την όπου ταιριάζει.");
+    });
+    check.addEventListener("click", function(){
+      var bad = [];
+      for (var i = 0; i < 3; i++) if (slots[i] !== i) bad.push(i);
+      var els = $$(".slot", slotsEl);
+      if (!bad.length){
+        solved = true;
+        if (!triedThis) firstTry++;
+        els.forEach(function(s){ s.classList.add("right"); });
+        check.hidden = true;
+        if (r < rounds.length - 1){
+          setMsg(msg, "Σωστά! Μπράβο!", "ok"); next.hidden = false; next.focus();
+        } else {
+          setMsg(msg, "Τέλειωσες! Σωστά με την πρώτη: " + firstTry + " από " + rounds.length + ". Μπράβο!", "ok");
+          again.hidden = false; markDone(1);
+        }
+      } else {
+        triedThis = true;
+        bad.forEach(function(i){ els[i].classList.add("wrong"); });
+        setMsg(msg, "Σχεδόν! Πάτα τα κόκκινα κουτιά για να γυρίσουν οι κάρτες και δοκίμασε ξανά. Πρώτα Είσοδος, μετά Επεξεργασία, στο τέλος Έξοδος.", "bad");
+      }
+    });
+    next.addEventListener("click", function(){ start(r + 1); });
+    again.addEventListener("click", function(){ firstTry = 0; start(0); });
+    start(0);
+  })();
+
+  /* ---------- Γ: Δεδομένα ---------- */
+  (function(){
+    var ages = [6,7,8,9];
+    var cols = [
+      {n:"κόκκινο", c:"#D64545"}, {n:"μπλε", c:"#2F6FD6"}, {n:"κίτρινο", c:"#F2C230"}, {n:"πράσινο", c:"#2E9E5B"}
+    ];
+    var age = null, col = null, processed = false, answered = false;
+    var nameIn = $("#nameIn"), ageOpts = $("#ageOpts"), colOpts = $("#colOpts");
+    var out = $("#outC"), msg = $("#msgC"), quiz = $("#quiz");
+
+    ageOpts.innerHTML = ages.map(function(a){ return '<button class="opt" data-a="' + a + '" aria-pressed="false">' + a + ' ετών</button>'; }).join("");
+    colOpts.innerHTML = cols.map(function(c, i){ return '<button class="opt" data-c="' + i + '" aria-pressed="false"><span class="sw" style="background:' + c.c + '"></span>' + c.n + '</button>'; }).join("");
+
+    function invalidate(){
+      if (!processed) return;
+      processed = false;
+      out.innerHTML = '<p style="margin:0;color:var(--muted)">Οι πληροφορίες θα εμφανιστούν εδώ.</p>';
+      quiz.hidden = true;
+    }
+    ageOpts.addEventListener("click", function(e){
+      var b = e.target.closest(".opt"); if (!b) return;
+      age = +b.getAttribute("data-a");
+      $$(".opt", ageOpts).forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      invalidate();
+    });
+    colOpts.addEventListener("click", function(e){
+      var b = e.target.closest(".opt"); if (!b) return;
+      col = +b.getAttribute("data-c");
+      $$(".opt", colOpts).forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+      invalidate();
+    });
+    nameIn.addEventListener("input", invalidate);
+
+    $("#goC").addEventListener("click", function(){
+      var name = nameIn.value.trim();
+      if (!name){ setMsg(msg, "Γράψε πρώτα το όνομά σου.", "bad"); nameIn.focus(); return; }
+      if (age === null){ setMsg(msg, "Διάλεξε πόσων ετών είσαι.", "bad"); return; }
+      if (col === null){ setMsg(msg, "Διάλεξε ένα χρώμα.", "bad"); return; }
+      var btn = $("#goC"); btn.disabled = true;
+      out.innerHTML = '<p style="margin:0;font-weight:700"><span style="display:inline-block;animation:spin 1s linear infinite">⚙️</span> Ο υπολογιστής επεξεργάζεται τα δεδομένα…</p>';
+      setMsg(msg, "Ο υπολογιστής δουλεύει…");
+      setTimeout(function(){
+        btn.disabled = false; processed = true;
+        var card = document.createElement("div"); card.className = "infocard";
+        var h = document.createElement("h4"); h.textContent = "Πληροφορίες για " + name; card.appendChild(h);
+        [["Όνομα", name], ["Ηλικία", age + " ετών"], ["Τάξη", "Β΄ Δημοτικού"], ["Αγαπημένο χρώμα", cols[col].n]].forEach(function(p){
+          var el = document.createElement("p"); var b = document.createElement("b");
+          b.textContent = p[0] + ": "; el.appendChild(b); el.appendChild(document.createTextNode(p[1])); card.appendChild(el);
+        });
+        var s = document.createElement("p"); s.className = "sentence";
+        s.textContent = "Με λένε " + name + ". Είμαι " + age + " ετών. Το αγαπημένο μου χρώμα είναι το " + cols[col].n + ".";
+        card.appendChild(s);
+        out.innerHTML = ""; out.appendChild(card);
+        quiz.hidden = false;
+        $$(".ans", quiz).forEach(function(a){ a.classList.remove("wrong","right"); });
+        setMsg(msg, "Έξοδος: ο υπολογιστής έδωσε πληροφορίες! Τώρα απάντησε στην ερώτηση.", "ok");
+      }, 1400);
+    });
+
+    quiz.addEventListener("click", function(e){
+      var b = e.target.closest(".ans"); if (!b) return;
+      if (b.getAttribute("data-ok") === "1"){
+        b.classList.add("right");
+        setMsg(msg, "Σωστά! Ο υπολογιστής αποθηκεύει τα δεδομένα με ηλεκτρικά σήματα, 0 και 1. Μπράβο!", "ok");
+        markDone(2);
+      } else {
+        b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+        setMsg(msg, "Όχι ακόμα. Θυμήσου το μάθημα με τη λάμπα: αναμμένη = 1, σβηστή = 0.", "bad");
+      }
+    });
+  })();
+})();
+</script>
+</body>
+</html>
