@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 11: Ο υπολογιστής είναι ψηφιακή συσκευή - Παιχνίδια</title>
+<style>
+  :root {
+    --primary: #4a69bd;
+    --success: #2ed573;
+    --danger: #ff4757;
+    --warning: #ffa502;
+    --bg: #f1f2f6;
+    --card: #ffffff;
+    --text: #2f3542;
+  }
+  body {
+    font-family: 'Comic Sans MS', 'Comfortaa', 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    text-align: center;
+    max-width: 850px;
+    margin-bottom: 25px;
+  }
+  h1 {
+    color: #1e3799;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    color: #57606f;
+  }
+  .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 900px;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    background: #fff;
+    border: 2px solid #38ada9;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    color: #079992;
+  }
+  .tab-btn:hover, .tab-btn.active {
+    background: #38ada9;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .game-container {
+    background: var(--card);
+    width: 100%;
+    max-width: 850px;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 25px;
+    box-sizing: border-box;
+    display: none;
+  }
+  .game-container.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .game-title {
+    color: #0c2461;
+    border-bottom: 3px dashed #b8e994;
+    padding-bottom: 10px;
+    margin-top: 0;
+  }
+  .instruction {
+    font-size: 1.1rem;
+    margin: 15px 0;
+    color: #2f3542;
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 5px solid #38ada9;
+  }
+  .feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: none;
+    text-align: center;
+  }
+  .feedback.show { display: block; }
+  .feedback.success { background: #d4edda; color: #155724; }
+  .feedback.error { background: #f8d7da; color: #721c24; }
+
+  /* Generic interactive components */
+  .btn-choice {
+    background: #74b9ff;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 8px;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .btn-choice:hover { background: #0984e3; transform: scale(1.05); }
+  .btn-action {
+    background: #38ada9;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    font-size: 1.05rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+  .btn-action:hover { background: #079992; }
+
+  /* Game 1: Switch & Bulb */
+  .bulb-arena {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  .bulb-display {
+    font-size: 5rem;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.1));
+  }
+  .bulb-on { filter: drop-shadow(0 0 25px #ffd32a); }
+  .bit-box {
+    font-size: 2.2rem;
+    font-weight: bold;
+    background: #2f3542;
+    color: #eccc68;
+    padding: 10px 30px;
+    border-radius: 12px;
+    border: 3px solid #ffa502;
+  }
+
+  /* Game 2: Sorting / Buckets */
+  .drop-targets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .drop-box {
+    border: 3px dashed #70a1ff;
+    background: #f1f2f6;
+    border-radius: 12px;
+    min-height: 140px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .drop-box h4 { margin: 0 0 10px 0; color: #1e3799; font-size: 1rem; }
+  .draggables-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+    min-height: 50px;
+    padding: 15px;
+    background: #e4e7eb;
+    border-radius: 12px;
+  }
+  .drag-item {
+    background: #fff;
+    border: 2px solid #5352ed;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: grab;
+    font-weight: bold;
+    user-select: none;
+  }
+
+  /* Machine Animation */
+  .machine-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: #eef2f7;
+    padding: 20px;
+    border-radius: 15px;
+  }
+  .step-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    width: 170px;
+  }
+  .step-card select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid #38ada9;
+    font-size: 1rem;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💻 Πληροφορική Β΄ Δημοτικού - Μάθημα 11</h1>
+  <div class="subtitle">«Ο υπολογιστής είναι ψηφιακή συσκευή» • 8 Διαδραστικά Παιχνίδια</div>
+</header>
+
+<div class="nav-tabs" id="navTabs">
+  <button class="tab-btn active" onclick="openGame(1)">1. Διακόπτης & 0/1</button>
+  <button class="tab-btn" onclick="openGame(2)">2. Το Μυστικό Δυαδικό</button>
+  <button class="tab-btn" onclick="openGame(3)">3. Το Μαγικό Πλυντήριο</button>
+  <button class="tab-btn" onclick="openGame(4)">4. Ο Αποχυμωτής</button>
+  <button class="tab-btn" onclick="openGame(5)">5. Ταξινόμηση Δεδομένων</button>
+  <button class="tab-btn" onclick="openGame(6)">6. Δεδομένο ή Πληροφορία;</button>
+  <button class="tab-btn" onclick="openGame(7)">7. Ο Υπερ-Υπολογιστής</button>
+  <button class="tab-btn" onclick="openGame(8)">8. Μεγάλο Κουίζ Bit</button>
+</div>
+
+<!-- GAME 1 -->
+<div class="game-container active" id="game1">
+  <h2 class="game-title">💡 Παιχνίδι 1: Άναψε τη Λάμπα με 0 και 1!</h2>
+  <div class="instruction">
+    Όταν περνάει ηλεκτρικό ρεύμα, η λάμπα ανάβει και έχουμε το ψηφίο <strong>1</strong>. Όταν δεν περνάει, σβήνει και έχουμε το <strong>0</strong>.
+  </div>
+  <div class="bulb-arena">
+    <div id="bulbIcon" class="bulb-display">💡</div>
+    <div id="bitState" class="bit-box">Ψηφίο (Bit): 1</div>
+    <div style="font-size: 1.2rem; font-weight: bold; color: #2ed573;" id="bulbStatusText">Η λάμπα είναι ΑΝΑΜΜΕΝΗ! (Ρεύμα ΝΑΙ)</div>
+    <button class="btn-action" style="font-size: 1.2rem; padding: 14px 28px;" onclick="toggleLight()">🔌 Πάτησε τον Διακόπτη!</button>
+  </div>
+</div>
+
+<!-- GAME 2 -->
+<div class="game-container" id="game2">
+  <h2 class="game-title">🕵️‍♂️ Παιχνίδι 2: Βρες το Σωστό Δυαδικό Ψηφίο (Bit)</h2>
+  <div class="instruction">
+    Διάβασε την κατάσταση και διάλεξε αν ο υπολογιστής καταλαβαίνει <strong>1</strong> ή <strong>0</strong>.
+  </div>
+  <div id="g2-challenge" style="font-size: 1.3rem; font-weight: bold; text-align: center; margin: 25px 0;"></div>
+  <div style="display: flex; justify-content: center; gap: 20px;">
+    <button class="btn-choice" style="font-size: 2rem; padding: 15px 40px;" onclick="checkG2(1)">1</button>
+    <button class="btn-choice" style="font-size: 2rem; padding: 15px 40px;" onclick="checkG2(0)">0</button>
+  </div>
+  <div id="g2-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 3 -->
+<div class="game-container" id="game3">
+  <h2 class="game-title">🧺 Παιχνίδι 3: Η Μηχανή Πλυντήριο (Είσοδος - Επεξεργασία - Έξοδος)</h2>
+  <div class="instruction">
+    Όλα τα μηχανήματα λειτουργούν σε 3 βήματα: <strong>Είσοδος $\rightarrow$ Επεξεργασία $\rightarrow$ Έξοδος</strong>. Βάλε τα βήματα του πλυντηρίου στη σωστή σειρά!
+  </div>
+  <div class="machine-flow">
+    <div class="step-card">
+      <div style="font-size: 2.5rem;">📥</div>
+      <h3>1. Είσοδος</h3>
+      <select id="washStep1">
+        <option value="">-- Επίλεξε --</option>
+        <option value="wash">Πλύσιμο με νερό & σαπούνι</option>
+        <option value="dirty">Βάζουμε άπλυτα ρούχα</option>
+        <option value="clean">Παίρνουμε καθαρά & μοσχομυριστά ρούχα</option>
+      </select>
+    </div>
+    <div style="font-size: 2rem;">➡️</div>
+    <div class="step-card">
+      <div style="font-size: 2.5rem;">⚙️</div>
+      <h3>2. Επεξεργασία</h3>
+      <select id="washStep2">
+        <option value="">-- Επίλεξε --</option>
+        <option value="wash">Πλύσιμο με νερό & σαπούνι</option>
+        <option value="dirty">Βάζουμε άπλυτα ρούχα</option>
+        <option value="clean">Παίρνουμε καθαρά & μοσχομυριστά ρούχα</option>
+      </select>
+    </div>
+    <div style="font-size: 2rem;">➡️</div>
+    <div class="step-card">
+      <div style="font-size: 2.5rem;">📤</div>
+      <h3>3. Έξοδος</h3>
+      <select id="washStep3">
+        <option value="">-- Επίλεξε --</option>
+        <option value="wash">Πλύσιμο με νερό & σαπούνι</option>
+        <option value="dirty">Βάζουμε άπλυτα ρούχα</option>
+        <option value="clean">Παίρνουμε καθαρά & μοσχομυριστά ρούχα</option>
+      </select>
+    </div>
+  </div>
+  <div style="text-align: center;">
+    <button class="btn-action" onclick="checkG3()">Έλεγχος Πλυντηρίου!</button>
+  </div>
+  <div id="g3-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 4 -->
+<div class="game-container" id="game4">
+  <h2 class="game-title">🍊 Παιχνίδι 4: Ο Μαγικός Αποχυμωτής</h2>
+  <div class="instruction">
+    Αντιστοίχισε τα μέρη για να φτιάξουμε νόστιμο χυμό πορτοκάλι!
+  </div>
+  <div class="machine-flow">
+    <div class="step-card">
+      <h3>Είσοδος</h3>
+      <div style="font-size: 2.5rem;">❓</div>
+      <select id="juiceStep1">
+        <option value="">Επίλεξε...</option>
+        <option value="glass">Ένα ποτήρι δροσερός χυμός</option>
+        <option value="squeeze">Στύψιμο των πορτοκαλιών</option>
+        <option value="oranges">Φρέσκα πορτοκάλια</option>
+      </select>
+    </div>
+    <div style="font-size: 2rem;">➡️</div>
+    <div class="step-card">
+      <h3>Επεξεργασία</h3>
+      <div style="font-size: 2.5rem;">❓</div>
+      <select id="juiceStep2">
+        <option value="">Επίλεξε...</option>
+        <option value="glass">Ένα ποτήρι δροσερός χυμός</option>
+        <option value="squeeze">Στύψιμο των πορτοκαλιών</option>
+        <option value="oranges">Φρέσκα πορτοκάλια</option>
+      </select>
+    </div>
+    <div style="font-size: 2rem;">➡️</div>
+    <div class="step-card">
+      <h3>Έξοδος</h3>
+      <div style="font-size: 2.5rem;">❓</div>
+      <select id="juiceStep3">
+        <option value="">Επίλεξε...</option>
+        <option value="glass">Ένα ποτήρι δροσερός χυμός</option>
+        <option value="squeeze">Στύψιμο των πορτοκαλιών</option>
+        <option value="oranges">Φρέσκα πορτοκάλια</option>
+      </select>
+    </div>
+  </div>
+  <div style="text-align: center;">
+    <button class="btn-action" onclick="checkG4()">Έλεγχος Αποχυμωτή!</button>
+  </div>
+  <div id="g4-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 5 -->
+<div class="game-container" id="game5">
+  <h2 class="game-title">📦 Παιχνίδι 5: Ταξινόμησε τα Δεδομένα στα Κουτιά τους</h2>
+  <div class="instruction">
+    Στο βιβλίο μάθαμε 4 είδη δεδομένων: <strong>Κείμενο, Αριθμοί, Εικόνες, Ήχοι</strong>. Σύρε (ή κάνε κλικ) σε κάθε καρτέλα για να τη βάλεις στο σωστό κουτί!
+  </div>
+  <div class="draggables-pool" id="g5Pool">
+    <div class="drag-item" data-type="text">«σχολείο»</div>
+    <div class="drag-item" data-type="num">2026</div>
+    <div class="drag-item" data-type="sound">🎵 Τραγούδι mp3</div>
+    <div class="drag-item" data-type="image">🖼️ Φωτογραφία γάτας</div>
+    <div class="drag-item" data-type="text">«Υπατία»</div>
+    <div class="drag-item" data-type="num">7</div>
+    <div class="drag-item" data-type="sound">🔊 Γάβγισμα σκύλου</div>
+    <div class="drag-item" data-type="image">🎨 Ζωγραφιά λουλούδι</div>
+  </div>
+  <div class="drop-targets">
+    <div class="drop-box" id="box-text"><h4>📝 Κείμενο</h4></div>
+    <div class="drop-box" id="box-num"><h4>🔢 Αριθμοί</h4></div>
+    <div class="drop-box" id="box-image"><h4>🖼️ Εικόνες</h4></div>
+    <div class="drop-box" id="box-sound"><h4>🔊 Ήχοι</h4></div>
+  </div>
+  <div style="text-align: center; margin-top: 15px;">
+    <button class="btn-action" onclick="checkG5()">Έλεγχος Κουτιών!</button>
+    <button class="btn-action" style="background:#747d8c;" onclick="resetG5()">Επαναφορά</button>
+  </div>
+  <div id="g5-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 6 -->
+<div class="game-container" id="game6">
+  <h2 class="game-title">🧩 Παιχνίδι 6: Είναι Δεδομένο (Data) ή Πληροφορία;</h2>
+  <div class="instruction">
+    Θυμήσου: Τα <strong>δεδομένα</strong> είναι σκόρπια κομμάτια (λέξεις, αριθμοί). Η <strong>πληροφορία</strong> είναι το ολοκληρωμένο αποτέλεσμα με νόημα!
+  </div>
+  <div id="g6-card" style="font-size: 1.4rem; font-weight: bold; background: #e0f2fe; padding: 25px; border-radius: 12px; text-align: center; margin: 20px 0; color: #0284c7;"></div>
+  <div style="display:flex; justify-content: center; gap: 20px;">
+    <button class="btn-choice" style="background:#0984e3;" onclick="checkG6('data')">📄 Απλό Δεδομένο</button>
+    <button class="btn-choice" style="background:#6c5ce7;" onclick="checkG6('info')">💡 Πληροφορία (με νόημα)</button>
+  </div>
+  <div id="g6-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 7 -->
+<div class="game-container" id="game7">
+  <h2 class="game-title">🤖 Παιχνίδι 7: Φτιάξε την Πρόταση της Υπατίας!</h2>
+  <div class="instruction">
+    Ο υπολογιστής παίρνει 4 σκόρπια δεδομένα (Είσοδος), τα επεξεργάζεται και βγάζει μια πρόταση (Έξοδος). Βάλε τα δεδομένα στη σωστή θέση!
+  </div>
+  <div style="display:flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px;">
+    <span style="background:#ffeaa7; padding: 6px 12px; border-radius: 8px; font-weight: bold;">[Δεδομένο 1: Ήρωνας]</span>
+    <span style="background:#ffeaa7; padding: 6px 12px; border-radius: 8px; font-weight: bold;">[Δεδομένο 2: 7]</span>
+    <span style="background:#ffeaa7; padding: 6px 12px; border-radius: 8px; font-weight: bold;">[Δεδομένο 3: Β΄]</span>
+    <span style="background:#ffeaa7; padding: 6px 12px; border-radius: 8px; font-weight: bold;">[Δεδομένο 4: Δημοτικό]</span>
+  </div>
+  <div style="font-size: 1.25rem; line-height: 2.2; text-align: center;">
+    Ο μαθητής λέγεται 
+    <select id="p1" style="font-size: 1.1rem; padding: 4px;"><option value="">--</option><option value="7">7</option><option value="Ήρωνας">Ήρωνας</option><option value="Β΄">Β΄</option></select>, 
+    είναι 
+    <select id="p2" style="font-size: 1.1rem; padding: 4px;"><option value="">--</option><option value="Ήρωνας">Ήρωνας</option><option value="7">7</option><option value="Δημοτικό">Δημοτικό</option></select> 
+    ετών και πηγαίνει στη 
+    <select id="p3" style="font-size: 1.1rem; padding: 4px;"><option value="">--</option><option value="Β΄">Β΄</option><option value="7">7</option><option value="Ήρωνας">Ήρωνας</option></select> 
+    τάξη στο 
+    <select id="p4" style="font-size: 1.1rem; padding: 4px;"><option value="">--</option><option value="Δημοτικό">Δημοτικό</option><option value="Ήρωνας">Ήρωνας</option><option value="7">7</option></select>!
+  </div>
+  <div style="text-align: center; margin-top: 20px;">
+    <button class="btn-action" onclick="checkG7()">Έξοδος Πληροφορίας!</button>
+  </div>
+  <div id="g7-feedback" class="feedback"></div>
+</div>
+
+<!-- GAME 8 -->
+<div class="game-container" id="game8">
+  <h2 class="game-title">🏆 Παιχνίδι 8: Το Μεγάλο Κουίζ του Ψηφιακού Κόσμου</h2>
+  <div class="instruction">
+    Απάντησε στις 4 ερωτήσεις για να κερδίσεις το Χρυσό Μετάλλιο Πληροφορικής!
+  </div>
+  <div id="quiz-content">
+    <div id="quiz-question" style="font-size: 1.25rem; font-weight: bold; margin: 20px 0;"></div>
+    <div id="quiz-options" style="display:flex; flex-direction:column; gap: 10px;"></div>
+  </div>
+  <div id="g8-feedback" class="feedback"></div>
+</div>
+
+<script>
+  function openGame(n) {
+    document.querySelectorAll('.game-container').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('game' + n).classList.add('active');
+    document.querySelectorAll('.tab-btn')[n-1].classList.add('active');
+  }
+
+  // --- GAME 1 ---
+  let isLightOn = true;
+  function toggleLight() {
+    isLightOn = !isLightOn;
+    const bulb = document.getElementById('bulbIcon');
+    const bit = document.getElementById('bitState');
+    const text = document.getElementById('bulbStatusText');
+    if (isLightOn) {
+      bulb.style.opacity = "1";
+      bulb.classList.add('bulb-on');
+      bit.innerText = "Ψηφίο (Bit): 1";
+      bit.style.color = "#eccc68";
+      text.innerText = "Η λάμπα είναι ΑΝΑΜΜΕΝΗ! (Περνάει ρεύμα = 1)";
+      text.style.color = "#2ed573";
+    } else {
+      bulb.style.opacity = "0.2";
+      bulb.classList.remove('bulb-on');
+      bit.innerText = "Ψηφίο (Bit): 0";
+      bit.style.color = "#747d8c";
+      text.innerText = "Η λάμπα είναι ΣΒΗΣΤΗ! (Δεν περνάει ρεύμα = 0)";
+      text.style.color = "#ff4757";
+    }
+  }
+
+  // --- GAME 2 ---
+  const g2Data = [
+    { text: "Ο διακόπτης είναι πατημένος και ανάβει η λάμπα!", ans: 1 },
+    { text: "Ο υπολογιστής είναι σβηστός και δεν περνάει ηλεκτρικό ρεύμα.", ans: 0 },
+    { text: "Πατάμε τον διακόπτη, περνάει ρεύμα!", ans: 1 },
+    { text: "Κλείνουμε τον διακόπτη, δεν περνάει ρεύμα.", ans: 0 }
+  ];
+  let g2Idx = 0;
+  function loadG2() {
+    document.getElementById('g2-challenge').innerText = g2Data[g2Idx].text;
+    document.getElementById('g2-feedback').className = 'feedback';
+  }
+  function checkG2(userAns) {
+    const fb = document.getElementById('g2-feedback');
+    if (userAns === g2Data[g2Idx].ans) {
+      fb.className = 'feedback show success';
+      fb.innerText = "🎉 Μπράβο! Σωστά το βρήκες!";
+      setTimeout(() => {
+        g2Idx = (g2Idx + 1) % g2Data.length;
+        loadG2();
+      }, 1500);
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Ξαναπροσπάθησε! Θυμήσου: 1 = περνάει ρεύμα, 0 = δεν περνάει!";
+    }
+  }
+  loadG2();
+
+  // --- GAME 3 ---
+  function checkG3() {
+    const s1 = document.getElementById('washStep1').value;
+    const s2 = document.getElementById('washStep2').value;
+    const s3 = document.getElementById('washStep3').value;
+    const fb = document.getElementById('g3-feedback');
+    if (s1 === 'dirty' && s2 === 'wash' && s3 === 'clean') {
+      fb.className = 'feedback show success';
+      fb.innerText = "✨ Εξαιρετικά! Είσοδος: Άπλυτα ρούχα ➔ Επεξεργασία: Πλύσιμο ➔ Έξοδος: Καθαρά ρούχα!";
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Κάτι μπερδεύτηκε! Σκέψου: Τι βάζουμε πρώτα; Τι κάνει μετά το πλυντήριο; Τι βγάζει στο τέλος;";
+    }
+  }
+
+  // --- GAME 4 ---
+  function checkG4() {
+    const s1 = document.getElementById('juiceStep1').value;
+    const s2 = document.getElementById('juiceStep2').value;
+    const s3 = document.getElementById('juiceStep3').value;
+    const fb = document.getElementById('g4-feedback');
+    if (s1 === 'oranges' && s2 === 'squeeze' && s3 === 'glass') {
+      fb.className = 'feedback show success';
+      fb.innerText = "🥤 Μπράβο! Είσοδος: Πορτοκάλια ➔ Επεξεργασία: Στύψιμο ➔ Έξοδος: Χυμός!";
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Κοίταξε ξανά τη σειρά των υλικών στον αποχυμωτή!";
+    }
+  }
+
+  // --- GAME 5 (Click to move for easy tablet/desktop interaction) ---
+  let selectedDrag = null;
+  document.querySelectorAll('.drag-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.drag-item').forEach(i => i.style.borderColor = '#5352ed');
+      selectedDrag = item;
+      item.style.borderColor = '#ff4757';
+    });
+  });
+  document.querySelectorAll('.drop-box').forEach(box => {
+    box.addEventListener('click', () => {
+      if (selectedDrag) {
+        box.appendChild(selectedDrag);
+        selectedDrag.style.borderColor = '#5352ed';
+        selectedDrag = null;
+      }
+    });
+  });
+  function resetG5() {
+    const pool = document.getElementById('g5Pool');
+    document.querySelectorAll('.drop-box .drag-item').forEach(item => pool.appendChild(item));
+    document.getElementById('g5-feedback').className = 'feedback';
+  }
+  function checkG5() {
+    const fb = document.getElementById('g5-feedback');
+    const boxes = [
+      { id: 'box-text', type: 'text', name: 'Κείμενο' },
+      { id: 'box-num', type: 'num', name: 'Αριθμοί' },
+      { id: 'box-image', type: 'image', name: 'Εικόνες' },
+      { id: 'box-sound', type: 'sound', name: 'Ήχοι' }
+    ];
+    let allCorrect = true;
+    let totalItems = 0;
+    boxes.forEach(b => {
+      const items = document.getElementById(b.id).querySelectorAll('.drag-item');
+      items.forEach(it => {
+        totalItems++;
+        if (it.getAttribute('data-type') !== b.type) allCorrect = false;
+      });
+    });
+    if (totalItems < 8) {
+      fb.className = 'feedback show error';
+      fb.innerText = "⚠️ Τοποθέτησε πρώτα όλα τα αντικείμενα στα 4 κουτιά!";
+    } else if (allCorrect) {
+      fb.className = 'feedback show success';
+      fb.innerText = "🎉 Άριστα! Όλα τα δεδομένα είναι στο σωστό κουτί τους!";
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Κάποιο αντικείμενο μπήκε σε λάθος κουτί. Πρόσεξε τα ονόματα!";
+    }
+  }
+
+  // --- GAME 6 ---
+  const g6Data = [
+    { text: "«7 ετών»", type: "data", explain: "Είναι απλό δεδομένο (αριθμός/λέξη)!" },
+    { text: "«Η Υπατία είναι 7 ετών και πηγαίνει στη Β΄ Δημοτικού.»", type: "info", explain: "Είναι ολοκληρωμένη πληροφορία με πλήρες νόημα!" },
+    { text: "«Σχολείο»", type: "data", explain: "Είναι μία μεμονωμένη λέξη (δεδομένο κειμένου)!" },
+    { text: "«Το σχολείο μας έχει 150 μαθητές.»", type: "info", explain: "Μας δίνει πληροφορία που καταλαβαίνουμε αμέσως!" }
+  ];
+  let g6Idx = 0;
+  function loadG6() {
+    document.getElementById('g6-card').innerText = g6Data[g6Idx].text;
+    document.getElementById('g6-feedback').className = 'feedback';
+  }
+  function checkG6(userType) {
+    const fb = document.getElementById('g6-feedback');
+    if (userType === g6Data[g6Idx].type) {
+      fb.className = 'feedback show success';
+      fb.innerText = `👏 Πολύ σωστά! ${g6Data[g6Idx].explain}`;
+      setTimeout(() => {
+        g6Idx = (g6Idx + 1) % g6Data.length;
+        loadG6();
+      }, 1800);
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Όχι ακριβώς. Σκέψου αν είναι απλά ένα σκόρπιο στοιχείο ή ολόκληρη φράση με νόημα!";
+    }
+  }
+  loadG6();
+
+  // --- GAME 7 ---
+  function checkG7() {
+    const p1 = document.getElementById('p1').value;
+    const p2 = document.getElementById('p2').value;
+    const p3 = document.getElementById('p3').value;
+    const p4 = document.getElementById('p4').value;
+    const fb = document.getElementById('g7-feedback');
+    if (p1 === "Ήρωνας" && p2 === "7" && p3 === "Β΄" && p4 === "Δημοτικό") {
+      fb.className = 'feedback show success';
+      fb.innerText = "🌟 Τέλεια! Ο υπολογιστής επεξεργάστηκε τα δεδομένα και έβγαλε την πληροφορία: «Ο μαθητής λέγεται Ήρωνας, είναι 7 ετών και πηγαίνει στη Β΄ τάξη στο Δημοτικό!»";
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Δες προσεκτικά πού ταιριάζει το όνομα, η ηλικία και η τάξη!";
+    }
+  }
+
+  // --- GAME 8 ---
+  const g8Data = [
+    {
+      q: "1. Με ποιον τρόπο αποθηκεύονται όλα τα δεδομένα μέσα στον υπολογιστή;",
+      opts: ["Με ηλεκτρικά σήματα (0 και 1)", "Με κανονικά χρώματα και μπογιές", "Με χαρτί και μολύβι"],
+      ans: 0
+    },
+    {
+      q: "2. Πώς λέγεται το κάθε ψηφίο 0 ή 1;",
+      opts: ["Γράμμα", "Δυαδικό ψηφίο (bit)", "Κουμπί"],
+      ans: 1
+    },
+    {
+      q: "3. Ποια είναι η σωστή σειρά λειτουργίας ενός μηχανήματος;",
+      opts: ["Έξοδος ➔ Επεξεργασία ➔ Είσοδος", "Επεξεργασία ➔ Έξοδος ➔ Είσοδος", "Είσοδος ➔ Επεξεργασία ➔ Έξοδος"],
+      ans: 2
+    },
+    {
+      q: "4. Ποιο από τα παρακάτω είναι παράδειγμα ψηφιακού δεδομένου;",
+      opts: ["Ένας αριθμός", "Μία εικόνα", "Όλα τα παραπάνω"],
+      ans: 2
+    }
+  ];
+  let g8Idx = 0;
+  function loadG8() {
+    const cur = g8Data[g8Idx];
+    document.getElementById('quiz-question').innerText = cur.q;
+    const optsDiv = document.getElementById('quiz-options');
+    optsDiv.innerHTML = '';
+    cur.opts.forEach((opt, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-choice';
+      btn.style.textAlign = 'left';
+      btn.innerText = opt;
+      btn.onclick = () => answerG8(idx);
+      optsDiv.appendChild(btn);
+    });
+    document.getElementById('g8-feedback').className = 'feedback';
+  }
+  function answerG8(selected) {
+    const fb = document.getElementById('g8-feedback');
+    if (selected === g8Data[g8Idx].ans) {
+      fb.className = 'feedback show success';
+      fb.innerText = "🎯 Μπράβο! Σωστή απάντηση!";
+      setTimeout(() => {
+        g8Idx++;
+        if (g8Idx < g8Data.length) {
+          loadG8();
+        } else {
+          document.getElementById('quiz-content').innerHTML = `
+            <div style="text-align:center; padding: 25px;">
+              <div style="font-size: 4rem;">🥇</div>
+              <h2 style="color:#2ed573;">Συγχαρητήρια!</h2>
+              <p style="font-size: 1.2rem;">Ολοκλήρωσες και τα 8 παιχνίδια του Μαθήματος 11 με επιτυχία!</p>
+              <button class="btn-action" onclick="g8Idx=0; loadG8();">Παίξε ξανά το Κουίζ</button>
+            </div>
+          `;
+          fb.className = 'feedback';
+        }
+      }, 1300);
+    } else {
+      fb.className = 'feedback show error';
+      fb.innerText = "❌ Δοκίμασε ξανά! Διάβασε προσεκτικά την ερώτηση.";
+    }
+  }
+  loadG8();
+</script>
+</body>
+</html>
