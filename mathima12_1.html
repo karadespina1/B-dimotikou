@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 12: Οι συσκευές του υπολογιστή - Παιχνίδια Β΄ Δημοτικού</title>
+<style>
+  :root {
+    --primary: #4b6584;
+    --accent: #20bf6b;
+    --secondary: #fa8231;
+    --card-bg: #ffffff;
+    --bg-color: #f1f2f6;
+    --text-color: #2f3542;
+  }
+
+  body {
+    font-family: 'Comic Sans MS', 'Comfortaa', 'Segoe UI', Tahoma, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    text-align: center;
+    max-width: 900px;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin: 5px 0;
+  }
+
+  .subtitle {
+    color: #576574;
+    font-size: 1.05rem;
+  }
+
+  /* Navigation Bar */
+  .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 950px;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    background: #fff;
+    border: 2px solid #3867d6;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #3867d6;
+    cursor: pointer;
+    transition: 0.2s all;
+  }
+
+  .tab-btn:hover, .tab-btn.active {
+    background: #3867d6;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+
+  /* Game Container */
+  .game-card {
+    background: var(--card-bg);
+    width: 100%;
+    max-width: 880px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.07);
+    padding: 25px;
+    box-sizing: border-box;
+    display: none;
+  }
+
+  .game-card.active {
+    display: block;
+    animation: popIn 0.3s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .game-header {
+    border-bottom: 3px dashed #fed330;
+    padding-bottom: 10px;
+    margin-top: 0;
+    color: #0c2461;
+  }
+
+  .help-box {
+    background: #eef5fc;
+    border-left: 6px solid #2d98da;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 1.05rem;
+  }
+
+  /* Interactive Elements */
+  .btn-opt {
+    background: #4b7bec;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.05rem;
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 6px;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  .btn-opt:hover { background: #3867d6; transform: scale(1.03); }
+
+  .btn-check {
+    background: #20bf6b;
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+  .btn-check:hover { background: #0fb9b1; }
+
+  .feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: none;
+    text-align: center;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #d4edda; color: #155724; }
+  .feedback.wrong { background: #f8d7da; color: #721c24; }
+
+  /* GAME 2: Memory */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  .mem-card {
+    height: 90px;
+    background: #4b7bec;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    padding: 5px;
+    transition: transform 0.2s;
+  }
+  .mem-card.flipped {
+    background: #ffffff;
+    color: #2c3e50;
+    border: 3px solid #3867d6;
+    cursor: default;
+  }
+  .mem-card.matched {
+    background: #d4edda;
+    border-color: #20bf6b;
+    color: #155724;
+    cursor: default;
+  }
+
+  /* GAME 3: Word Scramble */
+  .letter-pool {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .letter-tile {
+    background: #fed330;
+    color: #2f3542;
+    font-size: 1.8rem;
+    font-weight: bold;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 0 #f7b731;
+    cursor: pointer;
+  }
+  .word-slots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .word-slot {
+    width: 48px;
+    height: 48px;
+    border: 3px dashed #a5b1c2;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    background: #f8f9fa;
+  }
+
+  /* GAME 5: Categories (Bins) */
+  .bins-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .bin {
+    background: #f8f9fa;
+    border: 3px dashed #4b7bec;
+    border-radius: 15px;
+    min-height: 180px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .bin h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  .items-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    padding: 15px;
+    background: #eef2f7;
+    border-radius: 15px;
+    margin: 15px 0;
+    min-height: 60px;
+  }
+  .drag-badge {
+    background: #ffffff;
+    border: 2px solid #3867d6;
+    border-radius: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    transition: 0.2s;
+  }
+  .drag-badge.selected {
+    border-color: #eb3b5a;
+    background: #ffeae8;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖥️ Πληροφορική Β΄ Δημοτικού</h1>
+  <div class="subtitle">Μάθημα 12: «Οι συσκευές του υπολογιστή» (6 Διασκεδαστικά Παιχνίδια)</div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showGame(1)">1. Αινίγματα Συσκευών</button>
+  <button class="tab-btn" onclick="showGame(2)">2. Παιχνίδι Μνήμης</button>
+  <button class="tab-btn" onclick="showGame(3)">3. Μπέρδεμα Λέξεων</button>
+  <button class="tab-btn" onclick="showGame(4)">4. Βρες τη Δουλειά μου</button>
+  <button class="tab-btn" onclick="showGame(5)">5. Τα 3 Μαγικά Κουτιά</button>
+  <button class="tab-btn" onclick="showGame(6)">6. Ντετέκτιβ Συσκευών</button>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 1 ======================= -->
+<div class="game-card active" id="game1">
+  <h2 class="game-header">🔍 Παιχνίδι 1: «Ποια συσκευή είμαι;»</h2>
+  <div class="help-box">
+    Διάβασε το αίνιγμα και βρες για ποια συσκευή του υπολογιστή μιλάμε!
+  </div>
+  <div style="text-align: center; margin: 25px 0;">
+    <div style="font-size: 3rem; margin-bottom: 10px;">❓🤔</div>
+    <div id="g1-riddle" style="font-size: 1.35rem; font-weight: bold; color: #1e3799; min-height: 60px;"></div>
+  </div>
+  <div id="g1-choices" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;"></div>
+  <div id="g1-fb" class="feedback"></div>
+  <div style="text-align: center; margin-top: 15px; color: #778ca3; font-weight: bold;" id="g1-progress"></div>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 2 ======================= -->
+<div class="game-card" id="game2">
+  <h2 class="game-header">🃏 Παιχνίδι 2: Παιχνίδι Μνήμης με τις Συσκευές!</h2>
+  <div class="help-box">
+    Γύρισε τις κάρτες 2-2 και ταίριαξε την εικόνα με το σωστό όνομα της συσκευής!
+  </div>
+  <div class="memory-grid" id="memGrid"></div>
+  <div id="g2-fb" class="feedback"></div>
+  <div style="text-align: center; margin-top: 10px;">
+    <button class="btn-check" onclick="initMemoryGame()">🔄 Νέο Παιχνίδι Μνήμης</button>
+  </div>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 3 ======================= -->
+<div class="game-card" id="game3">
+  <h2 class="game-header">🔤 Παιχνίδι 3: Μπέρδεμα Γραμμάτων (Αναγραμματισμός)</h2>
+  <div class="help-box">
+    Τα γράμματα μπερδεύτηκαν! Πάτα τα με τη σωστή σειρά για να σχηματίσεις το όνομα της συσκευής που βλέπεις.
+  </div>
+  <div style="text-align: center; margin: 15px 0;">
+    <div id="g3-icon" style="font-size: 3.5rem;">🖱️</div>
+    <div id="g3-clue" style="font-weight: bold; color: #576574; font-size: 1.1rem; margin-top: 5px;"></div>
+  </div>
+  <div class="word-slots" id="g3Slots"></div>
+  <div class="letter-pool" id="g3Letters"></div>
+  <div style="text-align: center;">
+    <button class="btn-opt" style="background:#778ca3;" onclick="resetG3Current()">Καθαρισμός</button>
+    <button class="btn-check" onclick="checkG3Word()">Έλεγχος Λέξης!</button>
+  </div>
+  <div id="g3-fb" class="feedback"></div>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 4 ======================= -->
+<div class="game-card" id="game4">
+  <h2 class="game-header">🤝 Παιχνίδι 4: Σύνδεσε τη Συσκευή με τη Δουλειά της!</h2>
+  <div class="help-box">
+    Στη σελίδα 56 του βιβλίου είδαμε τις λειτουργίες των συσκευών. Επίλεξε τη σωστή συσκευή για κάθε εργασία!
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0;">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>1. Γράφω γράμματα, αριθμούς και σύμβολα:</strong></span>
+      <select id="m-task1" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="keyboard">Πληκτρολόγιο</option>
+        <option value="screen">Οθόνη</option>
+        <option value="speakers">Ηχεία</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>2. Εμφανίζει και βλέπω κείμενο και εικόνες:</strong></span>
+      <select id="m-task2" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="printer">Εκτυπωτής</option>
+        <option value="screen">Οθόνη</option>
+        <option value="mouse">Ποντίκι</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>3. Τυπώνει στο χαρτί κείμενο και εικόνες:</strong></span>
+      <select id="m-task3" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="printer">Εκτυπωτής</option>
+        <option value="mic">Μικρόφωνο</option>
+        <option value="scanner">Σαρωτής</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>4. Ακούω μουσική και ήχους:</strong></span>
+      <select id="m-task4" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="camera">Κάμερα</option>
+        <option value="speakers">Ηχεία και Ακουστικά</option>
+        <option value="screen">Οθόνη</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>5. Περνάει μέσα στον υπολογιστή τη φωνή μου:</strong></span>
+      <select id="m-task5" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="mic">Μικρόφωνο</option>
+        <option value="speakers">Ηχεία</option>
+        <option value="mouse">Ποντίκι</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#f8f9fa; padding:10px 15px; border-radius:10px;">
+      <span><strong>6. Περνάει στον υπολογιστή εικόνα από το χαρτί:</strong></span>
+      <select id="m-task6" style="padding:6px; font-size:1rem; border-radius:8px;">
+        <option value="">-- Επίλεξε συσκευή --</option>
+        <option value="scanner">Σαρωτής</option>
+        <option value="printer">Εκτυπωτής</option>
+        <option value="camera">Κάμερα</option>
+      </select>
+    </div>
+  </div>
+  <div style="text-align: center;">
+    <button class="btn-check" onclick="checkG4()">Έλεγχος Απαντήσεων!</button>
+  </div>
+  <div id="g4-fb" class="feedback"></div>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 5 ======================= -->
+<div class="game-card" id="game5">
+  <h2 class="game-header">📦 Παιχνίδι 5: Τα 3 Μαγικά Κουτιά (Είσοδος - Έξοδος - Αποθήκευση)</h2>
+  <div class="help-box">
+    <strong>Οδηγίες:</strong> Κάνε κλικ σε μία συσκευή (να κοκκινίσει) και μετά πάτα στο σωστό κουτί για να μπει μέσα! Εδώ έχουμε και τον <em>Δίσκο αποθήκευσης</em> και τη <em>Μνήμη φλας</em>!
+  </div>
+
+  <div class="items-pool" id="g5Pool">
+    <div class="drag-badge" data-category="input">⌨️ Πληκτρολόγιο</div>
+    <div class="drag-badge" data-category="input">🖱️ Ποντίκι</div>
+    <div class="drag-badge" data-category="input">🎙️ Μικρόφωνο</div>
+    <div class="drag-badge" data-category="output">🖥️ Οθόνη</div>
+    <div class="drag-badge" data-category="output">🖨️ Εκτυπωτής</div>
+    <div class="drag-badge" data-category="output">🔊 Ηχεία</div>
+    <div class="drag-badge" data-category="storage">💾 Δίσκος αποθήκευσης</div>
+    <div class="drag-badge" data-category="storage">🔌 Μνήμη φλας (USB)</div>
+  </div>
+
+  <div class="bins-wrapper">
+    <div class="bin" id="bin-input" style="border-color: #2ed573;">
+      <h3 style="color:#20bf6b;">📥 Συσκευές Εισόδου<br><small style="font-size:0.8rem; color:#57606f;">(Βάζουν δεδομένα μέσα)</small></h3>
+    </div>
+    <div class="bin" id="bin-output" style="border-color: #fa8231;">
+      <h3 style="color:#fa8231;">📤 Συσκευές Εξόδου<br><small style="font-size:0.8rem; color:#57606f;">(Μας δείχνουν/βγάζουν πληροφορίες)</small></h3>
+    </div>
+    <div class="bin" id="bin-storage" style="border-color: #8854d0;">
+      <h3 style="color:#8854d0;">💾 Συσκευές Αποθήκευσης<br><small style="font-size:0.8rem; color:#57606f;">(Κρατούν τα αρχεία φυλαγμένα)</small></h3>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 15px;">
+    <button class="btn-check" onclick="checkG5()">Έλεγχος Ταξινόμησης!</button>
+    <button class="btn-opt" style="background:#778ca3;" onclick="resetG5()">Επαναφορά</button>
+  </div>
+  <div id="g5-fb" class="feedback"></div>
+</div>
+
+<!-- ======================= ΠΑΙΧΝΙΔΙ 6 ======================= -->
+<div class="game-card" id="game6">
+  <h2 class="game-header">🕵️‍♀️ Παιχνίδι 6: Ο Ντετέκτιβ των Συσκευών</h2>
+  <div class="help-box">
+    Η Υπατία και ο Ήρωνας έχουν διάφορες αποστολές στο σχολείο! Βοήθησέ τους να διαλέξουν την κατάλληλη συσκευή ή κατηγορία.
+  </div>
+  <div style="background:#f1f2f6; padding:20px; border-radius:15px; text-align:center; margin:20px 0;">
+    <div style="font-size: 2.8rem; margin-bottom: 8px;">🎯</div>
+    <div id="g6-mission" style="font-size: 1.25rem; font-weight: bold; color: #2c3e50; min-height: 50px;"></div>
+  </div>
+  <div id="g6-options" style="display:flex; flex-direction:column; gap:10px; max-width:550px; margin: 0 auto;"></div>
+  <div id="g6-fb" class="feedback"></div>
+  <div style="text-align: center; margin-top: 15px; color: #778ca3; font-weight: bold;" id="g6-progress"></div>
+</div>
+
+<script>
+  // Navigation
+  function showGame(idx) {
+    document.querySelectorAll('.game-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('game' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx-1].classList.add('active');
+  }
+
+  // ================= GAME 1: Riddles =================
+  const riddles = [
+    {
+      q: "Έχω πολλά κουμπάκια με γράμματα και αριθμούς. Όταν με πατάς, γράφεις κείμενο στον υπολογιστή! Ποια είμαι;",
+      ans: "Πληκτρολόγιο",
+      opts: ["Πληκτρολόγιο", "Ποντίκι", "Ηχεία"]
+    },
+    {
+      q: "Μοιάζω με τηλεόραση! Πάνω μου βλέπεις τις ζωγραφιές, τα βίντεο και τις εργασίες σου. Ποια είμαι;",
+      ans: "Οθόνη",
+      opts: ["Εκτυπωτής", "Οθόνη", "Σαρωτής"]
+    },
+    {
+      q: "Με κουνάς με το χεράκι σου και κουνιέται ένα βελάκι στην οθόνη. Κάνω «κλικ-κλικ»! Ποιο είμαι;",
+      ans: "Ποντίκι",
+      opts: ["Μικρόφωνο", "Ποντίκι", "Κάμερα"]
+    },
+    {
+      q: "Όταν βάζεις τραγούδια ή βίντεο, από εμένα βγαίνει η μουσική για να την ακούσεις δυνατά! Ποια είμαστε;",
+      ans: "Ηχεία",
+      opts: ["Ηχεία", "Εκτυπωτής", "Πληκτρολόγιο"]
+    },
+    {
+      q: "Μου βάζεις λευκό χαρτί και μελάνι και σου τυπώνω τις ζωγραφιές σου για να τις πάρεις στο σπίτι! Ποιος είμαι;",
+      ans: "Εκτυπωτής",
+      opts: ["Σαρωτής", "Εκτυπωτής", "Οθόνη"]
+    },
+    {
+      q: "Μου μιλάς ή μου τραγουδάς και εγώ μεταφέρω τη φωνή σου μέσα στον υπολογιστή! Τι είμαι;",
+      ans: "Μικρόφωνο",
+      opts: ["Μικρόφωνο", "Ηχεία", "Ποντίκι"]
+    },
+    {
+      q: "Έχω μάτι και σε βλέπω! Στέλνω την εικόνα σου και το βίντεό σου στους φίλους σου όταν μιλάτε. Ποια είμαι;",
+      ans: "Κάμερα",
+      opts: ["Κάμερα", "Σαρωτής", "Οθόνη"]
+    },
+    {
+      q: "Βάζεις πάνω μου μια ζωγραφιά που έκανες σε χαρτί, ανάβω ένα έντονο φως και την περνάω μέσα στον υπολογιστή! Ποιος είμαι;",
+      ans: "Σαρωτής",
+      opts: ["Εκτυπωτής", "Σαρωτής", "Πληκτρολόγιο"]
+    }
+  ];
+  let rIdx = 0;
+  function loadRiddle() {
+    const r = riddles[rIdx];
+    document.getElementById('g1-riddle').innerText = r.q;
+    document.getElementById('g1-progress').innerText = `Αίνιγμα ${rIdx + 1} από ${riddles.length}`;
+    const box = document.getElementById('g1-choices');
+    box.innerHTML = '';
+    r.opts.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'btn-opt';
+      b.innerText = opt;
+      b.onclick = () => answerRiddle(opt);
+      box.appendChild(b);
+    });
+    document.getElementById('g1-fb').className = 'feedback';
+  }
+  function answerRiddle(choice) {
+    const fb = document.getElementById('g1-fb');
+    if (choice === riddles[rIdx].ans) {
+      fb.className = 'feedback show correct';
+      fb.innerText = "🎉 Μπράβο! Το βρήκες αμέσως!";
+      setTimeout(() => {
+        rIdx = (rIdx + 1) % riddles.length;
+        loadRiddle();
+      }, 1400);
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "❌ Για σκέψου το λίγο ακόμα... Διάβασε προσεκτικά τι κάνει!";
+    }
+  }
+  loadRiddle();
+
+  // ================= GAME 2: Memory =================
+  const memoryItems = [
+    { id: 1, val: "🖥️", match: "Οθόνη" },
+    { id: 2, val: "🖱️", match: "Ποντίκι" },
+    { id: 3, val: "⌨️", match: "Πληκτρολόγιο" },
+    { id: 4, val: "🖨️", match: "Εκτυπωτής" },
+    { id: 5, val: "🔊", match: "Ηχεία" },
+    { id: 6, val: "🎙️", match: "Μικρόφωνο" }
+  ];
+  let memCards = [];
+  let flipped = [];
+  let matchedPairs = 0;
+
+  function initMemoryGame() {
+    matchedPairs = 0;
+    flipped = [];
+    document.getElementById('g2-fb').className = 'feedback';
+    const grid = document.getElementById('memGrid');
+    grid.innerHTML = '';
+    
+    // Create card pairs (icon card & text card)
+    let deck = [];
+    memoryItems.forEach(item => {
+      deck.push({ pairId: item.id, text: item.val });
+      deck.push({ pairId: item.id, text: item.match });
+    });
+    deck.sort(() => Math.random() - 0.5);
+
+    deck.forEach((data, index) => {
+      const card = document.createElement('div');
+      card.className = 'mem-card';
+      card.dataset.index = index;
+      card.dataset.pair = data.pairId;
+      card.dataset.text = data.text;
+      card.innerText = "❓";
+      card.onclick = () => flipCard(card);
+      grid.appendChild(card);
+    });
+  }
+
+  function flipCard(card) {
+    if (flipped.length === 2 || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    
+    card.classList.add('flipped');
+    card.innerText = card.dataset.text;
+    flipped.push(card);
+
+    if (flipped.length === 2) {
+      if (flipped[0].dataset.pair === flipped[1].dataset.pair) {
+        flipped[0].classList.add('matched');
+        flipped[1].classList.add('matched');
+        matchedPairs++;
+        flipped = [];
+        if (matchedPairs === memoryItems.length) {
+          const fb = document.getElementById('g2-fb');
+          fb.className = 'feedback show correct';
+          fb.innerText = "🏆 Συγχαρητήρια! Βρήκες όλα τα ζευγάρια των συσκευών!";
+        }
+      } else {
+        setTimeout(() => {
+          flipped[0].classList.remove('flipped');
+          flipped[0].innerText = "❓";
+          flipped[1].classList.remove('flipped');
+          flipped[1].innerText = "❓";
+          flipped = [];
+        }, 900);
+      }
+    }
+  }
+  initMemoryGame();
+
+  // ================= GAME 3: Word Scramble =================
+  const scrambleWords = [
+    { word: "ΟΘΟΝΗ", icon: "🖥️", clue: "Μας δείχνει τις εικόνες και τα βίντεο!" },
+    { word: "ΠΟΝΤΙΚΙ", icon: "🖱️", clue: "Κινεί τον δείκτη στην οθόνη!" },
+    { word: "ΗΧΕΙΑ", icon: "🔊", clue: "Από εδώ ακούμε μουσική και ήχους!" },
+    { word: "ΚΑΜΕΡΑ", icon: "📷", clue: "Καταγράφει βίντεο και φωτογραφίες!" }
+  ];
+  let curScramble = 0;
+  let userLetters = [];
+
+  function loadScramble() {
+    userLetters = [];
+    const item = scrambleWords[curScramble];
+    document.getElementById('g3-icon').innerText = item.icon;
+    document.getElementById('g3-clue').innerText = item.clue;
+    document.getElementById('g3-fb').className = 'feedback';
+
+    // Slots
+    const slots = document.getElementById('g3Slots');
+    slots.innerHTML = '';
+    for(let i=0; i<item.word.length; i++) {
+      const s = document.createElement('div');
+      s.className = 'word-slot';
+      s.id = 'slot-' + i;
+      slots.appendChild(s);
+    }
+
+    // Shuffled Letters
+    const letters = item.word.split('').sort(() => Math.random() - 0.5);
+    const pool = document.getElementById('g3Letters');
+    pool.innerHTML = '';
+    letters.forEach((l) => {
+      const tile = document.createElement('div');
+      tile.className = 'letter-tile';
+      tile.innerText = l;
+      tile.onclick = () => pickLetter(tile, l);
+      pool.appendChild(tile);
+    });
+  }
+
+  function pickLetter(tile, char) {
+    const item = scrambleWords[curScramble];
+    if (userLetters.length < item.word.length && !tile.dataset.used) {
+      tile.dataset.used = "true";
+      tile.style.opacity = "0.3";
+      tile.style.cursor = "default";
+      
+      const slot = document.getElementById('slot-' + userLetters.length);
+      slot.innerText = char;
+      userLetters.push({ char: char, tileEl: tile });
+    }
+  }
+
+  function resetG3Current() {
+    userLetters.forEach(u => {
+      u.tileEl.dataset.used = "";
+      u.tileEl.style.opacity = "1";
+      u.tileEl.style.cursor = "pointer";
+    });
+    userLetters = [];
+    document.querySelectorAll('.word-slot').forEach(s => s.innerText = '');
+    document.getElementById('g3-fb').className = 'feedback';
+  }
+
+  function checkG3Word() {
+    const item = scrambleWords[curScramble];
+    const fb = document.getElementById('g3-fb');
+    const formed = userLetters.map(u => u.char).join('');
+    if (formed === item.word) {
+      fb.className = 'feedback show correct';
+      fb.innerText = `👏 Μπράβο! Σχημάτισες τη λέξη: ${item.word}!`;
+      setTimeout(() => {
+        curScramble = (curScramble + 1) % scrambleWords.length;
+        loadScramble();
+      }, 1500);
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "❌ Δεν είναι αυτή η λέξη. Πάτα «Καθαρισμός» και δοκίμασε ξανά!";
+    }
+  }
+  loadScramble();
+
+  // ================= GAME 4: Match Roles =================
+  function checkG4() {
+    const t1 = document.getElementById('m-task1').value;
+    const t2 = document.getElementById('m-task2').value;
+    const t3 = document.getElementById('m-task3').value;
+    const t4 = document.getElementById('m-task4').value;
+    const t5 = document.getElementById('m-task5').value;
+    const t6 = document.getElementById('m-task6').value;
+    const fb = document.getElementById('g4-fb');
+
+    if (!t1 || !t2 || !t3 || !t4 || !t5 || !t6) {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "⚠️ Συμπλήρωσε όλες τις επιλογές πριν τον έλεγχο!";
+      return;
+    }
+
+    if (t1 === 'keyboard' && t2 === 'screen' && t3 === 'printer' && t4 === 'speakers' && t5 === 'mic' && t6 === 'scanner') {
+      fb.className = 'feedback show correct';
+      fb.innerText = "🌟 Τέλεια! Έμαθες άριστα τι κάνει η κάθε συσκευή του υπολογιστή!";
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "❌ Κάποιες συσκευές μπήκαν σε λάθος εργασία. Ξαναδιάβασε προσεκτικά!";
+    }
+  }
+
+  // ================= GAME 5: 3 Bins (Input - Output - Storage) =================
+  let selectedBadge = null;
+  document.querySelectorAll('.drag-badge').forEach(badge => {
+    badge.addEventListener('click', () => {
+      document.querySelectorAll('.drag-badge').forEach(b => b.classList.remove('selected'));
+      selectedBadge = badge;
+      badge.classList.add('selected');
+    });
+  });
+
+  ['input', 'output', 'storage'].forEach(type => {
+    const bin = document.getElementById('bin-' + type);
+    bin.addEventListener('click', () => {
+      if (selectedBadge) {
+        bin.appendChild(selectedBadge);
+        selectedBadge.classList.remove('selected');
+        selectedBadge = null;
+      }
+    });
+  });
+
+  function resetG5() {
+    const pool = document.getElementById('g5Pool');
+    document.querySelectorAll('.bin .drag-badge').forEach(b => pool.appendChild(b));
+    document.getElementById('g5-fb').className = 'feedback';
+  }
+
+  function checkG5() {
+    const fb = document.getElementById('g5-fb');
+    const bins = [
+      { id: 'bin-input', cat: 'input' },
+      { id: 'bin-output', cat: 'output' },
+      { id: 'bin-storage', cat: 'storage' }
+    ];
+    let count = 0;
+    let ok = true;
+    bins.forEach(b => {
+      const items = document.getElementById(b.id).querySelectorAll('.drag-badge');
+      items.forEach(it => {
+        count++;
+        if (it.dataset.category !== b.cat) ok = false;
+      });
+    });
+
+    if (count < 8) {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "⚠️ Τοποθέτησε πρώτα και τις 8 συσκευές στα κουτιά!";
+    } else if (ok) {
+      fb.className = 'feedback show correct';
+      fb.innerText = "🎉 Άριστα! Ξεχώρισες τις Συσκευές Εισόδου, Εξόδου και Αποθήκευσης (Δίσκο & Μνήμη φλας)!";
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "❌ Κάποια συσκευή μπήκε σε λάθος κουτί! Θυμήσου: Πληκτρολόγιο/Ποντίκι/Μικρόφωνο = Είσοδος, Οθόνη/Ηχεία/Εκτυπωτής = Έξοδος, Δίσκος/Μνήμη USB = Αποθήκευση!";
+    }
+  }
+
+  // ================= GAME 6: Detective Missions =================
+  const missions = [
+    {
+      text: "Η Υπατία έφτιαξε μια όμορφη ζωγραφιά στο σχολείο και θέλει να την πάρει μαζί της στο σπίτι σε έναν άλλο υπολογιστή. Τι θα συνδέσει;",
+      ans: "Μνήμη φλας (USB)",
+      opts: ["Μνήμη φλας (USB)", "Ηχεία", "Σαρωτή"],
+      explain: "Σωστά! Η μνήμη φλας αποθηκεύει τα δεδομένα για να τα μεταφέρουμε εύκολα σε άλλο υπολογιστή!"
+    },
+    {
+      text: "Ο υπολογιστής κλείνει το βράδυ. Πού μένουν φυλαγμένα όλα τα παιχνίδια και τα αρχεία για να τα βρούμε αύριο;",
+      ans: "Στον δίσκο αποθήκευσης",
+      opts: ["Στον δίσκο αποθήκευσης", "Στο ποντίκι", "Στην οθόνη"],
+      explain: "Μπράβο! Ο εσωτερικός δίσκος αποθήκευσης φυλάει τα πάντα με ασφάλεια!"
+    },
+    {
+      text: "Το μικρόφωνο βάζει τη φωνή μας μέσα στον υπολογιστή. Άρα είναι συσκευή...",
+      ans: "Εισόδου",
+      opts: ["Εισόδου", "Εξόδου", "Αποθήκευσης"],
+      explain: "Πολύ σωστά! Επειδή στέλνει ήχο ΜΕΣΑ στον υπολογιστή, είναι συσκευή εισόδου!"
+    },
+    {
+      text: "Ο εκτυπωτής βγάζει τις ζωγραφιές μας τυπωμένες σε πραγματικό χαρτί. Άρα είναι συσκευή...",
+      ans: "Εξόδου",
+      opts: ["Εξόδου", "Εισόδου", "Αποθήκευσης"],
+      explain: "Τέλεια! Βγάζει πληροφορίες ΕΞΩ στο χαρτί, άρα είναι συσκευή εξόδου!"
+    },
+    {
+      text: "Στην ταμπλέτα πατάμε με το δάχτυλο τα πλήκτρα αλλά και βλέπουμε την εικόνα. Η οθόνη αφής είναι συσκευή...",
+      ans: "Και Εισόδου και Εξόδου!",
+      opts: ["Μόνο Εισόδου", "Μόνο Αποθήκευσης", "Και Εισόδου και Εξόδου!"],
+      explain: "Απίθανα! Το βιβλίο μας λέει ότι η οθόνη αφής κάνει και είσοδο (δάχτυλο) και έξοδο (εικόνα)!"
+    }
+  ];
+  let misIdx = 0;
+
+  function loadMission() {
+    const m = missions[misIdx];
+    document.getElementById('g6-mission').innerText = m.text;
+    document.getElementById('g6-progress').innerText = `Αποστολή ${misIdx + 1} από ${missions.length}`;
+    const box = document.getElementById('g6-options');
+    box.innerHTML = '';
+    m.opts.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'btn-opt';
+      b.innerText = opt;
+      b.onclick = () => answerMission(opt);
+      box.appendChild(b);
+    });
+    document.getElementById('g6-fb').className = 'feedback';
+  }
+
+  function answerMission(choice) {
+    const m = missions[misIdx];
+    const fb = document.getElementById('g6-fb');
+    if (choice === m.ans) {
+      fb.className = 'feedback show correct';
+      fb.innerText = `🎯 ${m.explain}`;
+      setTimeout(() => {
+        misIdx = (misIdx + 1) % missions.length;
+        loadMission();
+      }, 1800);
+    } else {
+      fb.className = 'feedback show wrong';
+      fb.innerText = "❌ Σκέψου το ξανά! Είναι είσοδος, έξοδος ή αποθήκευση;";
+    }
+  }
+  loadMission();
+</script>
+
+</body>
+</html>
