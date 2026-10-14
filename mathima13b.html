@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 13: Πώς χρησιμοποιώ τις εφαρμογές; - Β΄ Δημοτικού</title>
+<style>
+  :root {
+    --bg: #f3f4f6;
+    --primary: #4f46e5;
+    --success: #10b981;
+    --danger: #ef4444;
+    --accent: #f59e0b;
+    --text: #1f2937;
+    --card: #ffffff;
+  }
+  body {
+    font-family: 'Comic Sans MS', 'Comfortaa', 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header {
+    text-align: center;
+    max-width: 850px;
+    margin-bottom: 15px;
+  }
+  h1 {
+    color: #312e81;
+    font-size: 1.8rem;
+    margin: 5px 0;
+  }
+  .sub {
+    color: #4b5563;
+    font-size: 1.05rem;
+  }
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 900px;
+    margin-bottom: 20px;
+  }
+  .nav-btn {
+    background: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--primary);
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--primary);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+  .box {
+    background: var(--card);
+    width: 100%;
+    max-width: 820px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    padding: 25px;
+    box-sizing: border-box;
+    display: none;
+  }
+  .box.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .level-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-weight: bold;
+    padding: 4px 14px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  .instruction {
+    background: #eef2ff;
+    border-left: 5px solid var(--primary);
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    margin: 12px 0;
+    line-height: 1.5;
+  }
+  .action-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+    margin: 5px;
+  }
+  .action-btn:hover {
+    background: #4338ca;
+    transform: scale(1.02);
+  }
+  .choice-btn {
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 2px solid #c7d2fe;
+    padding: 12px 20px;
+    font-size: 1.05rem;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 6px;
+    transition: 0.2s;
+  }
+  .choice-btn:hover {
+    background: #c7d2fe;
+  }
+  .feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: none;
+    text-align: center;
+  }
+  .feedback.show { display: block; }
+  .feedback.win { background: #d1fae5; color: #065f46; }
+  .feedback.err { background: #fee2e2; color: #991b1b; }
+
+  /* Desktop Mockup */
+  .desktop-area {
+    background: #2563eb;
+    background-image: radial-gradient(#3b82f6 20%, transparent 20%);
+    background-size: 20px 20px;
+    border-radius: 14px;
+    height: 260px;
+    position: relative;
+    padding: 15px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .app-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    padding: 10px;
+    border-radius: 10px;
+    width: 80px;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  .app-icon:hover {
+    background: rgba(255,255,255,0.2);
+  }
+  .app-icon span.emoji {
+    font-size: 2.8rem;
+  }
+
+  /* Mockup Window */
+  .window-mock {
+    width: 100%;
+    max-width: 500px;
+    margin: 20px auto;
+    border: 3px solid #4b5563;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+  .window-titlebar {
+    background: #374151;
+    color: white;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+  }
+  .win-controls {
+    display: flex;
+    gap: 8px;
+  }
+  .w-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: 0.2s;
+  }
+  .w-min { background: #fbbf24; color: #000; }
+  .w-max { background: #34d399; color: #000; }
+  .w-close { background: #f87171; color: #fff; }
+  .w-btn:hover { filter: brightness(1.1); transform: scale(1.1); }
+  .window-body {
+    padding: 30px;
+    text-align: center;
+    font-size: 1.2rem;
+    min-height: 80px;
+  }
+
+  /* Bins layout */
+  .bins {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+  }
+  .bin {
+    border: 3px dashed var(--primary);
+    background: #f8fafc;
+    border-radius: 12px;
+    min-height: 140px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+  .bin h4 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    font-size: 0.95rem;
+  }
+  .badge {
+    background: #fff;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    padding: 6px 14px;
+    margin: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .badge.selected {
+    border-color: var(--danger);
+    background: #fee2e2;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>💻 Πληροφορική Β΄ Δημοτικού</h1>
+  <div class="sub">Μάθημα 13: «Πώς χρησιμοποιώ τις εφαρμογές του υπολογιστή;»</div>
+</header>
+
+<div class="nav">
+  <button class="nav-btn active" onclick="goTab(1)">1. Το Διπλό Κλικ</button>
+  <button class="nav-btn" onclick="goTab(2)">2. Τα 3 Κουμπιά</button>
+  <button class="nav-btn" onclick="goTab(3)">3. Ταξινόμηση Επιφάνειας</button>
+  <button class="nav-btn" onclick="goTab(4)">4. Η Σωστή Εφαρμογή</button>
+  <button class="nav-btn" onclick="goTab(5)">5. Μετακίνηση & Γραμμή Τίτλου</button>
+  <button class="nav-btn" onclick="goTab(6)">6. Ο Έξυπνος Βοηθός</button>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 1 ================= -->
+<div class="box active" id="tab1">
+  <div class="level-badge" id="g1-lvl">Επίπεδο 1: Άνοιγμα στον Υπολογιστή</div>
+  <h2 style="color:var(--primary); margin:0;">🖱️ Παιχνίδι 1: «Πώς ανοίγει η Εφαρμογή;»</h2>
+  <div class="instruction" id="g1-ins">
+    <strong>Οδηγία:</strong> Στον υπολογιστή με το ποντίκι, για να ανοίξουμε μια εφαρμογή πρέπει να κάνουμε <strong>γρήγορα διπλό κλικ</strong>! Κάνε γρήγορα δύο κλικ πάνω στο εικονίδιο της Ζωγραφικής!
+  </div>
+  <div class="desktop-area" id="g1-desktop">
+    <div class="app-icon" id="g1-icon" onclick="clickAppG1()">
+      <span class="emoji" id="g1-emoji">🎨</span>
+      <span id="g1-name">Ζωγραφική</span>
+    </div>
+  </div>
+  <div id="g1-fb" class="feedback"></div>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 2 ================= -->
+<div class="box" id="tab2">
+  <div class="level-badge" id="g2-lvl">Επίπεδο 1: Το Κουμπί για Κλείσιμο (X)</div>
+  <h2 style="color:var(--primary); margin:0;">🪟 Παιχνίδι 2: «Τα 3 Μαγικά Κουμπιά του Παραθύρου»</h2>
+  <div class="instruction" id="g2-ins">
+    <strong>Αποστολή:</strong> Η εργασία τελείωσε! Πάτησε το σωστό κουμπί πάνω δεξιά για να <strong>κλείσεις</strong> το παράθυρο.
+  </div>
+  <div class="window-mock" id="g2-win">
+    <div class="window-titlebar">
+      <span>📄 Το Κείμενό μου - Σημειωματάριο</span>
+      <div class="win-controls">
+        <button class="w-btn w-min" onclick="btnWinG2('min')">−</button>
+        <button class="w-btn w-max" onclick="btnWinG2('max')">□</button>
+        <button class="w-btn w-close" onclick="btnWinG2('close')">×</button>
+      </div>
+    </div>
+    <div class="window-body" id="g2-body">
+      ✍️ «Με λένε Υπατία και μου αρέσει η πληροφορική!»
+    </div>
+  </div>
+  <div id="g2-fb" class="feedback"></div>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 3 ================= -->
+<div class="box" id="tab3">
+  <div class="level-badge" id="g3-lvl">Επίπεδο 1: Εφαρμογή ή Φάκελος;</div>
+  <h2 style="color:var(--primary); margin:0;">📁 Παιχνίδι 3: «Ξεκαθάρισμα στην Επιφάνεια Εργασίας»</h2>
+  <div class="instruction" id="g3-ins">
+    <strong>Οδηγία:</strong> Πάτησε σε ένα εικονίδιο για να επιλεγεί (θα κοκκινίσει) και μετά πάτησε στο σωστό κουτί για να το ταξινομήσεις!
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:12px; background:#eef2f7; border-radius:12px;" id="g3-pool">
+    <div class="badge" data-type="app" onclick="pickBadgeG3(this)">🎨 TuxPaint</div>
+    <div class="badge" data-type="folder" onclick="pickBadgeG3(this)">📁 Έγγραφα</div>
+    <div class="badge" data-type="app" onclick="pickBadgeG3(this)">🌐 Φυλλομετρητής</div>
+    <div class="badge" data-type="folder" onclick="pickBadgeG3(this)">📁 Ζωγραφιές μου</div>
+  </div>
+  <div class="bins" id="g3-bins">
+    <div class="bin" id="bin-app" onclick="dropBadgeG3('app')">
+      <h4>📱 Εφαρμογές<br><small>(Προγράμματα)</small></h4>
+    </div>
+    <div class="bin" id="bin-folder" onclick="dropBadgeG3('folder')">
+      <h4>📁 Φάκελοι<br><small>(Εκεί φυλάμε πράγματα)</small></h4>
+    </div>
+    <div class="bin" id="bin-file" style="display:none;" onclick="dropBadgeG3('file')">
+      <h4>📄 Αρχεία<br><small>(Οι εργασίες μας)</small></h4>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:15px;">
+    <button class="action-btn" onclick="checkG3()">Έλεγχος Ταξινόμησης!</button>
+  </div>
+  <div id="g3-fb" class="feedback"></div>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 4 ================= -->
+<div class="box" id="tab4">
+  <div class="level-badge" id="g4-lvl">Επίπεδο 1: Ώρα για Ζωγραφική</div>
+  <h2 style="color:var(--primary); margin:0;">🎯 Παιχνίδι 4: «Ποια Εφαρμογή χρειάζομαι;»</h2>
+  <div class="instruction" id="g4-ins">
+    <strong>Ερώτηση:</strong> Ο Ήρωνας θέλει να <strong>ζωγραφίσει έναν σκύλο</strong> με έντονα χρώματα! Ποιο εικονίδιο εφαρμογής πρέπει να ανοίξει;
+  </div>
+  <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin:25px 0;" id="g4-opts">
+    <!-- Populated by JS -->
+  </div>
+  <div id="g4-fb" class="feedback"></div>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 5 ================= -->
+<div class="box" id="tab5">
+  <div class="level-badge" id="g5-lvl">Επίπεδο 1: Βρες τη Γραμμή Τίτλου</div>
+  <h2 style="color:var(--primary); margin:0;">🖐️ Παιχνίδι 5: «Μετακίνησε το Παράθυρο!»</h2>
+  <div class="instruction" id="g5-ins">
+    <strong>Οδηγία:</strong> Για να σύρουμε και να μετακινήσουμε ένα παράθυρο, το πιάνουμε από τη <strong>Γραμμή Τίτλου</strong> (την πάνω-πάνω γραμμή). Κάνε κλικ στη γραμμή τίτλου του παραθύρου!
+  </div>
+  <div class="window-mock" style="max-width:460px;">
+    <div class="window-titlebar" id="g5-bar" style="cursor:pointer;" onclick="clickTitleG5()">
+      <span>📌 Γραμμή Τίτλου: «Το Παιχνίδι μου»</span>
+      <div class="win-controls">
+        <span style="font-size:0.8rem; color:#d1d5db;">− □ ×</span>
+      </div>
+    </div>
+    <div class="window-body" id="g5-body" style="background:#f9fafb; cursor:pointer;" onclick="clickBodyG5()">
+      <p style="margin:0; color:#6b7280;">(Αυτό είναι το εσωτερικό του παραθύρου)</p>
+    </div>
+  </div>
+  <div id="g5-fb" class="feedback"></div>
+</div>
+
+<!-- ================= ΔΡΑΣΤΗΡΙΟΤΗΤΑ 6 ================= -->
+<div class="box" id="tab6">
+  <div class="level-badge" id="g6-lvl">Επίπεδο 1: Στο Τάμπλετ</div>
+  <h2 style="color:var(--primary); margin:0;">🤖 Παιχνίδι 6: «Ο Έξυπνος Βοηθός του Υπολογιστή»</h2>
+  <div class="instruction" id="g6-ins">
+    <strong>Ερώτηση:</strong> Στην ταμπλέτα και στο κινητό που έχουν οθόνη αφής, πώς ανοίγουμε μία εφαρμογή;
+  </div>
+  <div id="g6-choices" style="display:flex; flex-direction:column; gap:10px; max-width:500px; margin:20px auto;">
+    <!-- Populated by JS -->
+  </div>
+  <div id="g6-fb" class="feedback"></div>
+</div>
+
+<script>
+  function goTab(n) {
+    document.querySelectorAll('.box').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab' + n).classList.add('active');
+    document.querySelectorAll('.nav-btn')[n-1].classList.add('active');
+  }
+
+  /* ================= GAME 1 ================= */
+  let g1Clicks = 0;
+  let g1Timer = null;
+  let g1Level = 1;
+
+  function clickAppG1() {
+    const fb = document.getElementById('g1-fb');
+    if (g1Level === 1) {
+      g1Clicks++;
+      if (g1Clicks === 1) {
+        g1Timer = setTimeout(() => {
+          g1Clicks = 0;
+          fb.className = 'feedback show err';
+          fb.innerText = '⚠️ Έκανες μονό κλικ! Χρειάζονται ΔΥΟ γρήγορα κλικ (διπλό κλικ) για να ανοίξει!';
+        }, 500);
+      } else if (g1Clicks === 2) {
+        clearTimeout(g1Timer);
+        g1Clicks = 0;
+        fb.className = 'feedback show win';
+        fb.innerText = '🎉 ΜΠΡΑΒΟ! Με διπλό κλικ η εφαρμογή άνοιξε! Πάμε στο Επίπεδο 2!';
+        setTimeout(() => {
+          g1Level = 2;
+          document.getElementById('g1-lvl').innerText = 'Επίπεδο 2: Άνοιγμα σε Τάμπλετ (Οθόνη Αφής)';
+          document.getElementById('g1-ins').innerHTML = '<strong>Οδηγία:</strong> Τώρα είμαστε σε <strong>τάμπλετ με οθόνη αφής</strong>! Εδώ δεν έχουμε ποντίκι. Πάτησε <strong>ΜΙΑ μόνο φορά</strong> με το δαχτυλάκι σου στο εικονίδιο!';
+          document.getElementById('g1-emoji').innerText = '🎮';
+          document.getElementById('g1-name').innerText = 'Παιχνίδι';
+          document.getElementById('g1-desktop').style.background = '#059669';
+          fb.className = 'feedback';
+        }, 2000);
+      }
+    } else {
+      // Level 2: Single click
+      fb.className = 'feedback show win';
+      fb.innerText = '🌟 ΤΕΛΕΙΑ! Στην οθόνη αφής αρκεί ένα απαλό άγγιγμα με το δάχτυλο!';
+    }
+  }
+
+  /* ================= GAME 2 ================= */
+  let g2Level = 1;
+  function btnWinG2(btn) {
+    const fb = document.getElementById('g2-fb');
+    const win = document.getElementById('g2-win');
+
+    if (g2Level === 1) {
+      if (btn === 'close') {
+        fb.className = 'feedback show win';
+        fb.innerText = '🎉 Σωστά! Το κουμπί [×] κλείνει εντελώς το παράθυρο! Πάμε στο Επίπεδο 2!';
+        win.style.opacity = '0.3';
+        setTimeout(() => {
+          g2Level = 2;
+          win.style.opacity = '1';
+          document.getElementById('g2-lvl').innerText = 'Επίπεδο 2: Μεγάλωσε το Παράθυρο';
+          document.getElementById('g2-ins').innerHTML = '<strong>Αποστολή:</strong> Το παράθυρο είναι μικρό! Πάτησε το κουμπί που το κάνει να <strong>πιάνει όλη την οθόνη (μεγιστοποίηση)</strong>!';
+          fb.className = 'feedback';
+        }, 1800);
+      } else {
+        fb.className = 'feedback show err';
+        fb.innerText = '❌ Όχι αυτό το κουμπί! Ψάχνουμε το [×] που λέει αντίο στο παράθυρο!';
+      }
+    } else if (g2Level === 2) {
+      if (btn === 'max') {
+        fb.className = 'feedback show win';
+        fb.innerText = '🎉 Μπράβο! Το κουμπί [□] μεγαλώνει το παράθυρο σε όλη την οθόνη! Πάμε στο Επίπεδο 3!';
+        win.style.maxWidth = '700px';
+        setTimeout(() => {
+          g2Level = 3;
+          document.getElementById('g2-lvl').innerText = 'Επίπεδο 3: Κρύψε το Παράθυρο (Ελαχιστοποίηση)';
+          document.getElementById('g2-ins').innerHTML = '<strong>Αποστολή:</strong> Θέλουμε να κρύψουμε προσωρινά το παράθυρο κάτω στη γραμμή εργασιών χωρίς να το κλείσουμε! Πάτησε το κουμπί <strong>ελαχιστοποίησης [-]</strong>!';
+          fb.className = 'feedback';
+        }, 1800);
+      } else {
+        fb.className = 'feedback show err';
+        fb.innerText = '❌ Ψάχνουμε το τετραγωνάκι [□] που μεγαλώνει το παράθυρο!';
+      }
+    } else {
+      if (btn === 'min') {
+        fb.className = 'feedback show win';
+        fb.innerText = '🏆 Άριστα! Το κουμπί [-] μικραίνει το παράθυρο κάτω στη γραμμή εργασιών! Έμαθες και τα 3 κουμπιά!';
+        win.style.display = 'none';
+      } else {
+        fb.className = 'feedback show err';
+        fb.innerText = '❌ Πάτησε την παυλίτσα [-] για να το στείλεις κάτω στη γραμμή εργασιών!';
+      }
+    }
+  }
+
+  /* ================= GAME 3 ================= */
+  let g3Selected = null;
+  let g3Level = 1;
+
+  function pickBadgeG3(el) {
+    document.querySelectorAll('#g3-pool .badge, .bin .badge').forEach(b => b.classList.remove('selected'));
+    g3Selected = el;
+    el.classList.add('selected');
+  }
+
+  function dropBadgeG3(targetType) {
+    if (!g3Selected) return;
+    const dest = document.getElementById('bin-' + targetType);
+    dest.appendChild(g3Selected);
+    g3Selected.classList.remove('selected');
+    g3Selected = null;
+  }
+
+  function checkG3() {
+    const fb = document.getElementById('g3-fb');
+    let ok = true;
+    let total = 0;
+
+    const bins = ['app', 'folder'];
+    if (g3Level === 2) bins.push('file');
+
+    bins.forEach(t => {
+      const items = document.querySelectorAll('#bin-' + t + ' .badge');
+      items.forEach(it => {
+        total++;
+        if (it.dataset.type !== t) ok = false;
+      });
+    });
+
+    const poolRemain = document.querySelectorAll('#g3-pool .badge').length;
+    if (poolRemain > 0) {
+      fb.className = 'feedback show err';
+      fb.innerText = '⚠️ Βάλε πρώτα όλα τα εικονίδια μέσα στα κουτιά!';
+      return;
+    }
+
+    if (ok) {
+      if (g3Level === 1) {
+        fb.className = 'feedback show win';
+        fb.innerText = '🎉 Τέλεια! Ξεχώρισες τις Εφαρμογές από τους Φακέλους! Πάμε στο Επίπεδο 2 με Αρχεία!';
+        setTimeout(() => {
+          g3Level = 2;
+          document.getElementById('g3-lvl').innerText = 'Επίπεδο 2: Εφαρμογές, Φάκελοι & Αρχεία';
+          document.getElementById('g3-ins').innerHTML = '<strong>Οδηγία:</strong> Τώρα προστέθηκε και το κουτί <strong>Αρχεία</strong> (οι εργασίες μας, όπως κείμενο ή ζωγραφιά)!';
+          document.getElementById('bin-file').style.display = 'flex';
+          document.getElementById('g3-bins').style.gridTemplateColumns = 'repeat(3, 1fr)';
+          
+          // Clear bins
+          document.getElementById('bin-app').innerHTML = '<h4>📱 Εφαρμογές</h4>';
+          document.getElementById('bin-folder').innerHTML = '<h4>📁 Φάκελοι</h4>';
+          document.getElementById('bin-file').innerHTML = '<h4>📄 Αρχεία</h4>';
+          
+          const pool = document.getElementById('g3-pool');
+          pool.innerHTML = `
+            <div class="badge" data-type="app" onclick="pickBadgeG3(this)">🌐 Chrome</div>
+            <div class="badge" data-type="folder" onclick="pickBadgeG3(this)">📁 Σχολείο</div>
+            <div class="badge" data-type="file" onclick="pickBadgeG3(this)">📝 Εκθεση.doc</div>
+            <div class="badge" data-type="file" onclick="pickBadgeG3(this)">🖼️ Γάτα.png</div>
+          `;
+          fb.className = 'feedback';
+        }, 2000);
+      } else {
+        fb.className = 'feedback show win';
+        fb.innerText = '🏆 ΜΠΡΑΒΟ! Ταξινόμησες σωστά Εφαρμογές, Φακέλους και Αρχεία!';
+      }
+    } else {
+      fb.className = 'feedback show err';
+      fb.innerText = '❌ Κάποιο μπήκε σε λάθος κουτί! Θυμήσου: ο φάκελος είναι κίτρινος και φυλάει πράγματα!';
+    }
+  }
+
+  /* ================= GAME 4 ================= */
+  const g4Data = [
+    {
+      level: 1,
+      lvlText: 'Επίπεδο 1: Ώρα για Ζωγραφική',
+      q: 'Ο Ήρωνας θέλει να <strong>ζωγραφίσει έναν σκύλο</strong>! Ποια εφαρμογή θα ανοίξει;',
+      opts: [
+        { name: 'TuxPaint (Ζωγραφική)', icon: '🎨', correct: true },
+        { name: 'Αριθμομηχανή', icon: '🔢', correct: false },
+        { name: 'Μουσική', icon: '🎵', correct: false }
+      ]
+    },
+    {
+      level: 2,
+      lvlText: 'Επίπεδο 2: Γράφουμε Γράμμα',
+      q: 'Η Υπατία θέλει να <strong>γράψει ένα γράμμα στη γιαγιά</strong> της στον υπολογιστή! Ποια εφαρμογή χρειάζεται;',
+      opts: [
+        { name: 'Κειμενογράφος (Word / Writer)', icon: '📝', correct: true },
+        { name: 'Πρόγραμμα Ζωγραφικής', icon: '🎨', correct: false },
+        { name: 'Παιχνίδι με Αυτοκίνητα', icon: '🚗', correct: false }
+      ]
+    },
+    {
+      level: 3,
+      lvlText: 'Επίπεδο 3: Στο Διαδίκτυο',
+      q: 'Τα παιδιά θέλουν να <strong>δουν μια ιστοσελίδα με ζώα στο ίντερνετ</strong>! Ποια εφαρμογή θα ανοίξουν;',
+      opts: [
+        { name: 'Φυλλομετρητής (Browser)', icon: '🌐', correct: true },
+        { name: 'Σημειωματάριο', icon: '🗒️', correct: false },
+        { name: 'Αριθμομηχανή', icon: '🔢', correct: false }
+      ]
+    }
+  ];
+  let g4Idx = 0;
+
+  function loadG4() {
+    const d = g4Data[g4Idx];
+    document.getElementById('g4-lvl').innerText = d.lvlText;
+    document.getElementById('g4-ins').innerHTML = '<strong>Ερώτηση:</strong> ' + d.q;
+    const container = document.getElementById('g4-opts');
+    container.innerHTML = '';
+    d.opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'choice-btn';
+      b.style.fontSize = '1.2rem';
+      b.style.padding = '15px 25px';
+      b.innerHTML = `${o.icon} <br>${o.name}`;
+      b.onclick = () => answerG4(o.correct);
+      container.appendChild(b);
+    });
+    document.getElementById('g4-fb').className = 'feedback';
+  }
+
+  function answerG4(isCorrect) {
+    const fb = document.getElementById('g4-fb');
+    if (isCorrect) {
+      fb.className = 'feedback show win';
+      fb.innerText = '🎉 Σωστά! Αυτή ακριβώς είναι η κατάλληλη εφαρμογή!';
+      setTimeout(() => {
+        g4Idx++;
+        if (g4Idx < g4Data.length) {
+          loadG4();
+        } else {
+          document.getElementById('g4-opts').innerHTML = '<h3>🏆 Συγχαρητήρια! Ξέρεις ποια εφαρμογή να διαλέξεις για κάθε εργασία!</h3>';
+          fb.className = 'feedback';
+        }
+      }, 1600);
+    } else {
+      fb.className = 'feedback show err';
+      fb.innerText = '❌ Όχι αυτή... Σκέψου τι δουλειά κάνει αυτή η εφαρμογή!';
+    }
+  }
+  loadG4();
+
+  /* ================= GAME 5 ================= */
+  let g5Level = 1;
+  function clickTitleG5() {
+    const fb = document.getElementById('g5-fb');
+    if (g5Level === 1) {
+      fb.className = 'feedback show win';
+      fb.innerText = '🎉 ΜΠΡΑΒΟ! Από τη Γραμμή Τίτλου κρατάμε πατημένο το ποντίκι (σύρε) και κουνάμε το παράθυρο! Πάμε στο Επίπεδο 2!';
+      setTimeout(() => {
+        g5Level = 2;
+        document.getElementById('g5-lvl').innerText = 'Επίπεδο 2: Αλλαγή Μεγέθους';
+        document.getElementById('g5-ins').innerHTML = '<strong>Οδηγία:</strong> Αν θέλουμε να αλλάξουμε το <strong>σχήμα ή το μέγεθος</strong> του παραθύρου, από πού το πιάνουμε με το ποντίκι;';
+        document.getElementById('g5-body').innerHTML = `
+          <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+            <button class="choice-btn" onclick="checkResizeG5(true)">Από τις πλευρές και τις γωνίες του ↔️</button>
+            <button class="choice-btn" onclick="checkResizeG5(false)">Από τη μέση της οθόνης</button>
+          </div>
+        `;
+        fb.className = 'feedback';
+      }, 2000);
+    }
+  }
+  function clickBodyG5() {
+    if (g5Level === 1) {
+      const fb = document.getElementById('g5-fb');
+      fb.className = 'feedback show err';
+      fb.innerText = '❌ Πάτησες μέσα στο παράθυρο! Πρέπει να πατήσεις πάνω-πάνω στη σκούρα Γραμμή Τίτλου!';
+    }
+  }
+  function checkResizeG5(isCorrect) {
+    const fb = document.getElementById('g5-fb');
+    if (isCorrect) {
+      fb.className = 'feedback show win';
+      fb.innerText = '🌟 ΤΕΛΕΙΑ! Σύροντας τις πλευρές ή τις γωνίες του παραθύρου, το κάνουμε όσο φαρδύ ή ψηλό θέλουμε!';
+    } else {
+      fb.className = 'feedback show err';
+      fb.innerText = '❌ Όχι, το πιάνουμε από τις άκρες και τις γωνίες του!';
+    }
+  }
+
+  /* ================= GAME 6 ================= */
+  const g6Data = [
+    {
+      lvl: 'Επίπεδο 1: Στην Οθόνη Αφής',
+      q: 'Στην ταμπλέτα ή στο κινητό τηλέφωνο, πώς ανοίγω μια εφαρμογή;',
+      opts: [
+        { text: 'Πατάω μία φορά με το δάχτυλο στο εικονίδιο 👆', ok: true },
+        { text: 'Κουνάω την ταμπλέτα στον αέρα', ok: false },
+        { text: 'Της φωνάζω δυνατά', ok: false }
+      ]
+    },
+    {
+      lvl: 'Επίπεδο 2: Τι είναι η Επιφάνεια Εργασίας;',
+      q: 'Με τι μοιάζει η «Επιφάνεια Εργασίας» του υπολογιστή σύμφωνα με το βιβλίο μας;',
+      opts: [
+        { text: 'Με την επιφάνεια του γραφείου στο δωμάτιό μας 🛋️', ok: true },
+        { text: 'Με ένα πλυντήριο ρούχων', ok: false },
+        { text: 'Με ένα ποδήλατο', ok: false }
+      ]
+    },
+    {
+      lvl: 'Επίπεδο 3: Τι περιέχει η Επιφάνεια Εργασίας;',
+      q: 'Ποια από τα παρακάτω βρίσκονται πάνω στην επιφάνεια εργασίας;',
+      opts: [
+        { text: 'Εικονίδια για εφαρμογές, φακέλους και αρχεία ✨', ok: true },
+        { text: 'Πραγματικά μολύβια και γόμες', ok: false },
+        { text: 'Μόνο το ρολόι του τοίχου', ok: false }
+      ]
+    }
+  ];
+  let g6Idx = 0;
+
+  function loadG6() {
+    const d = g6Data[g6Idx];
+    document.getElementById('g6-lvl').innerText = d.lvl;
+    document.getElementById('g6-ins').innerHTML = '<strong>Ερώτηση:</strong> ' + d.q;
+    const box = document.getElementById('g6-choices');
+    box.innerHTML = '';
+    d.opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'choice-btn';
+      b.style.textAlign = 'left';
+      b.innerText = o.text;
+      b.onclick = () => answerG6(o.ok);
+      box.appendChild(b);
+    });
+    document.getElementById('g6-fb').className = 'feedback';
+  }
+
+  function answerG6(isOk) {
+    const fb = document.getElementById('g6-fb');
+    if (isOk) {
+      fb.className = 'feedback show win';
+      fb.innerText = '🎯 Μπράβο! Απάντησες ολόσωστα!';
+      setTimeout(() => {
+        g6Idx++;
+        if (g6Idx < g6Data.length) {
+          loadG6();
+        } else {
+          document.getElementById('g6-choices').innerHTML = '<h3 style="text-align:center; color:#059669;">🥇 Συγχαρητήρια! Ολοκλήρωσες όλα τα επίπεδα του Μαθήματος 13 με άριστα!</h3>';
+          fb.className = 'feedback';
+        }
+      }, 1500);
+    } else {
+      fb.className = 'feedback show err';
+      fb.innerText = '❌ Σκέψου το λίγο ακόμα... Ξαναδιάβασε την ερώτηση!';
+    }
+  }
+  loadG6();
+</script>
+</body>
+</html>
