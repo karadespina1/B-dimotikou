@@ -1,1204 +1,490 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Μάθημα 15: Αποθήκευση και άνοιγμα αρχείων - Εικονικός Υπολογιστής</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-  
-  body, html {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
-  }
-
-  /* Οθόνη Υπολογιστή */
-  #desktop {
-    width: 100vw;
-    height: 100vh;
-    background: #0284c7 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.07"><circle cx="50" cy="50" r="40" fill="%23ffffff"/></svg>') repeat;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Πίνακας Αποστολών / Δραστηριοτήτων (Στην κορυφή) */
-  #task-assistant {
-    background: #ffffff;
-    border-bottom: 3px solid #0369a1;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    padding: 10px 16px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .assistant-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .assistant-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: #0369a1;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .lesson-tag {
-    background: #fef08a;
-    color: #854d0e;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: bold;
-  }
-
-  .nav-activities {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  .act-chip {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    border-radius: 14px;
-    padding: 4px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #475569;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: 0.15s;
-  }
-
-  .act-chip.active {
-    background: #0284c7;
-    color: white;
-    border-color: #0369a1;
-    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
-  }
-
-  .steps-row {
-    display: flex;
-    gap: 8px;
-  }
-
-  .step-badge {
-    flex: 1;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 13px;
-    color: #64748b;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .step-badge.active {
-    background: #fef3c7;
-    border-color: #f59e0b;
-    color: #92400e;
-    font-weight: bold;
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
-  }
-
-  .step-badge.done {
-    background: #dcfce7;
-    border-color: #22c55e;
-    color: #166534;
-    font-weight: bold;
-  }
-
-  .num-circle {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #cbd5e1;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-  }
-
-  .step-badge.active .num-circle { background: #f59e0b; }
-  .step-badge.done .num-circle { background: #22c55e; }
-
-  /* Επιφάνεια Εργασίας (Desktop Grid) */
-  #desktop-icons {
-    flex: 1;
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 90px);
-    grid-auto-rows: 95px;
-    gap: 15px;
-    align-content: start;
-  }
-
-  .desktop-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 6px 4px;
-    transition: 0.1s;
-  }
-
-  .desktop-icon:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
-
-  .desktop-icon.selected {
-    background: rgba(56, 189, 248, 0.4);
-    outline: 1px dashed rgba(255, 255, 255, 0.6);
-  }
-
-  .icon-img {
-    font-size: 38px;
-    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
-    margin-bottom: 4px;
-  }
-
-  .icon-label {
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-    word-break: break-word;
-    line-height: 1.2;
-  }
-
-  /* Παράθυρο Εφαρμογής (Window Simulation) */
-  .window {
-    position: absolute;
-    background: #ffffff;
-    border-radius: 8px;
-    border: 2px solid #475569;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.35);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    z-index: 100;
-  }
-
-  .win-header {
-    background: linear-gradient(180deg, #0284c7 0%, #0369a1 100%);
-    color: white;
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: bold;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: move;
-  }
-
-  .win-btns {
-    display: flex;
-    gap: 6px;
-  }
-
-  .win-ctrl-btn {
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-  }
-
-  .btn-close { background: #ef4444; }
-  .btn-min { background: #eab308; }
-  .btn-max { background: #22c55e; }
-
-  /* Μενού Παραθύρου */
-  .win-menu {
-    background: #f8fafc;
-    border-bottom: 1px solid #cbd5e1;
-    display: flex;
-    font-size: 13px;
-    position: relative;
-  }
-
-  .menu-btn {
-    padding: 4px 10px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #334155;
-  }
-
-  .menu-btn:hover, .menu-btn.open {
-    background: #e2e8f0;
-    color: #0284c7;
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    top: 27px;
-    left: 0;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    border-radius: 4px;
-    min-width: 170px;
-    display: none;
-    z-index: 200;
-    padding: 4px 0;
-  }
-
-  .dropdown-menu.visible { display: block; }
-
-  .dropdown-item {
-    padding: 6px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #1e293b;
-    font-weight: 600;
-  }
-
-  .dropdown-item:hover {
-    background: #e0f2fe;
-    color: #0284c7;
-  }
-
-  .menu-sep {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 4px 0;
-  }
-
-  /* Γραμμή Εργαλείων */
-  .win-toolbar {
-    background: #f1f5f9;
-    border-bottom: 1px solid #cbd5e1;
-    padding: 5px 10px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-
-  .tool-btn {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #334155;
-    transition: 0.15s;
-  }
-
-  .tool-btn:hover {
-    background: #e0f2fe;
-    border-color: #38bdf8;
-    color: #0284c7;
-  }
-
-  .tool-btn.highlight-pulse {
-    border-color: #f59e0b;
-    background: #fef3c7;
-    color: #b45309;
-    animation: pulseGlow 0.8s infinite alternate;
-  }
-
-  @keyframes pulseGlow {
-    from { transform: scale(1); }
-    to { transform: scale(1.05); }
-  }
-
-  /* Περιεχόμενο Εγγράφου */
-  .win-workspace {
-    flex: 1;
-    background: #e2e8f0;
-    padding: 14px;
-    display: flex;
-    justify-content: center;
-    overflow-y: auto;
-  }
-
-  .editor-sheet {
-    background: white;
-    width: 100%;
-    max-width: 500px;
-    min-height: 220px;
-    padding: 20px;
-    border: 1px solid #cbd5e1;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    font-size: 16px;
-    line-height: 1.6;
-    outline: none;
-    border-radius: 4px;
-  }
-
-  /* Παράθυρο Φακέλου "Έγγραφα" */
-  .folder-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 80px);
-    grid-auto-rows: 85px;
-    gap: 12px;
-    padding: 14px;
-    background: #ffffff;
-    flex: 1;
-  }
-
-  .folder-file {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    cursor: pointer;
-    padding: 6px 4px;
-    border-radius: 6px;
-  }
-
-  .folder-file:hover {
-    background: #e0f2fe;
-  }
-
-  .folder-file.selected {
-    background: #bae6fd;
-    border: 1px solid #0284c7;
-  }
-
-  /* Διάλογος Αποθήκευσης / Ανοίγματος (Modal Dialog) */
-  .modal-backdrop {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 500;
-  }
-
-  .modal-backdrop.show { display: flex; }
-
-  .sys-dialog {
-    background: white;
-    width: 440px;
-    border-radius: 8px;
-    border: 2px solid #0284c7;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    overflow: hidden;
-  }
-
-  .dialog-title {
-    background: #0284c7;
-    color: white;
-    padding: 8px 12px;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .dialog-body {
-    padding: 14px;
-    background: #f8fafc;
-  }
-
-  .dialog-files-list {
-    background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    height: 120px;
-    overflow-y: auto;
-    padding: 4px;
-    margin: 8px 0;
-  }
-
-  .dialog-file-row {
-    padding: 6px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-  }
-
-  .dialog-file-row:hover { background: #f1f5f9; }
-  .dialog-file-row.selected { background: #bae6fd; color: #0369a1; }
-
-  .dialog-field-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .dialog-field-row label {
-    font-size: 12px;
-    font-weight: bold;
-    color: #475569;
-    width: 95px;
-  }
-
-  .dialog-input {
-    flex: 1;
-    padding: 5px 8px;
-    border: 1px solid #cbd5e1;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: bold;
-  }
-
-  .dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .dialog-btn {
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-  }
-
-  .btn-save-confirm { background: #0284c7; color: white; }
-  .btn-cancel-dialog { background: #e2e8f0; color: #475569; }
-
-  /* Γραμμή Εργασιών Υπολογιστή (Taskbar - Κάτω μέρος) */
-  #taskbar {
-    height: 44px;
-    background: #1e293b;
-    border-top: 1px solid #334155;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 10px;
-    z-index: 1000;
-  }
-
-  .taskbar-start {
-    background: #0284c7;
-    color: white;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .taskbar-items {
-    flex: 1;
-    display: flex;
-    gap: 8px;
-    margin-left: 12px;
-  }
-
-  .taskbar-tab {
-    background: #334155;
-    color: white;
-    padding: 5px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #475569;
-  }
-
-  .taskbar-tab.active {
-    background: #0284c7;
-    border-color: #38bdf8;
-  }
-
-  .taskbar-clock {
-    color: #94a3b8;
-    font-size: 13px;
-    font-weight: bold;
-    font-family: monospace;
-  }
-
-  /* Toast Notification */
-  #toast {
-    position: absolute;
-    bottom: 56px;
-    right: 20px;
-    background: #dcfce7;
-    border: 2px solid #22c55e;
-    color: #14532d;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    display: none;
-    z-index: 9999;
-  }
-
-  #toast.show { display: block; animation: toastSlide 0.2s ease; }
-  @keyframes toastSlide { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-</style>
+  <meta charset="UTF-8">
+  <title>Φύλλα Εργασίας - Πληροφορική Β΄ Δημοτικού</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #eef2f6; margin: 0; padding: 15px; }
+    .box-header { background: #1d4ed8; color: white; text-align: center; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+    .box-header h1 { margin: 0 0 5px 0; font-size: 22px; }
+    
+    /* Κουμπιά για αλλαγή φύλλου */
+    .nav-bar { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 15px; }
+    .nav-btn { background: white; border: 2px solid #1d4ed8; color: #1d4ed8; padding: 8px 12px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    .nav-btn.active { background: #1d4ed8; color: white; }
+
+    /* Περιεχόμενο Φύλλου */
+    .sheet { display: none; background: white; border-radius: 10px; padding: 20px; max-width: 750px; margin: 0 auto; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .sheet.active { display: block; }
+
+    .q-card { background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+    .q-card h3 { margin-top: 0; font-size: 16px; color: #b45309; }
+
+    /* Επιλογές απαντήσεων */
+    .choice-btn { display: block; width: 100%; text-align: left; background: white; border: 2px solid #94a3b8; padding: 10px; margin: 6px 0; border-radius: 6px; font-size: 15px; cursor: pointer; font-weight: bold; }
+    .choice-btn:hover { background: #f1f5f9; }
+    .choice-btn.selected { background: #bfdbfe; border-color: #2563eb; }
+    
+    /* Χρώματα σωστού / λάθους */
+    .correct { background: #bbf7d0 !important; border-color: #16a34a !important; color: #14532d !important; }
+    .wrong { background: #fecaca !important; border-color: #dc2626 !important; color: #7f1d1d !important; }
+
+    select { width: 100%; padding: 8px; font-size: 15px; border-radius: 6px; border: 2px solid #94a3b8; margin: 4px 0; background: white; }
+    
+    .check-btn { background: #16a34a; color: white; border: none; padding: 10px 20px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    .check-btn:hover { background: #15803d; }
+
+    .feedback { margin-top: 10px; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 15px; display: none; }
+    .feedback.ok { background: #dcfce7; color: #15803d; border: 1px solid #86efac; display: block; }
+    .feedback.fail { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; display: block; }
+  </style>
 </head>
 <body>
 
-<div id="desktop">
-  <!-- ΠΙΝΑΚΑΣ ΑΠΟΣΤΟΛΗΣ ΜΑΘΗΜΑΤΟΣ -->
-  <div id="task-assistant">
-    <div class="assistant-header">
-      <div class="assistant-title">
-        <span>🖥️ Εικονικός Υπολογιστής</span>
-        <span style="color:#64748b; font-size:13px; font-weight:normal;">| Μάθημα 15: Αποθήκευση και άνοιγμα αρχείων</span>
-      </div>
-      <div class="lesson-tag" id="currentActName">Δραστηριότητα 1: Το κουμπί της Δισκέτας</div>
-    </div>
-
-    <!-- 8 Δραστηριότητες (Tabs) -->
-    <div class="nav-activities" id="actTabsContainer"></div>
-
-    <!-- 3 Βήματα ανά Δραστηριότητα -->
-    <div class="steps-row" id="stepsRow">
-      <div class="step-badge active" id="stepBadge1">
-        <span class="num-circle">1</span> <span id="stepDesc1">Βήμα 1: Πάτησε τη δισκέτα 💾 στη γραμμή εργαλείων.</span>
-      </div>
-      <div class="step-badge" id="stepBadge2">
-        <span class="num-circle">2</span> <span id="stepDesc2">Βήμα 2: Πάτησε το κουμπί «Αποθήκευση» στο παράθυρο.</span>
-      </div>
-      <div class="step-badge" id="stepBadge3">
-        <span class="num-circle">3</span> <span id="stepDesc3">Βήμα 3: Δες τον τίτλο που άλλαξε στο παράθυρο!</span>
-      </div>
-    </div>
+  <div class="box-header">
+    <h1>💻 Πληροφορική Β΄ Δημοτικού</h1>
+    <p>Μάθημα 15: Αποθήκευση και άνοιγμα αρχείων</p>
   </div>
 
-  <!-- ΕΠΙΦΑΝΕΙΑ ΕΡΓΑΣΙΑΣ (DESKTOP) -->
-  <div id="desktop-icons">
-    <div class="desktop-icon" ondblclick="openFolderWindow()">
-      <div class="icon-img">📁</div>
-      <div class="icon-label">Έγγραφα</div>
-    </div>
-    <div class="desktop-icon" ondblclick="openAppWindow('writer')">
-      <div class="icon-img">📝</div>
-      <div class="icon-label">Επεξεργαστής Κειμένου</div>
-    </div>
-    <div class="desktop-icon" ondblclick="openAppWindow('paint')">
-      <div class="icon-img">🎨</div>
-      <div class="icon-label">Ζωγραφική</div>
-    </div>
-    <div class="desktop-icon" ondblclick="openAppWindow('sound')">
-      <div class="icon-img">🎙️</div>
-      <div class="icon-label">Ηχογράφηση</div>
-    </div>
-    <div class="desktop-icon">
-      <div class="icon-img">🗑️</div>
-      <div class="icon-label">Κάδος</div>
-    </div>
+  <div class="nav-bar">
+    <button class="nav-btn active" onclick="openSheet(1)">Φύλλο 1</button>
+    <button class="nav-btn" onclick="openSheet(2)">Φύλλο 2</button>
+    <button class="nav-btn" onclick="openSheet(3)">Φύλλο 3</button>
+    <button class="nav-btn" onclick="openSheet(4)">Φύλλο 4</button>
+    <button class="nav-btn" onclick="openSheet(5)">Φύλλο 5</button>
+    <button class="nav-btn" onclick="openSheet(6)">Φύλλο 6</button>
+    <button class="nav-btn" onclick="openSheet(7)">Φύλλο 7</button>
+    <button class="nav-btn" onclick="openSheet(8)">Φύλλο 8</button>
   </div>
 
-  <!-- ΠΑΡΑΘΥΡΟ ΕΦΑΡΜΟΓΗΣ (ΕΠΕΞΕΡΓΑΣΤΗΣ ΚΕΙΜΕΝΟΥ) -->
-  <div class="window" id="writerWindow" style="top: 130px; left: 240px; width: 620px; height: 420px;">
-    <!-- Titlebar -->
-    <div class="win-header">
-      <span id="winTitleText">📄 Έγγραφο1 - Επεξεργαστής Κειμένου</span>
-      <div class="win-btns">
-        <button class="win-ctrl-btn btn-min"></button>
-        <button class="win-ctrl-btn btn-max"></button>
-        <button class="win-ctrl-btn btn-close" onclick="closeWindow('writerWindow')"></button>
-      </div>
+  <!-- ΦΥΛΛΟ 1 -->
+  <div id="s1" class="sheet active">
+    <h2>Φύλλο 1: «Πού πήγε η ζωγραφιά;»</h2>
+    <div class="q-card" id="q1_1_box">
+      <h3>1. Αν κλείσουμε το πρόγραμμα από το ❌ χωρίς αποθήκευση, τι θα γίνει;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q1_1', 'A')">Α. Η ζωγραφιά θα μείνει εκεί μόνη της.</button>
+      <button class="choice-btn" onclick="choose(this, 'q1_1', 'B')">Β. Η ζωγραφιά θα χαθεί επειδή δεν πατήσαμε αποθήκευση!</button>
     </div>
-
-    <!-- Menubar -->
-    <div class="win-menu">
-      <div class="menu-btn" id="menuBtnFile" onclick="toggleFileMenu()">Αρχείο</div>
-      <div class="menu-btn" style="color:#94a3b8;">Επεξεργασία</div>
-      <div class="menu-btn" style="color:#94a3b8;">Προβολή</div>
-      <div class="menu-btn" style="color:#94a3b8;">Βοήθεια</div>
-
-      <!-- Dropdown Μενού Αρχείο -->
-      <div class="dropdown-menu" id="dropdownFile">
-        <div class="dropdown-item" onclick="handleNewDoc()">📄 Νέο</div>
-        <div class="dropdown-item" id="dropItemOpen" onclick="showFileDialog('open')">📂 Άνοιγμα...</div>
-        <div class="menu-sep"></div>
-        <div class="dropdown-item" id="dropItemSave" onclick="showFileDialog('save')">💾 Αποθήκευση</div>
-        <div class="dropdown-item" onclick="showFileDialog('save')">💾 Αποθήκευση ως...</div>
-        <div class="menu-sep"></div>
-        <div class="dropdown-item" onclick="closeWindow('writerWindow')">✕ Έξοδος</div>
-      </div>
+    <div class="q-card" id="q1_2_box">
+      <h3>2. Ποιο κουμπί πατάμε για να μη χαθεί η δουλειά μας;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q1_2', 'save')">💾 Αποθήκευση (δισκέτα)</button>
+      <button class="choice-btn" onclick="choose(this, 'q1_2', 'close')">❌ Κλείσιμο</button>
     </div>
-
-    <!-- Toolbar -->
-    <div class="win-toolbar">
-      <button class="tool-btn highlight-pulse" id="btnToolSave" onclick="showFileDialog('save')">
-        <span>💾</span> <span>Αποθήκευση</span>
-      </button>
-      <button class="tool-btn" id="btnToolOpen" onclick="showFileDialog('open')">
-        <span>📂</span> <span>Άνοιγμα</span>
-      </button>
-      <div style="height:18px; width:1px; background:#cbd5e1; margin:0 4px;"></div>
-      <button class="tool-btn" id="btnToolBark" style="display:none;" onclick="triggerBarkAudio()">
-        <span>🎙️</span> <span>Ηχογράφηση «Γαβ!»</span>
-      </button>
-      <button class="tool-btn" id="btnToolScan" style="display:none;" onclick="triggerScanPaper()">
-        <span>📠</span> <span>Σάρωση από Χαρτί</span>
-      </button>
-    </div>
-
-    <!-- Workspace -->
-    <div class="win-workspace">
-      <div class="editor-sheet" id="editorSheet" contenteditable="true" spellcheck="false">
-        Το κατοικίδιο που αγαπώ είναι ο σκύλος μου.
-      </div>
-      <div id="canvasBox" style="display:none; text-align:center;">
-        <canvas id="paintCanvas" width="360" height="150" style="background:white; border:2px dashed #94a3b8; border-radius:6px; cursor:crosshair;"></canvas><br>
-        <span style="font-size:12px; color:#475569;">Ζωγράφισε κάτι και πάτησε Αποθήκευση!</span>
-      </div>
-    </div>
+    <button class="check-btn" onclick="evalS1()">Έλεγχος Απαντήσεων</button>
+    <div id="fb1" class="feedback"></div>
   </div>
 
-  <!-- ΠΑΡΑΘΥΡΟ ΦΑΚΕΛΟΥ «ΕΓΓΡΑΦΑ» -->
-  <div class="window" id="folderWindow" style="top: 160px; left: 80px; width: 440px; height: 320px; display:none;">
-    <div class="win-header" style="background: #475569;">
-      <span>📁 Φάκελος: Έγγραφα</span>
-      <div class="win-btns">
-        <button class="win-ctrl-btn btn-close" onclick="closeWindow('folderWindow')"></button>
-      </div>
+  <!-- ΦΥΛΛΟ 2 -->
+  <div id="s2" class="sheet">
+    <h2>Φύλλο 2: «Τα κουμπιά στο μενού Αρχείο»</h2>
+    <div class="q-card">
+      <h3>1. Διάλεξε τι κάνει το κάθε κουμπί:</h3>
+      <p>📁 Φάκελος: 
+        <select id="s2_m1" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="save">Αποθήκευση</option>
+          <option value="open">Άνοιγμα</option>
+        </select>
+      </p>
+      <p>💾 Δισκέτα: 
+        <select id="s2_m2" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="save">Αποθήκευση</option>
+          <option value="open">Άνοιγμα</option>
+        </select>
+      </p>
     </div>
-    <div class="folder-view" id="folderViewFiles">
-      <!-- Αρχεία φακέλου -->
+    <div class="q-card">
+      <h3>2. Με ποια σειρά ανοίγουμε ένα αρχείο; (Βάλε 1, 2, 3)</h3>
+      <p>Πατάω τη λέξη «Αρχείο»: 
+        <select id="s2_o1" onchange="this.className=''"><option value="">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </p>
+      <p>Πατάω «Άνοιγμα...»: 
+        <select id="s2_o2" onchange="this.className=''"><option value="">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </p>
+      <p>Κάνω διπλό κλικ στο αρχείο «Ο σκύλος μου»: 
+        <select id="s2_o3" onchange="this.className=''"><option value="">-</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+      </p>
     </div>
+    <button class="check-btn" onclick="evalS2()">Έλεγχος Απαντήσεων</button>
+    <div id="fb2" class="feedback"></div>
   </div>
 
-  <!-- ΔΙΑΛΟΓΟΣ ΑΠΟΘΗΚΕΥΣΗΣ & ΑΝΟΙΓΜΑΤΟΣ (MODAL) -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="sys-dialog">
-      <div class="dialog-title">
-        <span id="dialogHeader">💾 Αποθήκευση</span>
-        <span style="cursor:pointer;" onclick="closeFileDialog()">✕</span>
-      </div>
-      <div class="dialog-body">
-        <div style="font-size:12px; font-weight:bold; color:#475569;">📁 Φάκελος: Έγγραφα</div>
-        
-        <div class="dialog-files-list" id="dialogList"></div>
-
-        <div class="dialog-field-row">
-          <label>Όνομα αρχείου:</label>
-          <input type="text" id="dlgInputName" class="dialog-input" value="Ο σκύλος μου">
-        </div>
-
-        <div class="dialog-actions">
-          <button class="dialog-btn btn-cancel-dialog" onclick="closeFileDialog()">Ακύρωση</button>
-          <button class="dialog-btn btn-save-confirm" id="btnDlgConfirm" onclick="confirmDialogAction()">Αποθήκευση</button>
-        </div>
-      </div>
+  <!-- ΦΥΛΛΟ 3 -->
+  <div id="s3" class="sheet">
+    <h2>Φύλλο 3: «Αποστολή στο Εργαστήριο»</h2>
+    <div class="q-card">
+      <h3>Τσεκάρετε όσα βήματα κάνατε στον υπολογιστή:</h3>
+      <p><label><input type="checkbox" id="chk1"> 1. Ανοίξαμε το πρόγραμμα ζωγραφικής.</label></p>
+      <p><label><input type="checkbox" id="chk2"> 2. Πατήσαμε «Αρχείο».</label></p>
+      <p><label><input type="checkbox" id="chk3"> 3. Πατήσαμε «Άνοιγμα...».</label></p>
+      <p><label><input type="checkbox" id="chk4"> 4. Βρήκαμε το αρχείο «Ο σκύλος μου».</label></p>
+      <p><label><input type="checkbox" id="chk5"> 5. Το σκυλάκι εμφανίστηκε στην οθόνη!</label></p>
     </div>
+    <button class="check-btn" onclick="evalS3()">Έλεγχος Αποστολής</button>
+    <div id="fb3" class="feedback"></div>
   </div>
 
-  <!-- ΓΡΑΜΜΗ ΕΡΓΑΣΙΩΝ (TASKBAR) -->
-  <div id="taskbar">
-    <div style="display:flex; align-items:center;">
-      <button class="taskbar-start">🪟 Έναρξη</button>
-      <div class="taskbar-items">
-        <div class="taskbar-tab active" id="taskTabWriter" onclick="bringToFront('writerWindow')">
-          <span>📝</span> <span>Επεξεργαστής Κειμένου</span>
-        </div>
-        <div class="taskbar-tab" id="taskTabFolder" style="display:none;" onclick="bringToFront('folderWindow')">
-          <span>📁</span> <span>Έγγραφα</span>
-        </div>
-      </div>
+  <!-- ΦΥΛΛΟ 4 -->
+  <div id="s4" class="sheet">
+    <h2>Φύλλο 4: «Ζωγραφίζω και σώζω!»</h2>
+    <div class="q-card">
+      <h3>1. Πώς ονομάσατε το αρχείο σας;</h3>
+      <input type="text" id="s4_name" placeholder="π.χ. Νίκος_Μαρία" style="padding: 8px; width: 60%; font-size: 15px;">
     </div>
-    <div class="taskbar-clock" id="taskbarClock">10:00 π.μ.</div>
+    <div class="q-card" id="s4_ans_box">
+      <h3>2. Κλείσατε και ξανανοίξατε την εφαρμογή. Ήταν η ζωγραφιά εκεί;</h3>
+      <button class="choice-btn" onclick="choose(this, 's4_ans', 'yes')">✅ ΝΑΙ, η εργασία μας σώθηκε!</button>
+      <button class="choice-btn" onclick="choose(this, 's4_ans', 'no')">❌ ΟΧΙ, χρειαζόμαστε βοήθεια</button>
+    </div>
+    <button class="check-btn" onclick="evalS4()">Έλεγχος</button>
+    <div id="fb4" class="feedback"></div>
   </div>
 
-  <!-- Toast Μήνυμα -->
-  <div id="toast"></div>
-</div>
+  <!-- ΦΥΛΛΟ 5 -->
+  <div id="s5" class="sheet">
+    <h2>Φύλλο 5: «Τι περιέχει το κάθε αρχείο;»</h2>
+    <div class="q-card">
+      <h3>Ταίριαξε το κάθε παράδειγμα:</h3>
+      <p>📝 «Το κατοικίδιο που αγαπώ»: 
+        <select id="s5_t1" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="txt">Αρχείο Κειμένου</option>
+          <option value="img">Αρχείο Εικόνας</option>
+          <option value="snd">Αρχείο Ήχου</option>
+        </select>
+      </p>
+      <p>🎨 Ζωγραφιά σκύλου: 
+        <select id="s5_t2" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="txt">Αρχείο Κειμένου</option>
+          <option value="img">Αρχείο Εικόνας</option>
+          <option value="snd">Αρχείο Ήχου</option>
+        </select>
+      </p>
+      <p>🔊 Ηχογράφηση «Γαβ! Γαβ!»: 
+        <select id="s5_t3" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="txt">Αρχείο Κειμένου</option>
+          <option value="img">Αρχείο Εικόνας</option>
+          <option value="snd">Αρχείο Ήχου</option>
+        </select>
+      </p>
+    </div>
+    <button class="check-btn" onclick="evalS5()">Έλεγχος Απαντήσεων</button>
+    <div id="fb5" class="feedback"></div>
+  </div>
 
-<script>
-  let currentAct = 1;
-  let currentStep = 1;
-  let currentDialogMode = 'save';
-  let selectedFileObj = null;
+  <!-- ΦΥΛΛΟ 6 -->
+  <div id="s6" class="sheet">
+    <h2>Φύλλο 6: «Σωστό Όνομα Αρχείου»</h2>
+    <div class="q-card" id="q6_1_box">
+      <h3>1. Ποιο όνομα είναι το πιο σωστό;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q6_1', 'bad1')">αααααααα</button>
+      <button class="choice-btn" onclick="choose(this, 'q6_1', 'good')">Υπατία_Σκύλος_Εργασία</button>
+      <button class="choice-btn" onclick="choose(this, 'q6_1', 'bad2')">123456</button>
+    </div>
+    <div class="q-card" id="q6_2_box">
+      <h3>2. Γιατί βάζουμε καλό όνομα στο αρχείο;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q6_2', 'correct')">Για να ξέρουμε τι έχει μέσα και να το βρίσκουμε γρήγορα!</button>
+      <button class="choice-btn" onclick="choose(this, 'q6_2', 'wrong')">Δεν έχει σημασία, ό,τι να 'ναι βάζουμε.</button>
+    </div>
+    <button class="check-btn" onclick="evalS6()">Έλεγχος Απαντήσεων</button>
+    <div id="fb6" class="feedback"></div>
+  </div>
 
-  const activities = [
-    {
-      name: "Δραστηριότητα 1: Το κουμπί της Δισκέτας",
-      steps: [
-        "Βήμα 1: Πάτησε τη δισκέτα 💾 στη γραμμή εργαλείων.",
-        "Βήμα 2: Πάτησε το κουμπί «Αποθήκευση» στο παράθυρο που άνοιξε.",
-        "Βήμα 3: Δες τον τίτλο που άλλαξε στο πάνω μέρος του παραθύρου!"
-      ]
-    },
-    {
-      name: "Δραστηριότητα 2: Τα 3 Είδη Αρχείων (Ήχος, Εικόνα, Κείμενο)",
-      steps: [
-        "Βήμα 1 (Ήχος): Πάτησε το κουμπί «🎙️ Ηχογράφηση» για να ακούσεις το «Γαβ!»",
-        "Βήμα 2 (Εικόνα): Ζωγράφισε κάτι στον καμβά και πάτησε «💾 Αποθήκευση».",
-        "Βήμα 3 (Κείμενο): Πάτησε «💾 Αποθήκευση» για να σώσεις το κείμενο."
-      ]
-    },
-    {
-      name: "Δραστηριότητα 3: Οι Ντετέκτιβ του Μενού «Αρχείο»",
-      steps: [
-        "Βήμα 1: Κάνε κλικ στο μενού «Αρχείο» πάνω αριστερά στο παράθυρο.",
-        "Βήμα 2: Στη λίστα που άνοιξε, κάνε κλικ στο «📂 Άνοιγμα...».",
-        "Βήμα 3: Μπράβο! Άνοιξε το παράθυρο με όλα τα αποθηκευμένα αρχεία σου!"
-      ]
-    },
-    {
-      name: "Δραστηριότητα 4: Το Μυστήριο του Διπλού Κλικ",
-      steps: [
-        "Βήμα 1: Πάτησε το κουμπί «📂 Άνοιγμα» στη γραμμή εργαλείων.",
-        "Βήμα 2 (1ος Τρόπος): Κάνε γρήγορο ΔΙΠΛΟ ΚΛΙΚ («τικ-τικ») στο αρχείο «Ο σκύλος μου».",
-        "Βήμα 3 (2ος Τρόπος): Κάνε 1 μονό κλικ στο αρχείο και μετά πάτα «Άνοιγμα»."
-      ]
-    },
-    {
-      name: "Δραστηριότητα 5: Ηχογραφώ τη Φωνή μου με το Μικρόφωνο",
-      steps: [
-        "Βήμα 1: Πάτησε «🎙️ Ηχογράφηση» για να καταγράψεις τη φωνή σου.",
-        "Βήμα 2: Πάτησε τη δισκέτα «💾 Αποθήκευση».",
-        "Βήμα 3: Πάτησε «Αποθήκευση» για να σωθεί το αρχείο ήχου «Φωνή.mp3»!"
-      ]
-    },
-    {
-      name: "Δραστηριότητα 6: Από το Χαρτί στην Οθόνη (Σαρωτής)",
-      steps: [
-        "Βήμα 1: Πάτησε το κουμπί «📠 Σάρωση από Χαρτί».",
-        "Βήμα 2: Δες τη ζωγραφιά που εμφανίστηκε στην οθόνη του υπολογιστή!",
-        "Βήμα 3: Πάτησε τη δισκέτα «💾 Αποθήκευση» για να σώσεις την εικόνα."
-      ]
-    },
-    {
-      name: "Δραστηριότητα 7: Σκυταλοδρομία: Γράφω Εγώ – Συνεχίζεις Εσύ!",
-      steps: [
-        "Βήμα 1 (Υπατία): Πάτησε «💾 Αποθήκευση» και μετά το κόκκινο «✕» για να κλείσεις το παράθυρο.",
-        "Βήμα 2 (Ήρωνας): Κάνε διπλό κλικ στο εικονίδιο «Επεξεργαστής Κειμένου» και άνοιξε το αρχείο.",
-        "Βήμα 3: Ο Ήρωνας συμπληρώνει τη φράση και πατάει ξανά «💾 Αποθήκευση»!"
-      ]
-    },
-    {
-      name: "Δραστηριότητα 8: Το Κυνήγι των Χαμένων Αρχείων",
-      steps: [
-        "Βήμα 1: Πάτησε το κουμπί «📂 Άνοιγμα» στη γραμμή εργαλείων.",
-        "Βήμα 2: Κάνε κλικ ΜΟΝΟ στο αρχείο εικόνας: «🖼️ Ζωγραφιά_Σκύλος.png».",
-        "Βήμα 3: Πάτησε το κουμπί «Άνοιγμα» για να δεις τη ζωγραφιά και να νικήσεις!"
-      ]
+  <!-- ΦΥΛΛΟ 7 -->
+  <div id="s7" class="sheet">
+    <h2>Φύλλο 7: «Συσκευές και Αρχεία»</h2>
+    <div class="q-card">
+      <h3>Ταίριαξε τη συσκευή με το αρχείο που φτιάχνει:</h3>
+      <p>🎙️ Μικρόφωνο: 
+        <select id="s7_d1" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="snd">Αρχείο Ήχου (ηχογράφηση φωνής)</option>
+          <option value="img">Αρχείο Εικόνας (φωτογραφία)</option>
+          <option value="scn">Σάρωση ζωγραφιάς από χαρτί</option>
+        </select>
+      </p>
+      <p>📷 Ψηφιακή Κάμερα: 
+        <select id="s7_d2" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="snd">Αρχείο Ήχου (ηχογράφηση φωνής)</option>
+          <option value="img">Αρχείο Εικόνας (φωτογραφία)</option>
+          <option value="scn">Σάρωση ζωγραφιάς από χαρτί</option>
+        </select>
+      </p>
+      <p>📠 Σαρωτής (Scanner): 
+        <select id="s7_d3" onchange="this.className=''">
+          <option value="">-- Διάλεξε --</option>
+          <option value="snd">Αρχείο Ήχου (ηχογράφηση φωνής)</option>
+          <option value="img">Αρχείο Εικόνας (φωτογραφία)</option>
+          <option value="scn">Σάρωση ζωγραφιάς από χαρτί</option>
+        </select>
+      </p>
+    </div>
+    <button class="check-btn" onclick="evalS7()">Έλεγχος Απαντήσεων</button>
+    <div id="fb7" class="feedback"></div>
+  </div>
+
+  <!-- ΦΥΛΛΟ 8 -->
+  <div id="s8" class="sheet">
+    <h2>Φύλλο 8: «Κουίζ Εμπέδωσης»</h2>
+    <div class="q-card" id="q8_1_box">
+      <h3>1. Πού είναι η επιλογή «Άνοιγμα...»;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q8_1', 'correct')">Μέσα στο μενού «Αρχείο» πάνω αριστερά.</button>
+      <button class="choice-btn" onclick="choose(this, 'q8_1', 'wrong')">Στο κόκκινο «Χ» κλεισίματος.</button>
+    </div>
+    <div class="q-card" id="q8_2_box">
+      <h3>2. Πώς ανοίγω ένα αρχείο από τη λίστα;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q8_2', 'correct')">Με γρήγορο διπλό κλικ (ή ένα κλικ και «Άνοιγμα»).</button>
+      <button class="choice-btn" onclick="choose(this, 'q8_2', 'wrong')">Πατώντας κουμπιά στην τύχη.</button>
+    </div>
+    <div class="q-card" id="q8_3_box">
+      <h3>3. Πότε πρέπει να αποθηκεύω τη δουλειά μου;</h3>
+      <button class="choice-btn" onclick="choose(this, 'q8_3', 'correct')">Συχνά, και οπωσδήποτε πριν κλείσω το πρόγραμμα!</button>
+      <button class="choice-btn" onclick="choose(this, 'q8_3', 'wrong')">Ποτέ, ο υπολογιστής τα θυμάται μόνος του.</button>
+    </div>
+    <button class="check-btn" onclick="evalS8()">Έλεγχος Κουίζ</button>
+    <div id="fb8" class="feedback"></div>
+  </div>
+
+  <script>
+    function openSheet(num) {
+      for (var i = 1; i <= 8; i++) {
+        document.getElementById('s' + i).className = 'sheet';
+      }
+      document.getElementById('s' + num).className = 'sheet active';
+
+      var buttons = document.querySelectorAll('.nav-btn');
+      for (var j = 0; j < buttons.length; j++) {
+        buttons[j].className = 'nav-btn';
+      }
+      buttons[num - 1].className = 'nav-btn active';
     }
-  ];
 
-  let filesInFolder = [
-    { name: "Ο σκύλος μου.doc", icon: "📄", type: "doc", content: "Το κατοικίδιο που αγαπώ είναι ο σκύλος μου." },
-    { name: "Ζωγραφιά_Σκύλος.png", icon: "🖼️", type: "png", content: "🎨 [Εικόνα: Χαριτωμένος σκύλος]" },
-    { name: "Γάβγισμα.mp3", icon: "🎵", type: "mp3", content: "🔊 [Ήχος: Γαβ! Γαβ!]" }
-  ];
+    var answers = {};
 
-  function init() {
-    renderActTabs();
-    selectAct(1);
-    renderFolderFiles();
-    updateClock();
-    setInterval(updateClock, 30000);
-    initCanvas();
-  }
-
-  function renderActTabs() {
-    const cont = document.getElementById('actTabsContainer');
-    cont.innerHTML = '';
-    activities.forEach((a, i) => {
-      const chip = document.createElement('div');
-      chip.className = 'act-chip' + (i + 1 === currentAct ? ' active' : '');
-      chip.textContent = `Δραστηριότητα ${i + 1}`;
-      chip.onclick = () => selectAct(i + 1);
-      cont.appendChild(chip);
-    });
-  }
-
-  function selectAct(actId) {
-    currentAct = actId;
-    currentStep = 1;
-    closeFileDialog();
-    hideFileMenu();
-    renderActTabs();
-    updateStepUI();
-
-    const btnSave = document.getElementById('btnToolSave');
-    const btnOpen = document.getElementById('btnToolOpen');
-    const btnBark = document.getElementById('btnToolBark');
-    const btnScan = document.getElementById('btnToolScan');
-    const sheet = document.getElementById('editorSheet');
-    const canvasBox = document.getElementById('canvasBox');
-
-    btnSave.classList.remove('highlight-pulse');
-    btnOpen.classList.remove('highlight-pulse');
-    btnBark.style.display = 'none';
-    btnScan.style.display = 'none';
-    canvasBox.style.display = 'none';
-    sheet.style.display = 'block';
-
-    if (actId === 1) {
-      btnSave.classList.add('highlight-pulse');
-      sheet.innerText = "Το κατοικίδιο που αγαπώ είναι ο σκύλος μου.";
-      document.getElementById('winTitleText').innerText = "📄 Έγγραφο1 - Επεξεργαστής Κειμένου";
-    } else if (actId === 2) {
-      btnBark.style.display = 'flex';
-      btnBark.classList.add('highlight-pulse');
-      sheet.innerHTML = `<h3>🎙️ Αρχείο Ήχου</h3><p>Πάτησε το κουμπί <strong>«Ηχογράφηση «Γαβ!»»</strong> στη γραμμή εργαλείων!</p>`;
-    } else if (actId === 3) {
-      document.getElementById('menuBtnFile').style.background = "#fef08a";
-      sheet.innerHTML = `<h3>🔍 Ψάχνουμε το μενού «Αρχείο»</h3><p>Κάνε κλικ στη λέξη <strong>«Αρχείο»</strong> πάνω αριστερά!</p>`;
-    } else if (actId === 4) {
-      btnOpen.classList.add('highlight-pulse');
-      sheet.innerHTML = `<h3>📂 Άνοιγμα Αρχείου</h3><p>Πάτησε το κουμπί <strong>«Άνοιγμα»</strong>!</p>`;
-    } else if (actId === 5) {
-      btnBark.style.display = 'flex';
-      btnBark.classList.add('highlight-pulse');
-      sheet.innerHTML = `<h3>🎤 Ηχογράφηση Φωνής</h3><p>Πάτησε το μικρόφωνο για να καταγράψεις τη φωνή σου!</p>`;
-    } else if (actId === 6) {
-      btnScan.style.display = 'flex';
-      btnScan.classList.add('highlight-pulse');
-      sheet.innerHTML = `<h3>📄 Έχουμε μια ζωγραφιά σε χαρτί!</h3><p>Πάτησε <strong>«Σάρωση από Χαρτί»</strong> για να τη διαβάσει ο σαρωτής!</p>`;
-    } else if (actId === 7) {
-      btnSave.classList.add('highlight-pulse');
-      sheet.innerText = "Μου αρέσουν τα σκυλάκια...";
-      document.getElementById('winTitleText').innerText = "📄 Έγγραφο1 - Επεξεργαστής Κειμένου";
-    } else if (actId === 8) {
-      btnOpen.classList.add('highlight-pulse');
-      sheet.innerHTML = `<h3>🏆 Κυνήγι Αρχείων</h3><p>Πάτησε <strong>«Άνοιγμα»</strong> και βρες το αρχείο εικόνας!</p>`;
+    function choose(btn, group, val) {
+      answers[group] = val;
+      var parent = btn.parentElement;
+      var sibs = parent.querySelectorAll('.choice-btn');
+      for (var i = 0; i < sibs.length; i++) {
+        sibs[i].className = 'choice-btn'; // αφαιρεί και το κόκκινο και το πράσινο για retry!
+      }
+      btn.className = 'choice-btn selected';
     }
-  }
 
-  function updateStepUI() {
-    const act = activities[currentAct - 1];
-    document.getElementById('currentActName').innerText = act.name;
-
-    for (let i = 1; i <= 3; i++) {
-      const badge = document.getElementById('stepBadge' + i);
-      const desc = document.getElementById('stepDesc' + i);
-      badge.className = 'step-badge';
-      desc.innerText = act.steps[i - 1];
-
-      if (i < currentStep) {
-        badge.classList.add('done');
-      } else if (i === currentStep) {
-        badge.classList.add('active');
+    function colorBox(boxId, isOk) {
+      var box = document.getElementById(boxId);
+      var sel = box.querySelector('.choice-btn.selected');
+      if (sel) {
+        sel.className = isOk ? 'choice-btn correct' : 'choice-btn wrong';
       }
     }
-  }
 
-  function advanceStep() {
-    if (currentStep < 3) {
-      currentStep++;
-      updateStepUI();
-    } else {
-      updateStepUI();
-      showToast('🌟 Μπράβο! Ολοκλήρωσες όλα τα βήματα αυτής της δραστηριότητας!');
-    }
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.innerText = msg;
-    t.className = 'show';
-    setTimeout(() => { t.className = ''; }, 3500);
-  }
-
-  /* File Menu */
-  function toggleFileMenu() {
-    const d = document.getElementById('dropdownFile');
-    d.classList.toggle('visible');
-    if (currentAct === 3 && currentStep === 1) {
-      advanceStep();
-      showToast('Μπράβο! Άνοιξες το μενού «Αρχείο». Τώρα πάτησε «📂 Άνοιγμα...»!');
-    }
-  }
-
-  function hideFileMenu() {
-    document.getElementById('dropdownFile').classList.remove('visible');
-  }
-
-  /* Modal Dialog */
-  function showFileDialog(mode) {
-    currentDialogMode = mode;
-    hideFileMenu();
-    document.getElementById('modalBackdrop').classList.add('show');
-    const header = document.getElementById('dialogHeader');
-    const confirmBtn = document.getElementById('btnDlgConfirm');
-    const nameInput = document.getElementById('dlgInputName');
-
-    renderDialogFiles();
-
-    if (mode === 'save') {
-      header.innerText = "💾 Αποθήκευση Αρχείου";
-      confirmBtn.innerText = "Αποθήκευση";
-      nameInput.disabled = false;
-      nameInput.value = (currentAct === 5) ? "Φωνή.mp3" : ((currentAct === 6) ? "Ζωγραφιά_Σκύλος.png" : "Ο σκύλος μου.doc");
-
-      if (currentAct === 1 && currentStep === 1) advanceStep();
-      if (currentAct === 2 && currentStep === 2) advanceStep();
-    } else {
-      header.innerText = "📂 Άνοιγμα Αρχείου";
-      confirmBtn.innerText = "Άνοιγμα";
-      nameInput.disabled = true;
-      nameInput.value = "Επίλεξε αρχείο από τη λίστα...";
-
-      if (currentAct === 3 && currentStep === 2) {
-        advanceStep();
-        showToast('Εμφανίστηκε το παράθυρο με τα αποθηκευμένα αρχεία!');
-      }
-      if (currentAct === 4 && currentStep === 1) advanceStep();
-      if (currentAct === 8 && currentStep === 1) advanceStep();
-    }
-  }
-
-  function closeFileDialog() {
-    document.getElementById('modalBackdrop').classList.remove('show');
-    selectedFileObj = null;
-  }
-
-  function renderDialogFiles() {
-    const list = document.getElementById('dialogList');
-    list.innerHTML = '';
-    filesInFolder.forEach(f => {
-      const row = document.createElement('div');
-      row.className = 'dialog-file-row';
-      row.innerHTML = `<span style="font-size:18px;">${f.icon}</span> <span>${f.name}</span>`;
-
-      // Μονό κλικ
-      row.onclick = () => {
-        document.querySelectorAll('.dialog-file-row').forEach(r => r.classList.remove('selected'));
-        row.classList.add('selected');
-        selectedFileObj = f;
-        document.getElementById('dlgInputName').value = f.name;
-
-        if (currentAct === 4 && currentStep === 3) {
-          showToast(`Επέλεξες το «${f.name}». Τώρα πάτησε «Άνοιγμα»!`);
-        }
-        if (currentAct === 8 && currentStep === 2) {
-          if (f.type === 'png') {
-            advanceStep();
-            showToast('Μπράβο! Βρήκες το αρχείο εικόνας! Πάτησε «Άνοιγμα»!');
-          } else {
-            showToast('Αυτό δεν είναι εικόνα! Ψάξε το εικονίδιο με το κάδρο 🖼️.');
-          }
-        }
-      };
-
-      // Διπλό κλικ
-      row.ondblclick = () => {
-        loadFile(f);
-        closeFileDialog();
-        if (currentAct === 4 && currentStep === 2) {
-          showToast(`🎉 ΤΕΛΕΙΑ! Το αρχείο άνοιξε ΑΜΕΣΩΣ με ΔΙΠΛΟ ΚΛΙΚ!`);
-          advanceStep();
-        } else {
-          showToast(`Το αρχείο «${f.name}» άνοιξε!`);
-        }
-      };
-
-      list.appendChild(row);
-    });
-  }
-
-  function confirmDialogAction() {
-    if (currentDialogMode === 'save') {
-      const name = document.getElementById('dlgInputName').value.trim();
-      document.getElementById('winTitleText').innerText = `📄 ${name} - Επεξεργαστής Κειμένου`;
-      closeFileDialog();
-
-      if (!filesInFolder.some(f => f.name === name)) {
-        filesInFolder.push({ name: name, icon: "📄", type: "doc", content: document.getElementById('editorSheet').innerText });
-        renderFolderFiles();
-      }
-
-      if (currentAct === 1 && currentStep === 2) {
-        showToast('Μπράβο! Το αρχείο σώθηκε με το όνομά του!');
-        advanceStep();
-      } else if (currentAct === 5) {
-        showToast('Η ηχογράφηση σώθηκε ως αρχείο ήχου!');
-        advanceStep();
-      } else if (currentAct === 6) {
-        showToast('Η ζωγραφιά αποθηκεύτηκε ως αρχείο εικόνας!');
-        advanceStep();
-      } else if (currentAct === 7 && currentStep === 1) {
-        showToast('Το αρχείο σώθηκε. Τώρα πάτησε το κόκκινο «✕» πάνω δεξιά για να το κλείσεις!');
-      } else {
-        showToast(`Το αρχείο «${name}» αποθηκεύτηκε επιτυχώς!`);
-      }
-    } else {
-      if (!selectedFileObj) {
-        showToast('Κάνε πρώτα ένα κλικ στο αρχείο που θέλεις!');
+    // Έλεγχος 1
+    function evalS1() {
+      var fb = document.getElementById('fb1');
+      if (!answers['q1_1'] || !answers['q1_2']) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Απάντησε και στις δύο ερωτήσεις!';
         return;
       }
-      loadFile(selectedFileObj);
-      closeFileDialog();
+      var ok1 = (answers['q1_1'] === 'B');
+      var ok2 = (answers['q1_2'] === 'save');
+      colorBox('q1_1_box', ok1);
+      colorBox('q1_2_box', ok2);
 
-      if (currentAct === 4 && currentStep === 3) {
-        showToast('🌟 Μπράβο! Το αρχείο άνοιξε με 1 κλικ και πάτημα του «Άνοιγμα»!');
-        advanceStep();
-      } else if (currentAct === 7 && currentStep === 2) {
-        document.getElementById('editorSheet').innerText = "Μου αρέσουν τα σκυλάκια... και παίζουμε μαζί κάθε μέρα!";
-        showToast('Ο Ήρωνας άνοιξε το αρχείο και πρόσθεσε τη συνέχεια! Πάτα «💾 Αποθήκευση».');
-        advanceStep();
-      } else if (currentAct === 8 && currentStep === 3) {
-        showToast('🏆 ΝΙΚΗΣΕΣ! Η εικόνα άνοιξε στην οθόνη! Ολοκλήρωσες όλες τις δραστηριότητες!');
-        advanceStep();
+      if (ok1 && ok2) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Απάντησες σωστά και στις δύο ερωτήσεις!';
       } else {
-        showToast(`Το αρχείο «${selectedFileObj.name}» άνοιξε!`);
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όποια απάντηση κοκκίνισε είναι λάθος. Κάνε κλικ σε άλλη και πάτα ξανά!';
       }
     }
-  }
 
-  function loadFile(f) {
-    document.getElementById('winTitleText').innerText = `📄 ${f.name} - Επεξεργαστής Κειμένου`;
-    document.getElementById('editorSheet').style.display = 'block';
-    document.getElementById('canvasBox').style.display = 'none';
-    document.getElementById('editorSheet').innerHTML = `<h3>${f.icon} ${f.name}</h3><p style="margin-top:8px;">${f.content}</p>`;
-  }
+    // Έλεγχος 2
+    function evalS2() {
+      var s1 = document.getElementById('s2_m1');
+      var s2 = document.getElementById('s2_m2');
+      var o1 = document.getElementById('s2_o1');
+      var o2 = document.getElementById('s2_o2');
+      var o3 = document.getElementById('s2_o3');
+      var fb = document.getElementById('fb2');
 
-  /* Folder View Window */
-  function openFolderWindow() {
-    document.getElementById('folderWindow').style.display = 'flex';
-    document.getElementById('taskTabFolder').style.display = 'flex';
-    bringToFront('folderWindow');
-  }
+      if (!s1.value || !s2.value || !o1.value || !o2.value || !o3.value) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Συμπλήρωσε όλα τα κουτάκια!';
+        return;
+      }
+      var ok1 = (s1.value === 'open');
+      var ok2 = (s2.value === 'save');
+      var okO1 = (o1.value === '1');
+      var okO2 = (o2.value === '2');
+      var okO3 = (o3.value === '3');
 
-  function renderFolderFiles() {
-    const fview = document.getElementById('folderViewFiles');
-    fview.innerHTML = '';
-    filesInFolder.forEach(f => {
-      const d = document.createElement('div');
-      d.className = 'folder-file';
-      d.innerHTML = `<span style="font-size:32px;">${f.icon}</span><span style="font-size:11px; font-weight:600; color:#334155; margin-top:4px;">${f.name}</span>`;
-      d.ondblclick = () => {
-        openAppWindow('writer');
-        loadFile(f);
-      };
-      fview.appendChild(d);
-    });
-  }
+      s1.className = ok1 ? 'correct' : 'wrong';
+      s2.className = ok2 ? 'correct' : 'wrong';
+      o1.className = okO1 ? 'correct' : 'wrong';
+      o2.className = okO2 ? 'correct' : 'wrong';
+      o3.className = okO3 ? 'correct' : 'wrong';
 
-  function openAppWindow(app) {
-    const win = document.getElementById('writerWindow');
-    win.style.display = 'flex';
-    bringToFront('writerWindow');
-    if (currentAct === 7 && currentStep === 2) {
-      showToast('Τώρα πάτα «📂 Άνοιγμα» για να βρει ο Ήρωνας το αρχείο!');
+      if (ok1 && ok2 && okO1 && okO2 && okO3) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Ταίριαξες σωστά τα κουμπιά και τη σειρά!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όσα κοκκίνισαν είναι λάθος. Άλλαξέ τα και ξαναδοκίμασε!';
+      }
     }
-  }
 
-  function closeWindow(id) {
-    document.getElementById(id).style.display = 'none';
-    if (id === 'writerWindow' && currentAct === 7 && currentStep === 1) {
-      advanceStep();
-      showToast('Το παράθυρο έκλεισε! Τώρα ο Ήρωνας κάνει διπλό κλικ στο εικονίδιο «Επεξεργαστής Κειμένου».');
+    // Έλεγχος 3
+    function evalS3() {
+      var fb = document.getElementById('fb3');
+      var all = true;
+      for (var i = 1; i <= 5; i++) {
+        if (!document.getElementById('chk' + i).checked) all = false;
+      }
+      if (all) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ ΣΤΗΝ ΟΜΑΔΑ! Κάνατε όλα τα βήματα!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Δεν τσεκάρατε όλα τα βήματα!';
+      }
     }
-  }
 
-  function bringToFront(id) {
-    document.getElementById('writerWindow').style.zIndex = (id === 'writerWindow' ? 200 : 100);
-    document.getElementById('folderWindow').style.zIndex = (id === 'folderWindow' ? 200 : 100);
-  }
-
-  /* Sound & Scan actions */
-  function triggerBarkAudio() {
-    playBarkSound();
-    document.getElementById('editorSheet').innerHTML = `<h3>🐶 «ΓΑΒ! ΓΑΒ!»</h3><p style="color:#16a34a; font-weight:bold;">Η ηχογράφηση έγινε! Δημιουργήθηκε αρχείο ήχου.</p>`;
-    showToast('Η ηχογράφηση έγινε! Πάτα «💾 Αποθήκευση».');
-
-    if (currentAct === 2 && currentStep === 1) {
-      advanceStep();
-      setTimeout(() => {
-        document.getElementById('editorSheet').style.display = 'none';
-        document.getElementById('canvasBox').style.display = 'block';
-      }, 700);
+    // Έλεγχος 4
+    function evalS4() {
+      var name = document.getElementById('s4_name').value.trim();
+      var fb = document.getElementById('fb4');
+      if (!name) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Γράψε ένα όνομα για το αρχείο σου στην ερώτηση 1!';
+        return;
+      }
+      if (!answers['s4_ans']) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Διάλεξε αν η εργασία σώθηκε στην ερώτηση 2!';
+        return;
+      }
+      var ok = (answers['s4_ans'] === 'yes');
+      colorBox('s4_ans_box', ok);
+      if (ok) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Το αρχείο «' + name + '» σώθηκε επιτυχώς!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Ζητήστε βοήθεια από τον δάσκαλο και δοκιμάστε ξανά!';
+      }
     }
-    if (currentAct === 5 && currentStep === 1) advanceStep();
-  }
 
-  function triggerScanPaper() {
-    document.getElementById('editorSheet').innerHTML = `
-      <div style="font-size:42px;">🐶 🖼️</div>
-      <p style="color:#16a34a; font-weight:bold; font-size:17px; margin-top:6px;">Η ζωγραφιά από το χαρτί σαρώθηκε και μπήκε στον υπολογιστή!</p>
-    `;
-    showToast('Ο σαρωτής διάβασε το χαρτί! Τώρα πάτα «💾 Αποθήκευση».');
-    if (currentAct === 6 && currentStep === 1) advanceStep();
-  }
+    // Έλεγχος 5
+    function evalS5() {
+      var s1 = document.getElementById('s5_t1');
+      var s2 = document.getElementById('s5_t2');
+      var s3 = document.getElementById('s5_t3');
+      var fb = document.getElementById('fb5');
 
-  function playBarkSound() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(320, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.15);
-      g.gain.setValueAtTime(0.3, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-      osc.connect(g);
-      g.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.15);
-    } catch(e){}
-  }
+      if (!s1.value || !s2.value || !s3.value) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Διάλεξε και για τα 3 παραδείγματα!';
+        return;
+      }
+      var ok1 = (s1.value === 'txt');
+      var ok2 = (s2.value === 'img');
+      var ok3 = (s3.value === 'snd');
 
-  function initCanvas() {
-    const c = document.getElementById('paintCanvas');
-    const ctx = c.getContext('2d');
-    let isDrawing = false;
-    c.onmousedown = () => isDrawing = true;
-    window.onmouseup = () => isDrawing = false;
-    c.onmousemove = (e) => {
-      if (!isDrawing) return;
-      const rect = c.getBoundingClientRect();
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = '#0284c7';
-      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-    };
-  }
+      s1.className = ok1 ? 'correct' : 'wrong';
+      s2.className = ok2 ? 'correct' : 'wrong';
+      s3.className = ok3 ? 'correct' : 'wrong';
 
-  function updateClock() {
-    const now = new Date();
-    let hrs = now.getHours();
-    let mins = now.getMinutes();
-    mins = mins < 10 ? '0' + mins : mins;
-    document.getElementById('taskbarClock').innerText = `${hrs}:${mins}`;
-  }
+      if (ok1 && ok2 && ok3) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Ξεχώρισες τέλεια τα 3 είδη αρχείων!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όσα κοκκίνισαν είναι λάθος. Δοκίμασε ξανά!';
+      }
+    }
 
-  function handleNewDoc() {
-    hideFileMenu();
-    document.getElementById('editorSheet').innerText = "";
-    document.getElementById('winTitleText').innerText = "📄 Έγγραφο Χωρίς Τίτλο";
-  }
+    // Έλεγχος 6
+    function evalS6() {
+      var fb = document.getElementById('fb6');
+      if (!answers['q6_1'] || !answers['q6_2']) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Απάντησε και στις δύο ερωτήσεις!';
+        return;
+      }
+      var ok1 = (answers['q6_1'] === 'good');
+      var ok2 = (answers['q6_2'] === 'correct');
+      colorBox('q6_1_box', ok1);
+      colorBox('q6_2_box', ok2);
 
-  window.onload = init;
-</script>
+      if (ok1 && ok2) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Το σωστό όνομα μας βοηθάει να βρίσκουμε εύκολα τη δουλειά μας!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όποια απάντηση κοκκίνισε είναι λάθος. Δοκίμασε άλλη!';
+      }
+    }
 
+    // Έλεγχος 7
+    function evalS7() {
+      var s1 = document.getElementById('s7_d1');
+      var s2 = document.getElementById('s7_d2');
+      var s3 = document.getElementById('s7_d3');
+      var fb = document.getElementById('fb7');
+
+      if (!s1.value || !s2.value || !s3.value) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Συμπλήρωσε και τις 3 συσκευές!';
+        return;
+      }
+      var ok1 = (s1.value === 'snd');
+      var ok2 = (s2.value === 'img');
+      var ok3 = (s3.value === 'scn');
+
+      s1.className = ok1 ? 'correct' : 'wrong';
+      s2.className = ok2 ? 'correct' : 'wrong';
+      s3.className = ok3 ? 'correct' : 'wrong';
+
+      if (ok1 && ok2 && ok3) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! Ταίριαξες σωστά τις συσκευές!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όσες συσκευές κοκκίνισαν είναι λάθος. Άλλαξέ τες!';
+      }
+    }
+
+    // Έλεγχος 8
+    function evalS8() {
+      var fb = document.getElementById('fb8');
+      if (!answers['q8_1'] || !answers['q8_2'] || !answers['q8_3']) {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '⚠️ Απάντησε και στις 3 ερωτήσεις!';
+        return;
+      }
+      var ok1 = (answers['q8_1'] === 'correct');
+      var ok2 = (answers['q8_2'] === 'correct');
+      var ok3 = (answers['q8_3'] === 'correct');
+
+      colorBox('q8_1_box', ok1);
+      colorBox('q8_2_box', ok2);
+      colorBox('q8_3_box', ok3);
+
+      if (ok1 && ok2 && ok3) {
+        fb.className = 'feedback ok';
+        fb.innerHTML = '🌟 ΜΠΡΑΒΟ! 3 στα 3! Είσαι τέλειος στην Αποθήκευση και το Άνοιγμα!';
+      } else {
+        fb.className = 'feedback fail';
+        fb.innerHTML = '❌ Όσες απαντήσεις κοκκίνισαν έχουν λάθος. Διάλεξε άλλη απάντηση!';
+      }
+    }
+  </script>
 </body>
 </html>
