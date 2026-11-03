@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 16: Αποθήκευση αρχείων σε φακέλους - Εικονικός Υπολογιστής</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+  body, html { width: 100%; height: 100%; overflow: hidden; background: #000; }
+
+  #desktop {
+    width: 100vw;
+    height: 100vh;
+    background: #0f766e url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" opacity="0.05"><rect x="10" y="10" width="60" height="60" rx="8" fill="%23fff"/></svg>') repeat;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #task-assistant {
+    background: #ffffff;
+    border-bottom: 3px solid #0d9488;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    padding: 10px 16px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .assistant-header { display: flex; justify-content: space-between; align-items: center; }
+  .assistant-title { font-size: 15px; font-weight: 800; color: #0f766e; display: flex; align-items: center; gap: 8px; }
+  .lesson-tag { background: #fef08a; color: #854d0e; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+  .nav-activities { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+
+  .act-chip {
+    background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 14px;
+    padding: 4px 12px; font-size: 12px; font-weight: 700; color: #475569;
+    cursor: pointer; white-space: nowrap; transition: 0.15s;
+  }
+
+  .act-chip.active {
+    background: #0d9488; color: white; border-color: #0f766e;
+    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.35);
+  }
+
+  .steps-row { display: flex; gap: 8px; }
+  .step-badge {
+    flex: 1; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px;
+    padding: 6px 10px; font-size: 13px; color: #64748b; display: flex; align-items: center; gap: 8px;
+  }
+  .step-badge.active { background: #fef3c7; border-color: #f59e0b; color: #92400e; font-weight: bold; box-shadow: 0 0 8px rgba(245, 158, 11, 0.25); }
+  .step-badge.done { background: #dcfce7; border-color: #22c55e; color: #166534; font-weight: bold; }
+
+  .num-circle {
+    width: 20px; height: 20px; border-radius: 50%; background: #cbd5e1; color: white;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;
+  }
+  .step-badge.active .num-circle { background: #f59e0b; }
+  .step-badge.done .num-circle { background: #22c55e; }
+
+  #desktop-icons {
+    flex: 1; padding: 20px; display: grid;
+    grid-template-columns: repeat(auto-fill, 90px); grid-auto-rows: 95px;
+    gap: 15px; align-content: start;
+  }
+
+  .desktop-icon {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    cursor: pointer; border-radius: 8px; padding: 6px 4px; transition: 0.1s;
+  }
+  .desktop-icon:hover { background: rgba(255, 255, 255, 0.2); }
+
+  .icon-img { font-size: 38px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3)); margin-bottom: 4px; }
+  .icon-label { color: white; font-size: 12px; font-weight: 600; text-shadow: 1px 1px 3px rgba(0,0,0,0.9); word-break: break-word; line-height: 1.2; }
+
+  .window {
+    position: absolute; background: #ffffff; border-radius: 8px; border: 2px solid #334155;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.35); display: flex; flex-direction: column;
+    overflow: hidden; z-index: 100;
+  }
+
+  .win-header {
+    background: linear-gradient(180deg, #0d9488 0%, #0f766e 100%); color: white;
+    padding: 6px 12px; font-size: 13px; font-weight: bold; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .win-btns { display: flex; gap: 6px; }
+  .win-ctrl-btn { width: 13px; height: 13px; border-radius: 50%; border: none; cursor: pointer; }
+  .btn-close { background: #ef4444; }
+
+  .win-toolbar { background: #f1f5f9; border-bottom: 1px solid #cbd5e1; padding: 6px 10px; display: flex; gap: 8px; align-items: center; }
+  .tool-btn {
+    background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px;
+    font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #334155;
+  }
+  .tool-btn:hover { background: #ccfbf1; border-color: #2dd4bf; color: #0f766e; }
+  .tool-btn.highlight-pulse { border-color: #f59e0b; background: #fef3c7; color: #b45309; animation: pulseGlow 0.8s infinite alternate; }
+  @keyframes pulseGlow { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+  .win-workspace { flex: 1; background: #e2e8f0; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-y: auto; }
+  .editor-sheet {
+    background: white; width: 100%; max-width: 520px; min-height: 200px; padding: 18px;
+    border: 1px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.06); font-size: 15px; line-height: 1.5; outline: none; border-radius: 4px;
+  }
+
+  .explorer-path { background: #ffffff; border-bottom: 1px solid #cbd5e1; padding: 6px 12px; font-size: 12px; font-weight: bold; color: #475569; display: flex; align-items: center; gap: 6px; }
+  .folder-content-grid { flex: 1; background: #ffffff; padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, 80px); grid-auto-rows: 85px; gap: 12px; overflow-y: auto; }
+  .folder-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; padding: 6px 4px; border-radius: 6px; }
+  .folder-item:hover { background: #e0f2fe; }
+  .folder-item.selected { background: #bae6fd; border: 1px solid #0284c7; }
+
+  /* Sorting Area */
+  .sorting-game-box { width: 100%; max-width: 540px; background: white; border-radius: 10px; padding: 14px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; gap: 12px; }
+  .files-to-click-row { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed #94a3b8; }
+  .click-sort-btn {
+    background: white; border: 2px solid #cbd5e1; border-radius: 8px; padding: 8px 12px;
+    font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .click-sort-btn:hover { border-color: #0d9488; background: #f0fdfa; }
+  .click-sort-btn.selected-item { background: #fef08a; border-color: #eab308; transform: scale(1.05); }
+
+  .drop-targets-row { display: flex; gap: 12px; }
+  .target-folder-box {
+    flex: 1; border: 2px dashed #0d9488; background: #f0fdfa; border-radius: 10px;
+    padding: 10px; min-height: 110px; display: flex; flex-direction: column; align-items: center; cursor: pointer;
+  }
+  .target-folder-box:hover { background: #ccfbf1; }
+  .target-folder-title { font-size: 13px; font-weight: bold; color: #0f766e; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .target-files-inside { width: 100%; display: flex; flex-direction: column; gap: 4px; }
+
+  /* Modal Save Dialog */
+  .modal-backdrop { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); display: none; justify-content: center; align-items: center; z-index: 500; }
+  .modal-backdrop.show { display: flex; }
+  .sys-dialog { background: white; width: 480px; border-radius: 8px; border: 2px solid #0d9488; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+  .dialog-title { background: #0d9488; color: white; padding: 8px 12px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; }
+  .dialog-body { padding: 14px; background: #f8fafc; }
+  .drive-selector-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .drive-selector-row label { font-size: 12px; font-weight: bold; color: #475569; width: 120px; }
+  .drive-select { flex: 1; padding: 6px 10px; border: 2px solid #cbd5e1; border-radius: 6px; font-size: 13px; font-weight: bold; }
+  .dialog-folder-list { background: white; border: 2px solid #cbd5e1; border-radius: 6px; height: 100px; overflow-y: auto; padding: 4px; margin: 8px 0; }
+  .dialog-item-row { padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; font-weight: bold; }
+  .dialog-item-row:hover { background: #f1f5f9; }
+  .dialog-item-row.selected { background: #ccfbf1; color: #0f766e; border: 1px solid #2dd4bf; }
+  .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .dialog-btn { padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; border: none; }
+  .btn-save-confirm { background: #0d9488; color: white; }
+  .btn-cancel-dialog { background: #e2e8f0; color: #475569; }
+
+  #taskbar { height: 44px; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; padding: 0 10px; z-index: 1000; }
+  .taskbar-start { background: #0d9488; color: white; border: none; padding: 6px 14px; border-radius: 4px; font-weight: bold; font-size: 13px; cursor: pointer; }
+  .taskbar-items { flex: 1; display: flex; gap: 8px; margin-left: 12px; }
+  .taskbar-tab { background: #334155; color: white; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; border: 1px solid #475569; }
+  .taskbar-tab.active { background: #0d9488; border-color: #2dd4bf; }
+
+  #toast { position: absolute; bottom: 56px; right: 20px; background: #dcfce7; border: 2px solid #22c55e; color: #14532d; padding: 12px 18px; border-radius: 8px; font-size: 14px; font-weight: bold; box-shadow: 0 6px 16px rgba(0,0,0,0.15); display: none; z-index: 9999; }
+  #toast.show { display: block; animation: toastPop 0.2s ease; }
+  @keyframes toastPop { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+</head>
+<body>
+
+<div id="desktop">
+  <div id="task-assistant">
+    <div class="assistant-header">
+      <div class="assistant-title">
+        <span>📁 Εικονικός Υπολογιστής</span>
+        <span style="color:#64748b; font-size:13px; font-weight:normal;">| Μάθημα 16: Αποθήκευση αρχείων σε φακέλους</span>
+      </div>
+      <div class="lesson-tag" id="currentActName">Δραστηριότητα 1: Ο Σκληρός Δίσκος (C:)</div>
+    </div>
+    <div class="nav-activities" id="actTabsContainer"></div>
+    <div class="steps-row" id="stepsRow">
+      <div class="step-badge active" id="stepBadge1">
+        <span class="num-circle">1</span> <span id="stepDesc1">Βήμα 1: Πάτησε «💾 Αποθήκευση».</span>
+      </div>
+      <div class="step-badge" id="stepBadge2">
+        <span class="num-circle">2</span> <span id="stepDesc2">Βήμα 2: Έλεγξε ότι είναι επιλεγμένος ο Τοπικός Δίσκος (C:).</span>
+      </div>
+      <div class="step-badge" id="stepBadge3">
+        <span class="num-circle">3</span> <span id="stepDesc3">Βήμα 3: Πάτησε «Αποθήκευση».</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="desktop-icons">
+    <div class="desktop-icon" onclick="openDriveWindow()" ondblclick="openDriveWindow()">
+      <div class="icon-img">🖥️</div>
+      <div class="icon-label">Υπολογιστής</div>
+    </div>
+    <div class="desktop-icon" onclick="openFolder('Έγγραφα')" ondblclick="openFolder('Έγγραφα')">
+      <div class="icon-img">📁</div>
+      <div class="icon-label">Έγγραφα</div>
+    </div>
+    <div class="desktop-icon" onclick="openFolder('Εικόνες')" ondblclick="openFolder('Εικόνες')">
+      <div class="icon-img">🖼️</div>
+      <div class="icon-label">Εικόνες</div>
+    </div>
+    <div class="desktop-icon" onclick="openApp('writer')" ondblclick="openApp('writer')">
+      <div class="icon-img">📝</div>
+      <div class="icon-label">Κειμενογράφος</div>
+    </div>
+    <div class="desktop-icon" onclick="openApp('paint')" ondblclick="openApp('paint')">
+      <div class="icon-img">🎨</div>
+      <div class="icon-label">Ζωγραφική</div>
+    </div>
+    <div class="desktop-icon">
+      <div class="icon-img">🗑️</div>
+      <div class="icon-label">Κάδος</div>
+    </div>
+  </div>
+
+  <div class="window" id="appWindow" style="top: 130px; left: 230px; width: 620px; height: 420px;">
+    <div class="win-header">
+      <span id="winHeaderTitle">📝 Κειμενογράφος - Νέο Έγγραφο</span>
+      <div class="win-btns">
+        <button class="win-ctrl-btn btn-close" onclick="closeWindow('appWindow')"></button>
+      </div>
+    </div>
+    <div class="win-toolbar">
+      <button class="tool-btn highlight-pulse" id="btnSaveToolbar" onclick="showSaveDialog()">
+        <span>💾</span> <span>Αποθήκευση</span>
+      </button>
+      <button class="tool-btn" onclick="showOpenDialog()">
+        <span>📂</span> <span>Άνοιγμα</span>
+      </button>
+    </div>
+    <div class="win-workspace">
+      <div class="editor-sheet" id="appEditorSheet" contenteditable="true" spellcheck="false">
+        Ο σκύλος μου είναι ο πιο πιστός μου φίλος!
+      </div>
+      <div id="sortingGameContainer" style="display:none;" class="sorting-game-box">
+        <p style="font-size:13px; font-weight:bold; color:#0f766e; text-align:center;">
+          Κάνε κλικ σε ένα αρχείο και μετά κάνε κλικ στον φάκελο όπου ανήκει:
+        </p>
+        <div class="files-to-click-row" id="dragSourceArea"></div>
+        <div class="drop-targets-row">
+          <div class="target-folder-box" onclick="placeSelectedFile('Έγγραφα')">
+            <div class="target-folder-title">📁 Φάκελος: Έγγραφα</div>
+            <div class="target-files-inside" id="targetDocs"></div>
+          </div>
+          <div class="target-folder-box" onclick="placeSelectedFile('Εικόνες')">
+            <div class="target-folder-title">🖼️ Φάκελος: Εικόνες</div>
+            <div class="target-files-inside" id="targetPics"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="window" id="explorerWindow" style="top: 160px; left: 80px; width: 480px; height: 340px; display:none;">
+    <div class="win-header" style="background:#475569;">
+      <span id="explorerTitle">📁 Φάκελος: Έγγραφα</span>
+      <div class="win-btns">
+        <button class="win-ctrl-btn btn-close" onclick="closeWindow('explorerWindow')"></button>
+      </div>
+    </div>
+    <div class="explorer-path">
+      <span>📍 Θέση:</span> <span id="explorerPathText">Τοπικός Δίσκος (C:) ➔ Έγγραφα</span>
+    </div>
+    <div class="folder-content-grid" id="explorerGrid"></div>
+  </div>
+
+  <div class="modal-backdrop" id="dialogBackdrop">
+    <div class="sys-dialog">
+      <div class="dialog-title">
+        <span id="dlgTitle">💾 Αποθήκευση αρχείου σε φάκελο</span>
+        <span style="cursor:pointer;" onclick="closeSaveDialog()">✕</span>
+      </div>
+      <div class="dialog-body">
+        <div class="drive-selector-row">
+          <label>1. Μέσο Αποθήκευσης:</label>
+          <select class="drive-select" id="selectDrive" onchange="changeDrive()">
+            <option value="C:">💾 Τοπικός Δίσκος (C:)</option>
+            <option value="E:">🔌 Μνήμη Flash USB (E:)</option>
+          </select>
+        </div>
+
+        <div style="font-size:12px; font-weight:bold; color:#475569; margin-top:6px;">2. Διάλεξε Φάκελο:</div>
+        <div class="dialog-folder-list" id="dialogFolderList"></div>
+
+        <div class="drive-selector-row" style="margin-top:10px;">
+          <label>3. Όνομα αρχείου:</label>
+          <input type="text" id="dlgFileName" class="drive-select" value="Σκύλος">
+        </div>
+
+        <div class="dialog-actions">
+          <button class="dialog-btn btn-cancel-dialog" onclick="closeSaveDialog()">Ακύρωση</button>
+          <button class="dialog-btn btn-save-confirm" id="btnConfirmSave" onclick="confirmSaveFile()">Αποθήκευση</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="taskbar">
+    <div style="display:flex; align-items:center;">
+      <button class="taskbar-start">🪟 Έναρξη</button>
+      <div class="taskbar-items">
+        <div class="taskbar-tab active" id="tabApp" onclick="bringFront('appWindow')">
+          <span>📝</span> <span>Κειμενογράφος</span>
+        </div>
+        <div class="taskbar-tab" id="tabExplorer" style="display:none;" onclick="bringFront('explorerWindow')">
+          <span>📁</span> <span>Εξερευνητής</span>
+        </div>
+      </div>
+    </div>
+    <div style="color:#94a3b8; font-size:12px; font-weight:bold;" id="clock">10:00 π.μ.</div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+  let currentAct = 1;
+  let currentStep = 1;
+  let selectedFolderInDialog = "Έγγραφα";
+  let activeClickItem = null;
+
+  let systemDrives = {
+    "C:": {
+      name: "Τοπικός Δίσκος (C:)",
+      folders: {
+        "Έγγραφα": [
+          { name: "Κατοικίδιο.doc", icon: "📄", type: "text" },
+          { name: "Σκύλος.doc", icon: "📄", type: "text" }
+        ],
+        "Εικόνες": [
+          { name: "Γάτα.png", icon: "🖼️", type: "pic" },
+          { name: "Το χωριό μου.jpg", icon: "🖼️", type: "pic" }
+        ],
+        "Σχολείο": [
+          { name: "Ασκήσεις.doc", icon: "📄", type: "text" }
+        ]
+      }
+    },
+    "E:": {
+      name: "Μνήμη Flash USB (E:)",
+      folders: {
+        "Εργασίες_Σπιτιού": []
+      }
+    }
+  };
+
+  const activities = [
+    {
+      name: "1. Ο Τοπικός Δίσκος (C:) & τα 3 Στοιχεία",
+      steps: [
+        "Βήμα 1: Πάτησε «💾 Αποθήκευση» στη γραμμή εργαλείων.",
+        "Βήμα 2: Έλεγξε ότι είναι επιλεγμένος ο «Τοπικός Δίσκος (C:)».",
+        "Βήμα 3: Πάτησε «Αποθήκευση» για να σωθεί το αρχείο στον δίσκο σου!"
+      ]
+    },
+    {
+      name: "2. Επιλογή του Κατάλληλου Φακέλου (Έγγραφα)",
+      steps: [
+        "Βήμα 1: Πάτησε «💾 Αποθήκευση» στο παράθυρο του Κειμενογράφου.",
+        "Βήμα 2: Στη λίστα φακέλων, κάνε κλικ στον φάκελο «📁 Έγγραφα».",
+        "Βήμα 3: Πάτησε «Αποθήκευση» για να μπει το κείμενο στον σωστό φάκελο!"
+      ]
+    },
+    {
+      name: "3. Ζωγραφιά στον Φάκελο «Εικόνες»",
+      steps: [
+        "Βήμα 1: Ζωγράφισες ένα κατοικίδιο! Πάτησε «💾 Αποθήκευση».",
+        "Βήμα 2: Κάνε κλικ στον φάκελο «🖼️ Εικόνες» για να τον επιλέξεις.",
+        "Βήμα 3: Πάτησε «Αποθήκευση» για να φυλαχτεί η εικόνα στις «Εικόνες»!"
+      ]
+    },
+    {
+      name: "4. Το Κατάλληλο Όνομα Αρχείου",
+      steps: [
+        "Βήμα 1: Πάτησε «💾 Αποθήκευση» στη γραμμή εργαλείων.",
+        "Βήμα 2: Στο πλαίσιο «Όνομα αρχείου:» γράψε «Σκύλος».",
+        "Βήμα 3: Πάτησε «Αποθήκευση» για να πάρει το αρχείο το σωστό του όνομα!"
+      ]
+    },
+    {
+      name: "5. Αποθήκευση στη Μνήμη Flash USB (E:)",
+      steps: [
+        "Βήμα 1: Θέλεις να πάρεις την εργασία στο σπίτι! Πάτησε «💾 Αποθήκευση».",
+        "Βήμα 2: Στο μέσο αποθήκευσης διάλεξε «🔌 Μνήμη Flash USB (E:)».",
+        "Βήμα 3: Πάτησε «Αποθήκευση» για να γραφτεί το αρχείο στο στικάκι σου!"
+      ]
+    },
+    {
+      name: "6. Τακτοποίηση Αρχείων (Βιβλίο σελ. 70)",
+      steps: [
+        "Βήμα 1: Κάνε κλικ σε ένα κείμενο («Κατοικίδιο», «Σκύλος») και μετά κλικ στον φάκελο «Έγγραφα».",
+        "Βήμα 2: Κάνε κλικ σε μια εικόνα («Γάτα», «Το χωριό μου») και μετά κλικ στον φάκελο «Εικόνες».",
+        "Βήμα 3: Μπράβο! Όλα τα αρχεία τακτοποιήθηκαν στους σωστούς φακέλους!"
+      ]
+    },
+    {
+      name: "7. Δημιουργία Νέου Φακέλου: «Σχολείο»",
+      steps: [
+        "Βήμα 1: Κάνε κλικ στο εικονίδιο «📁 Έγγραφα» στην επιφάνεια εργασίας.",
+        "Βήμα 2: Μέσα στον εξερευνητή, δες τον φάκελο «Σχολείο».",
+        "Βήμα 3: Κάνε κλικ για να μπεις μέσα στον φάκελο των εργασιών σου!"
+      ]
+    },
+    {
+      name: "8. Κυνήγι Θησαυρού: Βρες πού σώθηκε!",
+      steps: [
+        "Βήμα 1: Ο Ήρωνας ψάχνει τη ζωγραφιά του! Άνοιξε τον φάκελο «Εικόνες».",
+        "Βήμα 2: Κάνε κλικ στο αρχείο «Το χωριό μου.jpg».",
+        "Βήμα 3: Κάνε διπλό κλικ για να ανοίξει η εικόνα και να νικήσεις!"
+      ]
+    }
+  ];
+
+  function init() {
+    renderActTabs();
+    selectAct(1);
+    renderDialogFolders("C:");
+    updateClock();
+    setInterval(updateClock, 30000);
+  }
+
+  function renderActTabs() {
+    const cont = document.getElementById('actTabsContainer');
+    cont.innerHTML = '';
+    activities.forEach((a, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'act-chip' + (i + 1 === currentAct ? ' active' : '');
+      chip.textContent = `Δραστηριότητα ${i + 1}`;
+      chip.onclick = () => selectAct(i + 1);
+      cont.appendChild(chip);
+    });
+  }
+
+  function selectAct(id) {
+    currentAct = id;
+    currentStep = 1;
+    closeSaveDialog();
+    renderActTabs();
+    updateStepsUI();
+
+    const appWin = document.getElementById('appWindow');
+    const expWin = document.getElementById('explorerWindow');
+    const headerTitle = document.getElementById('winHeaderTitle');
+    const editor = document.getElementById('appEditorSheet');
+    const sortGame = document.getElementById('sortingGameContainer');
+    const btnSave = document.getElementById('btnSaveToolbar');
+
+    appWin.style.display = 'flex';
+    expWin.style.display = 'none';
+    editor.style.display = 'block';
+    sortGame.style.display = 'none';
+    btnSave.classList.add('highlight-pulse');
+
+    if (id === 1) {
+      headerTitle.innerText = "📝 Κειμενογράφος - Τοπικός Δίσκος";
+      editor.innerText = "Ο σκύλος μου είναι ο πιο πιστός μου φίλος!";
+    } else if (id === 2) {
+      headerTitle.innerText = "📝 Κειμενογράφος - Αποθήκευση σε Έγγραφα";
+      editor.innerText = "Η γάτα μου αγαπάει τα παιχνίδια.";
+    } else if (id === 3) {
+      headerTitle.innerText = "🎨 Ζωγραφική - Αποθήκευση σε Εικόνες";
+      editor.innerHTML = `<div style="text-align:center; padding:20px;"><span style="font-size:50px;">🐶 🎨</span><p style="font-weight:bold; color:#0f766e; margin-top:8px;">Έτοιμη η ζωγραφιά του σκύλου μου!</p></div>`;
+    } else if (id === 4) {
+      headerTitle.innerText = "📝 Κειμενογράφος - Ονοματοδοσία Αρχείου";
+      editor.innerText = "Το όνομα του σκύλου μου είναι Σπίθας.";
+    } else if (id === 5) {
+      headerTitle.innerText = "📝 Κειμενογράφος - Αποθήκευση σε USB Flash";
+      editor.innerText = "Εργασία για το σπίτι: Τα ζώα της φάρμας.";
+    } else if (id === 6) {
+      headerTitle.innerText = "📁 Τακτοποίηση Αρχείων στους Φακέλους τους";
+      editor.style.display = 'none';
+      sortGame.style.display = 'flex';
+      btnSave.classList.remove('highlight-pulse');
+      initSortingGame();
+    } else if (id === 7) {
+      appWin.style.display = 'none';
+      showToast("Κάνε κλικ στο εικονίδιο «📁 Έγγραφα» στην επιφάνεια εργασίας!");
+    } else if (id === 8) {
+      appWin.style.display = 'none';
+      showToast("Κάνε κλικ στο εικονίδιο «🖼️ Εικόνες» για να βρεις τη ζωγραφιά!");
+    }
+  }
+
+  function updateStepsUI() {
+    const act = activities[currentAct - 1];
+    document.getElementById('currentActName').innerText = act.name;
+
+    for (let i = 1; i <= 3; i++) {
+      const badge = document.getElementById('stepBadge' + i);
+      const desc = document.getElementById('stepDesc' + i);
+      badge.className = 'step-badge';
+      desc.innerText = act.steps[i - 1];
+
+      if (i < currentStep) badge.classList.add('done');
+      else if (i === currentStep) badge.classList.add('active');
+    }
+  }
+
+  function advanceStep() {
+    if (currentStep < 3) {
+      currentStep++;
+      updateStepsUI();
+    } else {
+      updateStepsUI();
+      showToast("🌟 Μπράβο! Ολοκλήρωσες όλα τα βήματα με απόλυτη επιτυχία!");
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.className = 'show';
+    setTimeout(() => t.className = '', 3500);
+  }
+
+  function showSaveDialog() {
+    document.getElementById('dialogBackdrop').classList.add('show');
+    const driveSelect = document.getElementById('selectDrive');
+    const nameInput = document.getElementById('dlgFileName');
+
+    if (currentAct === 5) {
+      driveSelect.value = "E:";
+      renderDialogFolders("E:");
+    } else {
+      driveSelect.value = "C:";
+      renderDialogFolders("C:");
+    }
+
+    if (currentAct === 3) nameInput.value = "Σκυλάκι.png";
+    else if (currentAct === 4) nameInput.value = "";
+    else nameInput.value = "Σκύλος.doc";
+
+    if (currentStep === 1) advanceStep();
+  }
+
+  function closeSaveDialog() {
+    document.getElementById('dialogBackdrop').classList.remove('show');
+  }
+
+  function changeDrive() {
+    const d = document.getElementById('selectDrive').value;
+    renderDialogFolders(d);
+    if (currentAct === 5 && currentStep === 2 && d === "E:") {
+      advanceStep();
+      showToast("Μπράβο! Επέλεξες τη Μνήμη Flash USB (E:)! Τώρα πάτα Αποθήκευση.");
+    }
+  }
+
+  function renderDialogFolders(drive) {
+    const list = document.getElementById('dialogFolderList');
+    list.innerHTML = '';
+    const folders = systemDrives[drive].folders;
+
+    Object.keys(folders).forEach(fname => {
+      const row = document.createElement('div');
+      row.className = 'dialog-item-row' + (fname === selectedFolderInDialog ? ' selected' : '');
+      row.innerHTML = `<span>📁</span> <span>${fname}</span>`;
+      row.onclick = () => {
+        document.querySelectorAll('.dialog-item-row').forEach(r => r.classList.remove('selected'));
+        row.classList.add('selected');
+        selectedFolderInDialog = fname;
+
+        if (currentAct === 2 && currentStep === 2 && fname === "Έγγραφα") {
+          advanceStep();
+          showToast("Σωστά! Επέλεξες τον φάκελο «Έγγραφα»! Πάτα Αποθήκευση.");
+        }
+        if (currentAct === 3 && currentStep === 2 && fname === "Εικόνες") {
+          advanceStep();
+          showToast("Σωστά! Επέλεξες τον φάκελο «Εικόνες»! Πάτα Αποθήκευση.");
+        }
+      };
+      list.appendChild(row);
+    });
+  }
+
+  function confirmSaveFile() {
+    const fname = document.getElementById('dlgFileName').value.trim();
+    if (!fname) {
+      showToast("⚠️ Πληκτρολόγησε ένα όνομα για το αρχείο!");
+      return;
+    }
+
+    closeSaveDialog();
+
+    if (currentAct === 1 && currentStep === 2) {
+      showToast(`💾 Το αρχείο αποθηκεύτηκε στον Τοπικό Δίσκο (C:), στον φάκελο «${selectedFolderInDialog}»!`);
+      advanceStep();
+    } else if (currentAct === 2 && currentStep === 3) {
+      showToast(`💾 Το κείμενο μπήκε στον φάκελο «Έγγραφα»!`);
+      advanceStep();
+    } else if (currentAct === 3 && currentStep === 3) {
+      showToast(`💾 Η εικόνα αποθηκεύτηκε στον φάκελο «Εικόνες»!`);
+      advanceStep();
+    } else if (currentAct === 4) {
+      showToast(`💾 Το αρχείο πήρε το όνομα «${fname}» και αποθηκεύτηκε!`);
+      advanceStep();
+      advanceStep();
+    } else if (currentAct === 5 && currentStep === 3) {
+      showToast(`🔌 Το αρχείο σώθηκε στη Μνήμη Flash USB (E:) για να το πάρεις στο σπίτι!`);
+      advanceStep();
+    } else {
+      showToast(`💾 Το αρχείο «${fname}» αποθηκεύτηκε με επιτυχία!`);
+    }
+  }
+
+  let filesToSort = [
+    { name: "Κατοικίδιο.doc", target: "Έγγραφα", icon: "📄" },
+    { name: "Σκύλος.doc", target: "Έγγραφα", icon: "📄" },
+    { name: "Γάτα.png", target: "Εικόνες", icon: "🖼️" },
+    { name: "Το χωριό μου.jpg", target: "Εικόνες", icon: "🖼️" }
+  ];
+
+  function initSortingGame() {
+    const src = document.getElementById('dragSourceArea');
+    const docT = document.getElementById('targetDocs');
+    const picT = document.getElementById('targetPics');
+    src.innerHTML = '';
+    docT.innerHTML = '';
+    picT.innerHTML = '';
+    sortedCount = 0;
+    activeClickItem = null;
+
+    filesToSort.forEach((f, idx) => {
+      const card = document.createElement('div');
+      card.className = 'click-sort-btn';
+      card.id = 'sortcard_' + idx;
+      card.innerHTML = `<span>${f.icon}</span> <span>${f.name}</span>`;
+      card.onclick = () => {
+        document.querySelectorAll('.click-sort-btn').forEach(c => c.classList.remove('selected-item'));
+        card.classList.add('selected-item');
+        activeClickItem = { ...f, elementId: 'sortcard_' + idx };
+        showToast(`Επέλεξες το «${f.name}». Τώρα κάνε κλικ στον σωστό φάκελο παρακάτω!`);
+      };
+      src.appendChild(card);
+    });
+  }
+
+  let sortedCount = 0;
+  function placeSelectedFile(targetFolder) {
+    if (!activeClickItem) {
+      showToast("👉 Κάνε πρώτα κλικ σε ένα αρχείο από πάνω!");
+      return;
+    }
+
+    if (activeClickItem.target === targetFolder) {
+      const item = document.createElement('div');
+      item.style.padding = '4px 8px';
+      item.style.background = '#ffffff';
+      item.style.borderRadius = '4px';
+      item.style.fontSize = '12px';
+      item.style.fontWeight = 'bold';
+      item.innerHTML = `${activeClickItem.icon} ${activeClickItem.name} ✅`;
+
+      if (targetFolder === "Έγγραφα") document.getElementById('targetDocs').appendChild(item);
+      else document.getElementById('targetPics').appendChild(item);
+
+      const el = document.getElementById(activeClickItem.elementId);
+      if (el) el.style.display = 'none';
+
+      activeClickItem = null;
+      sortedCount++;
+      showToast(`Μπράβο! Το αρχείο μπήκε στον φάκελο «${targetFolder}»!`);
+
+      if (sortedCount === 2 && currentStep === 1) advanceStep();
+      if (sortedCount === 4) {
+        advanceStep();
+        showToast("🏆 Τέλεια! Όλα τα αρχεία τακτοποιήθηκαν στους σωστούς φακέλους!");
+      }
+    } else {
+      showToast(`⚠️ Προσοχή! Το αρχείο ανήκει στον φάκελο «${activeClickItem.target}»!`);
+    }
+  }
+
+  function openFolder(folderName) {
+    const win = document.getElementById('explorerWindow');
+    win.style.display = 'flex';
+    document.getElementById('tabExplorer').style.display = 'flex';
+    bringFront('explorerWindow');
+    document.getElementById('explorerTitle').innerText = `📁 Φάκελος: ${folderName}`;
+    document.getElementById('explorerPathText').innerText = `Τοπικός Δίσκος (C:) ➔ ${folderName}`;
+
+    const grid = document.getElementById('explorerGrid');
+    grid.innerHTML = '';
+    const files = systemDrives["C:"].folders[folderName] || [];
+
+    files.forEach(f => {
+      const d = document.createElement('div');
+      d.className = 'folder-item';
+      d.innerHTML = `<span style="font-size:32px;">${f.icon}</span><span style="font-size:11px; font-weight:bold; margin-top:4px;">${f.name}</span>`;
+
+      d.onclick = () => {
+        document.querySelectorAll('.folder-item').forEach(i => i.classList.remove('selected'));
+        d.classList.add('selected');
+        if (currentAct === 8 && currentStep === 2 && f.name.includes("Το χωριό μου")) {
+          advanceStep();
+          showToast("Μπράβο! Βρήκες το αρχείο! Τώρα κάνε διπλό κλικ για να το ανοίξεις!");
+        }
+      };
+
+      d.ondblclick = () => {
+        if (currentAct === 8 && currentStep === 3) {
+          showToast("🏆 ΝΙΚΗΣΕΣ! Η εικόνα «Το χωριό μου.jpg» άνοιξε πανηγυρικά στην οθόνη!");
+          advanceStep();
+        } else {
+          showToast(`Το αρχείο «${f.name}» άνοιξε!`);
+        }
+      };
+
+      grid.appendChild(d);
+    });
+
+    if (currentAct === 7 && currentStep === 1) {
+      advanceStep();
+      showToast("Μπράβο! Άνοιξες τον φάκελο «Έγγραφα».");
+    }
+    if (currentAct === 8 && currentStep === 1 && folderName === "Εικόνες") {
+      advanceStep();
+      showToast("Μπράβο! Άνοιξες τον φάκελο «Εικόνες». Τώρα βρες το αρχείο!");
+    }
+  }
+
+  function openDriveWindow() {
+    showToast("🖥️ Εδώ βρίσκονται ο Τοπικός Δίσκος (C:) και οι συνδεδεμένες μνήμες Flash!");
+  }
+
+  function openApp(app) {
+    document.getElementById('appWindow').style.display = 'flex';
+    bringFront('appWindow');
+  }
+
+  function closeWindow(id) {
+    document.getElementById(id).style.display = 'none';
+  }
+
+  function bringFront(id) {
+    document.getElementById('appWindow').style.zIndex = (id === 'appWindow' ? 200 : 100);
+    document.getElementById('explorerWindow').style.zIndex = (id === 'explorerWindow' ? 200 : 100);
+  }
+
+  function updateClock() {
+    const now = new Date();
+    let hrs = now.getHours();
+    let mins = now.getMinutes();
+    mins = mins < 10 ? '0' + mins : mins;
+    document.getElementById('clock').innerText = `${hrs}:${mins}`;
+  }
+
+  window.onload = init;
+</script>
+
+</body>
+</html>
