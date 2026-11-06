@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 6ο: Προγραμματίζω με την εντολή επανάληψης - ScratchJr Ποδόσφαιρο!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      background: radial-gradient(circle at top, #fbcfe8, #fed7aa, #fef08a);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .retro-shadow {
+      box-shadow: 0 10px 0 rgba(0,0,0,0.1), 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    /* Pitch styling */
+    .pitch-grass {
+      background: linear-gradient(180deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+      border: 4px solid #15803d;
+    }
+    .pitch-line {
+      border: 2px dashed rgba(255, 255, 255, 0.7);
+    }
+    .ball-spin {
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ball-jump {
+      animation: jumpAnim 0.6s ease-in-out;
+    }
+    @keyframes jumpAnim {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(0, -50px) scale(1.3); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+    /* Authentic ScratchJr block style */
+    .scratch-repeat {
+      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+      border: 3px solid #9a3412;
+      border-radius: 18px;
+    }
+    .scratch-motion {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 2px solid #0369a1;
+      border-radius: 14px;
+    }
+    .scratch-jump {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 2px solid #0369a1;
+      border-radius: 14px;
+    }
+    .scratch-speed {
+      background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+      border: 2px solid #9a3412;
+      border-radius: 14px;
+    }
+    .scratch-reset {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 2px solid #0369a1;
+      border-radius: 14px;
+    }
+    .sparkle-pop {
+      animation: popSparkle 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popSparkle {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 md:p-8 flex flex-col items-center">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 retro-shadow border-4 border-orange-300 flex flex-col gap-5">
+
+    <!-- Header: ScratchJr Theme -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-orange-200 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-5xl sm:text-6xl animate-bounce">⚽</span>
+        <div>
+          <span class="bg-orange-500 text-white font-black px-3.5 py-1 rounded-full text-base sm:text-lg uppercase shadow">
+            Μάθημα 6ο
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-black text-orange-950 tracking-tight mt-1">
+            ScratchJr: Ποδόσφαιρο στο Πάρκο! 🌳
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="soundToggle" onclick="toggleSound()" class="bg-orange-100 hover:bg-orange-200 text-orange-900 text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl border-2 border-orange-300 transition">
+          🔊 Ήχος: <span id="soundStatus">ON</span>
+        </button>
+        <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl shadow border-2 border-emerald-600 transition flex items-center gap-2">
+          💾 <span>Αποθήκευση</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar: 8 Activities -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between text-lg sm:text-2xl font-black text-gray-700">
+        <span id="actIndicator" class="text-orange-950">Δραστηριότητα 1 από 8</span>
+        <div class="flex items-center gap-2">
+          <span id="starCounter" class="text-2xl sm:text-3xl text-amber-500 font-black">⭐ 0/24</span>
+        </div>
+      </div>
+
+      <!-- 8 Activity Tabs -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="navBubbles"></div>
+
+      <!-- 3 Substep Dots -->
+      <div class="flex items-center justify-center gap-3 mt-1">
+        <span class="text-base sm:text-xl font-black text-orange-900">Βήμα:</span>
+        <div id="substepDots" class="flex gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Interactive Workspace: ScratchJr Stage on Left, Question on Right -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: ScratchJr Interactive Stage -->
+      <div class="lg:col-span-5 bg-gradient-to-b from-sky-100 to-amber-100 p-4 rounded-3xl border-4 border-amber-300 shadow-inner flex flex-col items-center gap-3">
+        
+        <div class="w-full flex items-center justify-between">
+          <h2 class="text-xl sm:text-2xl font-black text-orange-950 flex items-center gap-2">
+            <span>🎮</span> Η Σκηνή του ScratchJr
+          </h2>
+          <span id="speedBadge" class="bg-amber-200 text-orange-950 font-black px-3 py-1 rounded-xl text-sm sm:text-base border border-amber-400">
+            🏃 Κανονική
+          </span>
+        </div>
+
+        <!-- The Soccer Pitch Stage -->
+        <div class="w-full h-56 sm:h-64 pitch-grass rounded-2xl relative overflow-hidden shadow-md flex items-center justify-between px-3 sm:px-6">
+          
+          <!-- Background Decor: Trees and Sun -->
+          <div class="absolute top-2 left-4 text-3xl opacity-80 select-none">🌳</div>
+          <div class="absolute top-2 right-4 text-3xl opacity-80 select-none">☀️</div>
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div class="w-24 h-24 rounded-full pitch-line flex items-center justify-center">
+              <div class="w-2 h-2 rounded-full bg-white/70"></div>
+            </div>
+          </div>
+
+          <!-- Character Left: Girl (Υπατία) -->
+          <div id="charLeft" class="flex flex-col items-center z-10 select-none">
+            <span class="text-5xl sm:text-6xl drop-shadow">👧</span>
+            <span class="bg-white/90 text-orange-950 font-black text-xs sm:text-sm px-2 py-0.5 rounded-full shadow mt-1">Υπατία</span>
+          </div>
+
+          <!-- The Ball (Animated Actor) -->
+          <div id="ballSprite" class="absolute z-20 text-4xl sm:text-5xl ball-spin cursor-pointer drop-shadow-lg" style="left: 22%; bottom: 25%;" onclick="runInteractiveDemo()">
+            ⚽
+          </div>
+
+          <!-- Character Right: Boy (Ήρωνας) -->
+          <div id="charRight" class="flex flex-col items-center z-10 select-none">
+            <span class="text-5xl sm:text-6xl drop-shadow">👦</span>
+            <span class="bg-white/90 text-orange-950 font-black text-xs sm:text-sm px-2 py-0.5 rounded-full shadow mt-1">Ήρωνας</span>
+          </div>
+
+          <!-- Stop Button overlay (Top Right) -->
+          <button onclick="stopBallMotion()" title="Κόκκινο Εξάγωνο STOP" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 active:scale-90 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-xl shadow-lg border-2 border-white flex items-center gap-1 z-30">
+            <span>🛑</span> <span>STOP</span>
+          </button>
+        </div>
+
+        <!-- Action Button: Run Demo -->
+        <button id="runScriptBtn" onclick="runInteractiveDemo()" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-black text-xl py-3 px-4 rounded-2xl shadow-lg border-2 border-orange-600 flex items-center justify-center gap-3 transition transform active:scale-95">
+          <span class="text-3xl">▶️</span>
+          <span>Δοκίμασε την πάσα!</span>
+        </button>
+
+        <!-- ScratchJr Palette / Block Visualization -->
+        <div class="w-full bg-white p-3 rounded-2xl border-2 border-orange-200 flex flex-col items-center text-center shadow-sm">
+          <span class="text-xs sm:text-sm font-bold text-orange-800 uppercase tracking-wide">Το Πρόγραμμα της Μπάλας:</span>
+          <div id="codeVisualBlocks" class="flex flex-wrap items-center justify-center gap-1.5 pt-2"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Simplified Question Area -->
+      <div class="lg:col-span-7 bg-white p-5 sm:p-7 rounded-3xl border-4 border-orange-200 shadow-sm flex flex-col gap-5 min-h-[460px] justify-between">
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <span id="actCategory" class="inline-block bg-orange-100 text-orange-900 font-black px-3.5 py-1 rounded-xl text-sm sm:text-base mb-2">
+              Κατηγορία
+            </span>
+            <h3 id="questionPrompt" class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 leading-snug">
+              Ερώτηση...
+            </h3>
+            <p id="questionSub" class="text-lg sm:text-2xl text-orange-700 font-bold mt-1">
+              Οδηγία...
+            </p>
+          </div>
+
+          <!-- Answers Container -->
+          <div id="questionInteractiveArea" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- Feedback & Auto Next -->
+        <div id="feedbackContainer" class="p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]">
+          <div id="feedbackText" class="text-lg sm:text-2xl font-black text-gray-700 flex items-center gap-2">
+            <span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>
+          </div>
+          <div id="autoNextTimer" class="hidden flex items-center gap-2 text-emerald-700 font-black text-lg">
+            <span>Μπράβο! Επόμενο...</span>
+            <div class="w-6 h-6 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-between text-xs sm:text-sm text-gray-500 border-t-2 border-gray-200 pt-3">
+      <span>Πληροφορική Β΄ Δημοτικού • Μάθημα 6ο (σελ. 26-29)</span>
+      <span class="font-black text-orange-900">ScratchJr ⚽ • Ποδόσφαιρο • Επανάληψη</span>
+    </footer>
+
+  </div>
+
+  <!-- Audio Synthesizer -->
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundStatus').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundToggle').classList.toggle('bg-gray-200', !soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'kick') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.15);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(650, now + 0.2);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'whistle') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(950, now);
+        osc.frequency.setValueAtTime(1200, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(170, now + 0.15);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+  </script>
+
+  <!-- Lesson 6 Data: 8 Activities x 3 Substeps = 24 Mini-Tasks -->
+  <script>
+    /*
+      Lesson 6 Curriculum:
+      - Building a ScratchJr project with 2 kids and a ball playing soccer (σελ. 26).
+      - Moving ball right to boy with [ΚΙΝΗΣΟΥ ΔΕΞΙΑ] and left back to girl with [ΚΙΝΗΣΟΥ ΑΡΙΣΤΕΡΑ] (σελ. 26-27).
+      - Setting the start position with [ΠΗΓΑΙΝΕ ΣΤΗΝ ΑΡΧΗ] (σελ. 27).
+      - Using the orange [ΕΠΑΝΑΛΑΒΕ] block so the ball passes back and forth (σελ. 27-28).
+      - Stopping program anytime with the Red Stop Hexagon (σελ. 28).
+      - Adding fun blocks: [ΠΗΔΑ] & [ΟΡΙΣΕ ΤΑΧΥΤΗΤΑ] (σελ. 28-29).
+      - Reversing who kicks first (σελ. 30).
+    */
+    const activities = [
+      // 1. Φτιάχνουμε την Ιστορία στο ScratchJr (σελ. 26)
+      {
+        title: "Ποδόσφαιρο στο Πάρκο!",
+        category: "Οι Ήρωες του Έργου",
+        substeps: [
+          {
+            prompt: "Ποιο αντικείμενο πρέπει να κινείται ανάμεσα στα δύο παιδιά;",
+            sub: "Δες ποιο αντικείμενο προγραμματίζουμε:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-right", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "➡️ 14", label: "Κινήσου Δεξιά" }],
+            options: [
+              { text: "Η μπάλα του ποδοσφαίρου! ⚽", correct: true },
+              { text: "Το παγκάκι του πάρκου 🪵", correct: false }
+            ]
+          },
+          {
+            prompt: "Για να πάει η μπάλα από το κορίτσι στο αγόρι, ποια εντολή της δίνουμε;",
+            sub: "Κοίταξε το μπλε βελάκι:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-right", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "➡️ 14", label: "Κινήσου Δεξιά" }],
+            options: [
+              { text: "Κινήσου Δεξιά ➡️", correct: true },
+              { text: "Κινήσου Κάτω ⬇️", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Στο ScratchJr, μπορούμε να διαλέξουμε όποιο σκηνικό μας αρέσει από τη βιβλιοθήκη.",
+            sub: "Όπως μας δείχνει το βιβλίο στη σελίδα 26:",
+            type: "tf",
+            stageSetup: { ballPos: "left", mode: "pass-right", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "➡️ 14", label: "Κινήσου Δεξιά" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 2. Η Πάσα Επιστρέφει! (σελ. 27)
+      {
+        title: "Η Πάσα Επιστρέφει!",
+        category: "Κίνηση Αριστερά",
+        substeps: [
+          {
+            prompt: "Η μπάλα έφτασε στο αγόρι. Ποια εντολή θα τη στείλει πίσω στο κορίτσι;",
+            sub: "Διάλεξε το αντίθετο βελάκι:",
+            type: "choice",
+            stageSetup: { ballPos: "right", mode: "pass-left", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "⬅️ 14", label: "Κινήσου Αριστερά" }],
+            options: [
+              { text: "Κινήσου Αριστερά ⬅️", correct: true },
+              { text: "Πήγαινε ψηλά στον ουρανό ☁️", correct: false }
+            ]
+          },
+          {
+            prompt: "Αν έκανε 14 βήματα δεξιά, πόσα βήματα αριστερά πρέπει να κάνει για να γυρίσει ακριβώς πίσω;",
+            sub: "Σκέψου αν πρέπει να είναι τα ίδια βήματα:",
+            type: "choice",
+            stageSetup: { ballPos: "right", mode: "pass-left", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "⬅️ 14", label: "Κινήσου Αριστερά" }],
+            options: [
+              { text: "Ακριβώς 14 βήματα! 🎯", correct: true },
+              { text: "Μόνο 1 βήμα", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μετά την πάσα δεξιά και αριστερά, η μπάλα έχει πάει και έχει γυρίσει μία φορά.",
+            sub: "Αυτό είναι ένα πλήρες πέρα-δώθε:",
+            type: "tf",
+            stageSetup: { ballPos: "left", mode: "pass-both", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "➡️ 14", label: "Δεξιά" }, { type: "single", cmd: "⬅️ 14", label: "Αριστερά" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 3. Το Τουβλάκι «Πήγαινε στην Αρχή» (σελ. 27)
+      {
+        title: "Πήγαινε στην Αρχή!",
+        category: "Βοηθητικό Τουβλάκι",
+        substeps: [
+          {
+            prompt: "Τι κάνει το μπλε τουβλάκι με το γυριστό βέλος «Πήγαινε στην Αρχή»;",
+            sub: "Όπως μας θυμίζει ο Ήρωνας στη σελίδα 27:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "reset", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "↩️", label: "Πήγαινε στην Αρχή" }],
+            options: [
+              { text: "Φέρνει την μπάλα πίσω εκεί που την βάλαμε στην αρχή! 🔄", correct: true },
+              { text: "Σβήνει όλο το παιχνίδι από τον υπολογιστή", correct: false }
+            ]
+          },
+          {
+            prompt: "Πού μας βοηθάει να βάζουμε αυτό το τουβλάκι;",
+            sub: "Σκέψου όταν κάνουμε δοκιμές:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "reset", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "↩️", label: "Πήγαινε στην Αρχή" }],
+            options: [
+              { text: "Στην αρχή του προγράμματός μας! 🚀", correct: true },
+              { text: "Πουθενά, δεν χρειάζεται ποτέ", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Με το τουβλάκι αυτό, δεν χρειάζεται να σέρνουμε συνέχεια την μπάλα με το ποντίκι.",
+            sub: "Επιστρέφει μόνη της αυτόματα:",
+            type: "tf",
+            stageSetup: { ballPos: "left", mode: "reset", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "↩️", label: "Πήγαινε στην Αρχή" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 4. Η Εντολή Επανάληψης στην Μπάλα (σελ. 27-28)
+      {
+        title: "Πάσες Ξανά και Ξανά!",
+        category: "Το Πορτοκαλί Τουβλάκι",
+        substeps: [
+          {
+            prompt: "Θέλουμε η μπάλα να πηγαινοέρχεται πολλές φορές. Ποιο τουβλάκι αγκαλιάζει τις εντολές;",
+            sub: "Δες το χρώμα του:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-loop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 14", "⬅️ 14"] }],
+            options: [
+              { text: "Το πορτοκαλί τουβλάκι ΕΠΑΝΑΛΑΒΕ 🔁", correct: true },
+              { text: "Το ροζ τουβλάκι ήχου 📢", correct: false }
+            ]
+          },
+          {
+            prompt: "Αν γράψουμε τον αριθμό 4 στο κυκλάκι, πόσες φορές θα παίξουν πάσα τα παιδιά;",
+            sub: "Δες τον αριθμό στο πορτοκαλί κυκλάκι:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-loop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 14", "⬅️ 14"] }],
+            options: [
+              { text: "4 φορές! ⚽⚽⚽⚽", correct: true },
+              { text: "1 μόνο φορά", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να αλλάξουμε τον αριθμό 4 σε όποιον αριθμό θέλουμε.",
+            sub: "Πατώντας πάνω στο κυκλάκι:",
+            type: "tf",
+            stageSetup: { ballPos: "left", mode: "pass-loop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 14", "⬅️ 14"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 5. Το Κόκκινο Κουμπί STOP (σελ. 28)
+      {
+        title: "Σταμάτα το Παιχνίδι! (STOP)",
+        category: "Το Κόκκινο Εξάγωνο",
+        substeps: [
+          {
+            prompt: "Αν η μπάλα κινείται και θέλουμε να τη σταματήσουμε αμέσως, τι πατάμε;",
+            sub: "Κοίταξε πάνω δεξιά στη σκηνή:",
+            type: "choice",
+            stageSetup: { ballPos: "middle", mode: "stop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "🛑", label: "Κόκκινο STOP" }],
+            options: [
+              { text: "Το κόκκινο εξάγωνο κουμπί STOP! 🛑", correct: true },
+              { text: "Κλείνουμε τα φώτα στο δωμάτιο 💡", correct: false }
+            ]
+          },
+          {
+            prompt: "Πού εμφανίζεται το κόκκινο κουμπί STOP στο ScratchJr;",
+            sub: "Δες τη θέση του:",
+            type: "choice",
+            stageSetup: { ballPos: "middle", mode: "stop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "🛑", label: "Κόκκινο STOP" }],
+            options: [
+              { text: "Επάνω δεξιά στην οθόνη! ↗️", correct: true },
+              { text: "Κάτω στο πάτωμα", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Πατώντας το κόκκινο STOP, η κίνηση σταματάει αμέσως εκεί που βρίσκεται.",
+            sub: "Δοκίμασε να πατήσεις το κόκκινο STOP στη σκηνή:",
+            type: "tf",
+            stageSetup: { ballPos: "middle", mode: "stop", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "🛑", label: "Κόκκινο STOP" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 6. Κάνε την Μπάλα να Πηδάει! (σελ. 28)
+      {
+        title: "Η Μπάλα Πηδάει Ψηλά!",
+        category: "Νέα Εντολή: ΠΗΔΑ",
+        substeps: [
+          {
+            prompt: "Θέλουμε η μπάλα να πηδάει στον αέρα πριν φτάσει στο παιδί. Ποια εντολή βάζουμε;",
+            sub: "Δες το μπλε τουβλάκι με το τοξωτό βελάκι:",
+            type: "choice",
+            stageSetup: { ballPos: "middle", mode: "jump-demo", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "⤴️ 2", label: "Πήδα" }],
+            options: [
+              { text: "Την εντολή ΠΗΔΑ! 🦘", correct: true },
+              { text: "Την εντολή ΚΟΙΜΗΣΟΥ 😴", correct: false }
+            ]
+          },
+          {
+            prompt: "Αν βάλουμε το [ΠΗΔΑ 2] μέσα στην επανάληψη, τι θα κάνει η μπάλα;",
+            sub: "Σκέψου πότε θα πηδάει:",
+            type: "choice",
+            stageSetup: { ballPos: "middle", mode: "jump-demo", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["⤴️ 2", "➡️ 14"] }],
+            options: [
+              { text: "Θα πηδάει σε κάθε πάσα! ⚽✨", correct: true },
+              { text: "Δεν θα κουνηθεί καθόλου", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Η εντολή ΠΗΔΑ κάνει το παιχνίδι μας πιο όμορφο και διασκεδαστικό.",
+            sub: "Όπως μας δείχνει το βιβλίο στη σελίδα 28:",
+            type: "tf",
+            stageSetup: { ballPos: "middle", mode: "jump-demo", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "⤴️ 2", label: "Πήδα" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 7. Πιο Γρήγορα! (ΟΡΙΣΕ ΤΑΧΥΤΗΤΑ - σελ. 28-29)
+      {
+        title: "Βάλε Ταχύτητα!",
+        category: "Νέα Εντολή: ΤΑΧΥΤΗΤΑ",
+        substeps: [
+          {
+            prompt: "Θέλουμε η μπάλα να τρέχει σαν αστραπή! Ποια πορτοκαλί εντολή ρυθμίζει πόσο γρήγορα πάει;",
+            sub: "Δες το ανθρωπάκι που τρέχει:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-fast", speedText: "⚡ Γρήγορη!" },
+            blockPreview: [{ type: "single", cmd: "🏃💨", label: "Όρισε Ταχύτητα" }],
+            options: [
+              { text: "Η εντολή ΟΡΙΣΕ ΤΑΧΥΤΗΤΑ! ⚡", correct: true },
+              { text: "Η εντολή ΣΒΗΣΕ ΤΑ ΦΩΤΑ 🌑", correct: false }
+            ]
+          },
+          {
+            prompt: "Για να πάει όσο πιο γρήγορα γίνεται, ποιο ανθρωπάκι διαλέγουμε στο τριγωνάκι;",
+            sub: "Σκέψου ποιο τρέχει πιο πολύ:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-fast", speedText: "⚡ Γρήγορη!" },
+            blockPreview: [{ type: "single", cmd: "🏃💨", label: "Τέρμα Γρήγορο" }],
+            options: [
+              { text: "Το ανθρωπάκι που τρέχει πολύ γρήγορα! 🏃💨", correct: true },
+              { text: "Τη χελώνα που περπατάει αργά 🐢", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να αλλάξουμε την ταχύτητα για να κάνουμε την μπάλα είτε πιο αργή είτε πιο γρήγορη.",
+            sub: "Όπως μάθαμε στη σελίδα 29:",
+            type: "tf",
+            stageSetup: { ballPos: "left", mode: "pass-fast", speedText: "⚡ Γρήγορη!" },
+            blockPreview: [{ type: "single", cmd: "🏃💨", label: "Ταχύτητα" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 8. Αλλαγή Σειράς & Αυτοαξιολόγηση (σελ. 30)
+      {
+        title: "Σούπερ Δημιουργός ScratchJr!",
+        category: "Σελίδα 30 & Επιβράβευση",
+        substeps: [
+          {
+            prompt: "Αν σύρουμε την μπάλα στα πόδια του αγοριού, ποια εντολή πρέπει να μπει ΠΡΩΤΗ;",
+            sub: "Για να ξεκινήσει η μπάλα από το αγόρι και να πάει στο κορίτσι:",
+            type: "choice",
+            stageSetup: { ballPos: "right", mode: "pass-left", speedText: "🏃 Κανονική" },
+            blockPreview: [{ type: "single", cmd: "⬅️ 14", label: "Κινήσου Αριστερά" }],
+            options: [
+              { text: "Πρώτα η εντολή Αριστερά ⬅️!", correct: true },
+              { text: "Πρώτα η εντολή Δεξιά ➡️", correct: false }
+            ]
+          },
+          {
+            prompt: "Τι έμαθες σήμερα στο Μάθημα 6 του ScratchJr;",
+            sub: "Διάλεξε όλα τα σπουδαία που κατάφερες:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-loop", speedText: "🏆 Άριστα!" },
+            blockPreview: [{ type: "repeat", count: 5, inner: ["⚽ Ποδόσφαιρο!", "🔁 Επανάληψη!"] }],
+            options: [
+              { text: "Να προγραμματίζω την μπάλα με επανάληψη, άλμα και ταχύτητα! 🌟", correct: true },
+              { text: "Να κάθομαι χωρίς να κάνω τίποτα", correct: false }
+            ]
+          },
+          {
+            prompt: "Είσαι περήφανος που έγινες πραγματικός προγραμματιστής ιστοριών και παιχνιδιών;",
+            sub: "Διάλεξε πόσο τέλεια τα πήγες:",
+            type: "choice",
+            stageSetup: { ballPos: "left", mode: "pass-loop", speedText: "🏆 24/24!" },
+            blockPreview: [{ type: "repeat", count: 5, inner: ["👑 Πρωταθλητής!"] }],
+            options: [
+              { text: "🌟 Ναι! Έγινα σούπερ προγραμματιστής στο ScratchJr!", correct: true },
+              { text: "👍 Ήταν πολύ εύκολο και τρομερά ευχάριστο!", correct: true },
+              { text: "🎉 Μπράβο μου! Κέρδισα όλα τα αστέρια!", correct: true }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    let starsCount = 0;
+    const answeredSteps = new Set();
+    let isTransitioning = false;
+    let isBallMoving = false;
+    let animationTimer = null;
+
+    window.onload = function() {
+      renderNav();
+      loadCurrentQuestion();
+    };
+
+    function renderNav() {
+      const navContainer = document.getElementById('navBubbles');
+      navContainer.innerHTML = '';
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `act-bubble-${idx}`;
+        const isActive = idx === currentActIndex;
+        btn.className = `py-2 px-1 rounded-2xl font-black text-sm sm:text-base border-3 transition flex flex-col items-center justify-center gap-0.5 ${
+          isActive 
+            ? 'bg-orange-500 text-white border-orange-700 shadow-md scale-105' 
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-orange-50'
+        }`;
+        btn.innerHTML = `
+          <span>Δρ.${idx + 1}</span>
+          <span class="text-xs ${isActive ? 'text-white' : 'text-orange-900'}">${getActProgressIcon(idx)}</span>
+        `;
+        btn.onclick = () => {
+          if (isTransitioning) return;
+          stopBallMotion();
+          playSound('click');
+          currentActIndex = idx;
+          currentSubIndex = 0;
+          renderNav();
+          loadCurrentQuestion();
+        };
+        navContainer.appendChild(btn);
+      });
+
+      const dotContainer = document.getElementById('substepDots');
+      dotContainer.innerHTML = '';
+      for (let s = 0; s < 3; s++) {
+        const dot = document.createElement('div');
+        const isCurrent = s === currentSubIndex;
+        const isDone = answeredSteps.has(`${currentActIndex}-${s}`);
+        dot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-base sm:text-lg border-2 transition ${
+          isCurrent 
+            ? 'bg-orange-600 text-white border-orange-800 shadow scale-110' 
+            : isDone 
+              ? 'bg-emerald-400 text-white border-emerald-600' 
+              : 'bg-gray-100 text-gray-400 border-gray-300'
+        }`;
+        dot.textContent = isDone ? '✓' : (s + 1);
+        dotContainer.appendChild(dot);
+      }
+
+      document.getElementById('actIndicator').textContent = `Δραστηριότητα ${currentActIndex + 1} από 8: ${activities[currentActIndex].title}`;
+      document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+    }
+
+    function getActProgressIcon(actIdx) {
+      const c1 = answeredSteps.has(`${actIdx}-0`);
+      const c2 = answeredSteps.has(`${actIdx}-1`);
+      const c3 = answeredSteps.has(`${actIdx}-2`);
+      if (c1 && c2 && c3) return '⭐⭐⭐';
+      if ((c1 && c2) || (c2 && c3) || (c1 && c3)) return '⭐⭐';
+      if (c1 || c2 || c3) return '⭐';
+      return '⚪';
+    }
+
+    function loadCurrentQuestion() {
+      isTransitioning = false;
+      const act = activities[currentActIndex];
+      const q = act.substeps[currentSubIndex];
+
+      document.getElementById('actCategory').textContent = act.category;
+      document.getElementById('questionPrompt').textContent = q.prompt;
+      document.getElementById('questionSub').textContent = q.sub;
+
+      // Update Pitch Stage
+      setupStage(q.stageSetup);
+
+      // Render Code Blocks
+      renderCodeVisual(q.blockPreview);
+
+      // Reset Feedback Box
+      const fbBox = document.getElementById('feedbackContainer');
+      fbBox.className = 'p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]';
+      document.getElementById('feedbackText').innerHTML = `<span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+
+      // Render Answers
+      const container = document.getElementById('questionInteractiveArea');
+      container.innerHTML = '';
+
+      if (q.type === 'choice') {
+        const shuffled = shuffle(q.options);
+        const letters = ['Α', 'Β', 'Γ'];
+        shuffled.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-4 sm:p-5 rounded-2xl bg-orange-50 hover:bg-orange-100 active:scale-[0.99] border-3 border-orange-200 hover:border-orange-400 font-black text-xl sm:text-2xl text-gray-800 transition flex items-center gap-4 shadow-sm';
+          btn.innerHTML = `
+            <span class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow">
+              ${letters[optIdx] || '•'}
+            </span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.correct);
+          container.appendChild(btn);
+        });
+      } else if (q.type === 'tf') {
+        const tfOptions = shuffle([
+          { text: "ΣΩΣΤΟ 👍", val: true, bg: "bg-emerald-100 hover:bg-emerald-200 border-emerald-400 text-emerald-950" },
+          { text: "ΛΑΘΟΣ 👎", val: false, bg: "bg-rose-100 hover:bg-rose-200 border-rose-400 text-rose-950" }
+        ]);
+
+        const tfGrid = document.createElement('div');
+        tfGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+        tfOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = `p-6 sm:p-8 rounded-3xl border-4 font-black text-3xl sm:text-4xl text-center shadow transition transform active:scale-95 ${opt.bg}`;
+          btn.textContent = opt.text;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.val === q.correctAnswer);
+          tfGrid.appendChild(btn);
+        });
+        container.appendChild(tfGrid);
+      }
+    }
+
+    function setupStage(setup) {
+      stopBallMotion();
+      const ball = document.getElementById('ballSprite');
+      document.getElementById('speedBadge').textContent = setup.speedText || '🏃 Κανονική';
+
+      if (setup.ballPos === 'right') {
+        ball.style.left = '75%';
+      } else if (setup.ballPos === 'middle') {
+        ball.style.left = '48%';
+      } else {
+        ball.style.left = '22%';
+      }
+      ball.style.bottom = '25%';
+      ball.classList.remove('ball-jump');
+    }
+
+    function renderCodeVisual(blocks) {
+      const box = document.getElementById('codeVisualBlocks');
+      box.innerHTML = '';
+      if (!blocks || !blocks.length) return;
+
+      blocks.forEach(b => {
+        if (b.type === 'repeat') {
+          const wrap = document.createElement('div');
+          wrap.className = 'scratch-repeat p-2 px-3 text-white flex items-center gap-2 shadow-md';
+          
+          let innerHtml = '';
+          b.inner.forEach(cmd => {
+            innerHtml += `<span class="scratch-motion px-2.5 py-1 text-white font-black text-base sm:text-lg shadow-inner">${cmd}</span>`;
+          });
+
+          wrap.innerHTML = `
+            <div class="flex items-center gap-1 font-black text-base sm:text-lg">
+              <span>🔁</span>
+              <span>Επανάλαβε</span>
+            </div>
+            <div class="flex items-center gap-1 bg-white/25 p-1 rounded-xl">
+              ${innerHtml}
+            </div>
+            <div class="w-9 h-9 rounded-full bg-white text-orange-950 font-black text-xl flex items-center justify-center shadow">
+              ${b.count}
+            </div>
+          `;
+          box.appendChild(wrap);
+        } else if (b.type === 'single') {
+          const singleWrap = document.createElement('div');
+          singleWrap.className = 'scratch-motion px-3 py-1.5 text-white font-black text-base sm:text-lg shadow-md flex items-center gap-1.5';
+          singleWrap.innerHTML = `<span>${b.cmd}</span> <span class="text-xs bg-white/20 px-1.5 py-0.5 rounded-lg">${b.label}</span>`;
+          box.appendChild(singleWrap);
+        }
+      });
+    }
+
+    // Interactive Demo on the Pitch
+    async function runInteractiveDemo() {
+      if (isBallMoving) return;
+      isBallMoving = true;
+
+      const q = activities[currentActIndex].substeps[currentSubIndex];
+      const ball = document.getElementById('ballSprite');
+      const mode = q.stageSetup.mode;
+      const btn = document.getElementById('runScriptBtn');
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+      if (mode === 'pass-right') {
+        ball.style.left = '22%';
+        playSound('kick');
+        await new Promise(r => setTimeout(r, 100));
+        ball.style.left = '75%';
+        await new Promise(r => setTimeout(r, 650));
+        playSound('whistle');
+      } else if (mode === 'pass-left') {
+        ball.style.left = '75%';
+        playSound('kick');
+        await new Promise(r => setTimeout(r, 100));
+        ball.style.left = '22%';
+        await new Promise(r => setTimeout(r, 650));
+        playSound('whistle');
+      } else if (mode === 'pass-both' || mode === 'pass-loop' || mode === 'pass-fast') {
+        const passes = (mode === 'pass-loop' || mode === 'pass-fast') ? 3 : 1;
+        const speed = (mode === 'pass-fast') ? 320 : 550;
+
+        for (let p = 0; p < passes; p++) {
+          if (!isBallMoving) break;
+          // Kick Right
+          playSound('kick');
+          ball.style.left = '75%';
+          await new Promise(r => setTimeout(r, speed));
+
+          if (!isBallMoving) break;
+          // Kick Left
+          playSound('kick');
+          ball.style.left = '22%';
+          await new Promise(r => setTimeout(r, speed));
+        }
+        playSound('whistle');
+      } else if (mode === 'jump-demo') {
+        ball.style.left = '22%';
+        playSound('kick');
+        ball.style.left = '48%';
+        await new Promise(r => setTimeout(r, 350));
+        
+        playSound('jump');
+        ball.classList.add('ball-jump');
+        await new Promise(r => setTimeout(r, 450));
+        ball.classList.remove('ball-jump');
+
+        playSound('kick');
+        ball.style.left = '75%';
+        await new Promise(r => setTimeout(r, 350));
+        playSound('whistle');
+      } else if (mode === 'reset') {
+        ball.style.left = '75%';
+        await new Promise(r => setTimeout(r, 200));
+        playSound('jump');
+        ball.style.left = '22%';
+        ball.classList.add('sparkle-pop');
+        setTimeout(() => ball.classList.remove('sparkle-pop'), 500);
+      } else if (mode === 'stop') {
+        ball.style.left = '22%';
+        playSound('kick');
+        ball.style.left = '50%';
+        await new Promise(r => setTimeout(r, 350));
+        stopBallMotion();
+        playSound('whistle');
+      }
+
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
+      isBallMoving = false;
+    }
+
+    function stopBallMotion() {
+      isBallMoving = false;
+      const ball = document.getElementById('ballSprite');
+      const currentLeft = window.getComputedStyle(ball).left;
+      ball.style.left = currentLeft;
+      ball.classList.remove('ball-jump');
+    }
+
+    function handleChoiceAnswer(btnElement, isCorrect) {
+      if (isTransitioning) return;
+
+      const fbBox = document.getElementById('feedbackContainer');
+      const fbText = document.getElementById('feedbackText');
+      const timerIndicator = document.getElementById('autoNextTimer');
+
+      if (isCorrect) {
+        isTransitioning = true;
+        playSound('correct');
+
+        btnElement.classList.remove('bg-orange-50', 'hover:bg-orange-100', 'border-orange-200');
+        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'scale-[1.02]', 'shadow-lg');
+
+        const key = `${currentActIndex}-${currentSubIndex}`;
+        if (!answeredSteps.has(key)) {
+          answeredSteps.add(key);
+          starsCount++;
+          document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+        }
+
+        fbBox.className = 'p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-4xl">🎉</span> <span class="text-emerald-800 text-xl sm:text-2xl font-black">Μπράβο! ΓΚΟΟΟΛ! ⚽</span>`;
+        timerIndicator.classList.remove('hidden');
+
+        // Automatic run of demo to reward visual feedback!
+        runInteractiveDemo();
+
+        setTimeout(() => {
+          advanceToNext();
+        }, 1200);
+
+      } else {
+        playSound('wrong');
+        btnElement.classList.add('bg-rose-100', 'border-rose-400');
+        fbBox.className = 'p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-3xl">🤔</span> <span class="text-rose-800 font-black">Δοκίμασε ξανά! Δες τη σκηνή στο γήπεδο!</span>`;
+      }
+    }
+
+    function advanceToNext() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+      } else {
+        if (currentActIndex < activities.length - 1) {
+          currentActIndex++;
+          currentSubIndex = 0;
+        } else {
+          showFinalCelebration();
+          return;
+        }
+      }
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function showFinalCelebration() {
+      renderNav();
+      const area = document.getElementById('questionInteractiveArea');
+      document.getElementById('questionPrompt').textContent = "🏆 Πρωταθλητής στο ScratchJr!";
+      document.getElementById('questionSub').textContent = "Έμαθες να προγραμματίζεις την μπάλα με επανάληψη, άλμα και ταχύτητα!";
+
+      area.innerHTML = `
+        <div class="bg-gradient-to-r from-amber-200 via-orange-200 to-emerald-200 p-6 rounded-3xl text-center border-4 border-orange-400 flex flex-col items-center gap-4">
+          <span class="text-6xl animate-bounce">👑 ⚽ 👧 👦 ⭐</span>
+          <h4 class="text-2xl sm:text-3xl font-black text-orange-950">
+            Κέρδισες και τα 24 Αστέρια!
+          </h4>
+          <p class="text-lg sm:text-xl font-bold text-gray-800 max-w-lg">
+            Μπορείς τώρα να αποθηκεύσεις το παιχνίδι στον υπολογιστή σου για να παίζεις όποτε θες χωρίς internet!
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="downloadHTML()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-emerald-800 transition transform active:scale-95">
+              💾 Αποθήκευση Αρχείου
+            </button>
+            <button onclick="restartAll()" class="bg-orange-500 hover:bg-orange-600 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-orange-700 transition transform active:scale-95">
+              🔄 Παίξε Ξανά
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('feedbackText').innerHTML = `<span>🌟</span> <span class="text-amber-800 font-black">Τέλεια 24/24! Σούπερ Σκόρερ!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+    }
+
+    function restartAll() {
+      currentActIndex = 0;
+      currentSubIndex = 0;
+      starsCount = 0;
+      answeredSteps.clear();
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function downloadHTML() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pliroforiki_B_Dimotikou_Mathima6_ScratchJr.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
