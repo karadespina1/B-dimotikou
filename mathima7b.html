@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 7ο: Πάρτι Χορού στο ScratchJr - Β΄ Δημοτικού</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      background: radial-gradient(circle at top, #fbcfe8, #c4b5fd, #a5f3fc);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .retro-shadow {
+      box-shadow: 0 10px 0 rgba(0,0,0,0.1), 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    /* Dance Floor Styling */
+    .dance-floor {
+      background: radial-gradient(circle, #312e81 0%, #1e1b4b 100%);
+      border: 4px solid #4338ca;
+    }
+    .dance-lights {
+      background: radial-gradient(circle at 50% 20%, rgba(244, 114, 182, 0.35), transparent 70%);
+    }
+    /* Dance animations */
+    .dancer-twist {
+      animation: twistAnim 0.7s infinite alternate ease-in-out;
+    }
+    @keyframes twistAnim {
+      0% { transform: rotate(-16deg) scale(1.05); }
+      100% { transform: rotate(16deg) scale(1.05); }
+    }
+    .dancer-jump {
+      animation: jumpAnim 0.6s infinite alternate ease-in-out;
+    }
+    @keyframes jumpAnim {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-30px) scale(1.1); }
+    }
+    .dancer-spin {
+      animation: spinAnim 1s infinite linear;
+    }
+    @keyframes spinAnim {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* ScratchJr Block Styles */
+    .scratch-start {
+      background: linear-gradient(180deg, #facc15 0%, #eab308 100%);
+      border: 3px solid #a16207;
+      border-radius: 16px;
+    }
+    .scratch-motion {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 2px solid #0369a1;
+      border-radius: 14px;
+    }
+    .scratch-forever {
+      background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+      border: 3px solid #9f1239;
+      border-radius: 16px;
+    }
+    .disco-ball {
+      animation: swingBall 2s infinite ease-in-out alternate;
+      transform-origin: top center;
+    }
+    @keyframes swingBall {
+      0% { transform: rotate(-10deg); }
+      100% { transform: rotate(10deg); }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 md:p-8 flex flex-col items-center">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 retro-shadow border-4 border-indigo-300 flex flex-col gap-5">
+
+    <!-- Header: Dance Party Theme -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-indigo-200 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-5xl sm:text-6xl disco-ball">🪩</span>
+        <div>
+          <span class="bg-indigo-600 text-white font-black px-3.5 py-1 rounded-full text-base sm:text-lg uppercase shadow">
+            Μάθημα 7ο
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-black text-indigo-950 tracking-tight mt-1">
+            Πάρτι Χορού στο ScratchJr! 💃🕺
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="soundToggle" onclick="toggleSound()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-900 text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl border-2 border-indigo-300 transition">
+          🔊 Ήχος: <span id="soundStatus">ON</span>
+        </button>
+        <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl shadow border-2 border-emerald-600 transition flex items-center gap-2">
+          💾 <span>Αποθήκευση</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar: 8 Activities -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between text-lg sm:text-2xl font-black text-gray-700">
+        <span id="actIndicator" class="text-indigo-950">Δραστηριότητα 1 από 8</span>
+        <div class="flex items-center gap-2">
+          <span id="starCounter" class="text-2xl sm:text-3xl text-amber-500 font-black">⭐ 0/24</span>
+        </div>
+      </div>
+
+      <!-- 8 Activity Tabs -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="navBubbles"></div>
+
+      <!-- 3 Substep Dots -->
+      <div class="flex items-center justify-center gap-3 mt-1">
+        <span class="text-base sm:text-xl font-black text-indigo-900">Βήμα:</span>
+        <div id="substepDots" class="flex gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Interactive Workspace: Dance Floor on Left, Question on Right -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: Dance Floor Stage with 3 Dancers -->
+      <div class="lg:col-span-5 bg-gradient-to-b from-indigo-100 to-purple-100 p-4 rounded-3xl border-4 border-indigo-300 shadow-inner flex flex-col items-center gap-3">
+        
+        <div class="w-full flex items-center justify-between">
+          <h2 class="text-xl sm:text-2xl font-black text-indigo-950 flex items-center gap-2">
+            <span>🎉</span> Η Πίστα Χορού
+          </h2>
+          <span id="eventBadge" class="bg-amber-200 text-amber-950 font-black px-3 py-1 rounded-xl text-sm sm:text-base border border-amber-400">
+            🚩 Πράσινη Σημαία
+          </span>
+        </div>
+
+        <!-- The Dance Floor Box -->
+        <div class="w-full h-56 sm:h-64 dance-floor rounded-2xl relative overflow-hidden shadow-lg flex items-end justify-around pb-4 px-3 dance-lights">
+          
+          <!-- Disco Ball hanging -->
+          <div class="absolute top-1 inset-x-0 flex justify-center pointer-events-none">
+            <span class="text-4xl sm:text-5xl disco-ball">🪩</span>
+          </div>
+
+          <!-- Spotlights & Party Notes floating -->
+          <div class="absolute top-3 left-4 text-2xl opacity-75 select-none animate-pulse">🎵</div>
+          <div class="absolute top-3 right-4 text-2xl opacity-75 select-none animate-pulse">🎶</div>
+
+          <!-- Dancer 1: Girl (Υπατία) -->
+          <div id="dancer1" class="flex flex-col items-center z-10 select-none transition-transform duration-300">
+            <span class="text-5xl sm:text-6xl drop-shadow">👧</span>
+            <span class="bg-pink-500 text-white font-black text-xs px-2 py-0.5 rounded-full shadow mt-1">Υπατία</span>
+          </div>
+
+          <!-- Dancer 2: Robot (Τάλως) -->
+          <div id="dancer2" class="flex flex-col items-center z-10 select-none transition-transform duration-300">
+            <span class="text-5xl sm:text-6xl drop-shadow">🤖</span>
+            <span class="bg-amber-500 text-amber-950 font-black text-xs px-2 py-0.5 rounded-full shadow mt-1">Τάλως</span>
+          </div>
+
+          <!-- Dancer 3: Boy (Ήρωνας) -->
+          <div id="dancer3" class="flex flex-col items-center z-10 select-none transition-transform duration-300">
+            <span class="text-5xl sm:text-6xl drop-shadow">👦</span>
+            <span class="bg-cyan-500 text-cyan-950 font-black text-xs px-2 py-0.5 rounded-full shadow mt-1">Ήρωνας</span>
+          </div>
+
+          <!-- Stop Button overlay (Top Right) -->
+          <button onclick="stopPartyDance()" title="Κόκκινο Εξάγωνο STOP" class="absolute top-2 right-2 bg-rose-600 hover:bg-rose-700 active:scale-90 text-white font-black text-xs sm:text-sm px-2.5 py-1 rounded-xl shadow-lg border-2 border-white flex items-center gap-1 z-30">
+            <span>🛑</span> <span>STOP</span>
+          </button>
+        </div>
+
+        <!-- Big Play Button: Start with Green Flag -->
+        <button id="flagBtn" onclick="runPartyDance()" class="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-black text-xl py-3 px-4 rounded-2xl shadow-lg border-2 border-emerald-600 flex items-center justify-center gap-3 transition transform active:scale-95">
+          <span class="text-3xl">🚩</span>
+          <span>Πάτα την Πράσινη Σημαία!</span>
+        </button>
+
+        <!-- ScratchJr Blocks Palette Preview -->
+        <div class="w-full bg-white p-3 rounded-2xl border-2 border-indigo-200 flex flex-col items-center text-center shadow-sm">
+          <span class="text-xs sm:text-sm font-bold text-indigo-900 uppercase tracking-wide">Το Πρόγραμμα Χορού:</span>
+          <div id="codeVisualBlocks" class="flex flex-wrap items-center justify-center gap-1.5 pt-2"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Simplified Question Area -->
+      <div class="lg:col-span-7 bg-white p-5 sm:p-7 rounded-3xl border-4 border-indigo-200 shadow-sm flex flex-col gap-5 min-h-[460px] justify-between">
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <span id="actCategory" class="inline-block bg-indigo-100 text-indigo-950 font-black px-3.5 py-1 rounded-xl text-sm sm:text-base mb-2">
+              Κατηγορία
+            </span>
+            <h3 id="questionPrompt" class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 leading-snug">
+              Ερώτηση...
+            </h3>
+            <p id="questionSub" class="text-lg sm:text-2xl text-indigo-700 font-bold mt-1">
+              Οδηγία...
+            </p>
+          </div>
+
+          <!-- Answers Container -->
+          <div id="questionInteractiveArea" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- Feedback & Auto Next -->
+        <div id="feedbackContainer" class="p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]">
+          <div id="feedbackText" class="text-lg sm:text-2xl font-black text-gray-700 flex items-center gap-2">
+            <span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>
+          </div>
+          <div id="autoNextTimer" class="hidden flex items-center gap-2 text-emerald-700 font-black text-lg">
+            <span>Μπράβο! Επόμενο...</span>
+            <div class="w-6 h-6 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-between text-xs sm:text-sm text-gray-500 border-t-2 border-gray-200 pt-3">
+      <span>Πληροφορική Β΄ Δημοτικού • Μάθημα 7ο (σελ. 30-34)</span>
+      <span class="font-black text-indigo-900">Πάρτι Χορού 🪩 • Πράσινη Σημαία 🚩 • Επανάλαβε για Πάντα 🔁</span>
+    </footer>
+
+  </div>
+
+  <!-- Audio Synthesizer -->
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundStatus').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundToggle').classList.toggle('bg-gray-200', !soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'music') {
+        // Melodic disco pop chord
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now); // A4
+        osc.frequency.setValueAtTime(554.37, now + 0.1); // C#5
+        osc.frequency.setValueAtTime(659.25, now + 0.2); // E5
+        osc.frequency.setValueAtTime(880, now + 0.3); // A5
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      } else if (type === 'spin') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.2);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'bell') {
+        // School bell event sound
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.setValueAtTime(1000, now + 0.15);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(170, now + 0.15);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+  </script>
+
+  <!-- Lesson 7 Data: 8 Activities x 3 Substeps = 24 Mini-Tasks -->
+  <script>
+    /*
+      Lesson 7: "Πάρτι χορού" (σελ. 30-34)
+      - ScratchJr: Scene "Άδειο Δωμάτιο" with 2-3 characters dancing (σελ. 30).
+      - Dance motion patterns with blue blocks: Step Right, Left, Turn Right/Left [ΣΤΡΙΨΕ ΔΕΞΙΑ / ΑΡΙΣΤΕΡΑ] (σελ. 31-32).
+      - Starting everyone together with the yellow [ΞΕΚΙΝΑ ΜΕ ΤΗΝ ΠΡΑΣΙΝΗ ΣΗΜΑΙΑ] (σελ. 32).
+      - Concept of "Γεγονός" (Event) like the school bell (σελ. 33).
+      - Dancing forever with red block [ΕΠΑΝΑΛΑΒΕ ΓΙΑ ΠΑΝΤΑ] (σελ. 33).
+      - Red STOP hexagon button (σελ. 33).
+      - Adding titles with the ABC button & full-screen view (σελ. 33).
+      - Reviewing all ScratchJr blocks learned so far (σελ. 34).
+    */
+    const activities = [
+      // 1. Το Σκηνικό & οι Χορευτές (σελ. 30)
+      {
+        title: "Η Πίστα του Πάρτι!",
+        category: "Σκηνικό & Ήρωες",
+        substeps: [
+          {
+            prompt: "Ποιο σκηνικό διαλέγουμε στο ScratchJr για το πάρτι γενεθλίων;",
+            sub: "Όπως μας λέει το βιβλίο στη σελίδα 30:",
+            type: "choice",
+            stageSetup: { danceType: "idle", badge: "🛋️ Άδειο Δωμάτιο" },
+            blockPreview: [{ type: "single", cmd: "🖼️", label: "Άδειο Δωμάτιο" }],
+            options: [
+              { text: "Το σκηνικό «Άδειο Δωμάτιο»! 🛋️", correct: true },
+              { text: "Τον βυθό της θάλασσας με καρχαρίες 🦈", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσους χαρακτήρες φέρνουμε στην πίστα για να χορέψουν μαζί;",
+            sub: "Δες τους ήρωες στη σκηνή:",
+            type: "choice",
+            stageSetup: { danceType: "idle", badge: "2 ή 3 Χορευτές" },
+            blockPreview: [{ type: "single", cmd: "👥", label: "2-3 Παιδιά" }],
+            options: [
+              { text: "2 ή 3 χαρακτήρες από τη βιβλιοθήκη! 👧🤖👦", correct: true },
+              { text: "100 ελέφαντες 🐘", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Κάθε χαρακτήρας μπορεί να έχει το δικό του μοναδικό πρόγραμμα χορού.",
+            sub: "Ώστε να χορεύουν με διαφορετικό τρόπο:",
+            type: "tf",
+            stageSetup: { danceType: "idle", badge: "Διαφορετικός Χορός" },
+            blockPreview: [{ type: "single", cmd: "💃🕺", label: "Ξεχωριστά Βήματα" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 2. Νέες Εντολές: Στρίψε Δεξιά & Αριστερά (σελ. 31)
+      {
+        title: "Στροφές και Φιγούρες!",
+        category: "Νέες Μπλε Εντολές",
+        substeps: [
+          {
+            prompt: "Ποια νέα μπλε εντολή περιστρέφει τον χαρακτήρα προς τα δεξιά;",
+            sub: "Δες το καμπυλωτό βελάκι:",
+            type: "choice",
+            stageSetup: { danceType: "spin", badge: "🔄 Στροφή Δεξιά" },
+            blockPreview: [{ type: "single", cmd: "↷ 2", label: "Στρίψε Δεξιά" }],
+            options: [
+              { text: "Η εντολή ΣΤΡΙΨΕ ΔΕΞΙΑ! ↷", correct: true },
+              { text: "Η εντολή ΚΑΤΣΕ ΚΑΤΩ 🪑", correct: false }
+            ]
+          },
+          {
+            prompt: "Και ποια εντολή τον στρίβει προς τα αριστερά;",
+            sub: "Διάλεξε την αντίθετη στροφή:",
+            type: "choice",
+            stageSetup: { danceType: "spin", badge: "↺ Στροφή Αριστερά" },
+            blockPreview: [{ type: "single", cmd: "↶ 2", label: "Στρίψε Αριστερά" }],
+            options: [
+              { text: "Η εντολή ΣΤΡΙΨΕ ΑΡΙΣΤΕΡΑ! ↶", correct: true },
+              { text: "Η εντολή ΠΗΓΑΙΝΕ ΓΙΑ ΥΠΝΟ 🌙", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Συνδυάζοντας βήματα και στροφές, φτιάχνουμε τέλειες χορευτικές φιγούρες!",
+            sub: "Δοκίμασε να πατήσεις το πράσινο κουμπί για να δεις:",
+            type: "tf",
+            stageSetup: { danceType: "twist", badge: "Χορευτικό Μοτίβο" },
+            blockPreview: [{ type: "single", cmd: "↷ 2", label: "Δεξιά" }, { type: "single", cmd: "↶ 2", label: "Αριστερά" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 3. Η Κίτρινη Πράσινη Σημαία (σελ. 32)
+      {
+        title: "Όλοι Μαζί στον Χορό!",
+        category: "Η Πράσινη Σημαία 🚩",
+        substeps: [
+          {
+            prompt: "Πώς θα κάνουμε όλους τους χορευτές να ξεκινήσουν ΤΑΥΤΟΧΡΟΝΑ;",
+            sub: "Ποια κίτρινη εντολή βάζουμε πρώτη σε όλους;",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "🚩 Ταυτόχρονη Έναρξη" },
+            blockPreview: [{ type: "start", label: "Ξεκίνα με Πράσινη Σημαία" }],
+            options: [
+              { text: "Την εντολή ΞΕΚΙΝΑ ΜΕ ΤΗΝ ΠΡΑΣΙΝΗ ΣΗΜΑΙΑ! 🚩", correct: true },
+              { text: "Την εντολή ΚΛΕΙΣΕ ΤΟΝ ΥΠΟΛΟΓΙΣΤΗ 🔌", correct: false }
+            ]
+          },
+          {
+            prompt: "Πού μπαίνει η εντολή με την πράσινη σημαία στο πρόγραμμα;",
+            sub: "Σκέψου αν μπαίνει στην αρχή ή στο τέλος:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "Πρώτη Εντολή!" },
+            blockPreview: [{ type: "start", label: "Πρώτη Εντολή" }],
+            options: [
+              { text: "Ως ΠΡΩΤΗ εντολή στην αρχή! 🥇", correct: true },
+              { text: "Στο τέλος κρυμμένη", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μόλις πατάμε την πράσινη σημαία, όλοι οι χαρακτήρες αρχίζουν να χορεύουν μαζί!",
+            sub: "Όπως στο πραγματικό πάρτι:",
+            type: "tf",
+            stageSetup: { danceType: "twist", badge: "Πάρτι σε εξέλιξη!" },
+            blockPreview: [{ type: "start", label: "Έναρξη!" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 4. Τι είναι το Γεγονός; (σελ. 33)
+      {
+        title: "Τι είναι το «Γεγονός»;",
+        category: "Συμβάντα & Συναγερμοί",
+        substeps: [
+          {
+            prompt: "Στον προγραμματισμό, με τι μοιάζει ένα «γεγονός» στο σχολείο μας;",
+            sub: "Όπως μας εξηγεί το βιβλίο στη σελίδα 33:",
+            type: "choice",
+            stageSetup: { danceType: "bell", badge: "🔔 Κουδούνι Σχολείου" },
+            blockPreview: [{ type: "start", label: "Γεγονός: Κουδούνι" }],
+            options: [
+              { text: "Με το κουδούνι για διάλειμμα που χτυπάει! 🔔", correct: true },
+              { text: "Με τον πίνακα που είναι ακούνητος", correct: false }
+            ]
+          },
+          {
+            prompt: "Όταν χτυπάει το κουδούνι, τι κάνουν όλα τα παιδιά στην τάξη;",
+            sub: "Σκέψου την αντίδραση όλων:",
+            type: "choice",
+            stageSetup: { danceType: "bell", badge: "🔔 Ώρα για Διάλειμμα!" },
+            blockPreview: [{ type: "start", label: "Αντίδραση" }],
+            options: [
+              { text: "Ετοιμάζονται όλοι μαζί να βγουν έξω! 🏃‍♂️🏃‍♀️", correct: true },
+              { text: "Πέφτουν όλοι για ύπνο στα θρανία 💤", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το πάτημα της πράσινης σημαίας είναι ένα γεγονός που δίνει το σύνθημα.",
+            sub: "Ακριβώς επειδή δίνει την εντολή εκκίνησης:",
+            type: "tf",
+            stageSetup: { danceType: "twist", badge: "Σύνθημα Έναρξης" },
+            blockPreview: [{ type: "start", label: "Σύνθημα 🚩" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 5. Χορός για Πάντα! (σελ. 33)
+      {
+        title: "Χορός Χωρίς Σταματημό!",
+        category: "Η Κόκκινη Επανάληψη",
+        substeps: [
+          {
+            prompt: "Θέλουμε οι ήρωες να χορεύουν ασταμάτητα! Ποιο κόκκινο τουβλάκι βάζουμε στο τέλος;",
+            sub: "Δες τα κυκλικά βελάκια:",
+            type: "choice",
+            stageSetup: { danceType: "forever", badge: "🔁 Ασταμάτητος Χορός" },
+            blockPreview: [{ type: "forever", label: "Επανάλαβε για Πάντα" }],
+            options: [
+              { text: "Το κόκκινο τουβλάκι ΕΠΑΝΑΛΑΒΕ ΓΙΑ ΠΑΝΤΑ! 🔁", correct: true },
+              { text: "Το τουβλάκι που σβήνει τα φώτα 🌑", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποια είναι η διαφορά του από την απλή πορτοκαλί επανάληψη;",
+            sub: "Σκέψου αν σταματάει ποτέ μόνο του:",
+            type: "choice",
+            stageSetup: { danceType: "forever", badge: "🔁 Δεν Σταματάει!" },
+            blockPreview: [{ type: "forever", label: "Χωρίς Αριθμό" }],
+            options: [
+              { text: "Δεν έχει αριθμό και δεν σταματάει ποτέ μόνο του! ♾️", correct: true },
+              { text: "Σταματάει στο 1 δευτερόλεπτο", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Για να σταματήσουν όλοι όταν χορεύουν για πάντα, πατάμε το κόκκινο STOP 🛑.",
+            sub: "Όπως μάθαμε στο προηγούμενο μάθημα:",
+            type: "tf",
+            stageSetup: { danceType: "forever", badge: "Πάτα STOP 🛑" },
+            blockPreview: [{ type: "single", cmd: "🛑", label: "Κόκκινο STOP" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 6. Τίτλος στην Ιστορία (σελ. 33)
+      {
+        title: "Γράψε Τίτλο στο Έργο!",
+        category: "Το Κουμπί ABC",
+        substeps: [
+          {
+            prompt: "Θέλουμε να γράψουμε «ΤΟ ΠΑΡΤΙ ΜΟΥ» πάνω στη σκηνή. Ποιο κουμπί πατάμε;",
+            sub: "Κοίταξε το στρογγυλό κουμπί με τα γράμματα:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "🔤 Κουμπί ABC" },
+            blockPreview: [{ type: "single", cmd: "ABC", label: "Γράψε Τίτλο" }],
+            options: [
+              { text: "Το γαλάζιο κουμπί με τα γράμματα ABC! 🔤", correct: true },
+              { text: "Το κουμπί με τη γόμα", correct: false }
+            ]
+          },
+          {
+            prompt: "Αν θέλουμε η σκηνή να μεγαλώσει σε ολόκληρη την οθόνη, ποιο κουμπί πατάμε;",
+            sub: "Για να φαίνεται σαν κανονική ταινία:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "🖥️ Πλήρης Οθόνη" },
+            blockPreview: [{ type: "single", cmd: "🔲", label: "Μεγάλη Οθόνη" }],
+            options: [
+              { text: "Το γκρι ορθογώνιο κουμπί πλήρους οθόνης! 🖥️", correct: true },
+              { text: "Κλείνουμε τα μάτια μας", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Βάζοντας τίτλο, όλοι ξέρουν πώς λέγεται η ιστορία ή το πάρτι μας.",
+            sub: "Κάνει την παρουσίαση πιο όμορφη:",
+            type: "tf",
+            stageSetup: { danceType: "twist", badge: "«Το Πάρτι Μου!»" },
+            blockPreview: [{ type: "single", cmd: "ABC", label: "Τίτλος" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 7. Παιχνίδι Μνήμης με τα Χρώματα των Μπλοκ (σελ. 34)
+      {
+        title: "Τα Χρώματα των Εντολών!",
+        category: "Αναγνώριση Εντολών",
+        substeps: [
+          {
+            prompt: "Τι χρώμα έχουν οι εντολές έναρξης (όπως η Πράσινη Σημαία);",
+            sub: "Δες το χρώμα στο τουβλάκι της σημαίας:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "🟡 Κίτρινο Χρώμα" },
+            blockPreview: [{ type: "start", label: "Κίτρινο Μπλοκ" }],
+            options: [
+              { text: "Είναι ΚΙΤΡΙΝΕΣ! 🟡", correct: true },
+              { text: "Είναι μαύρες σαν κάρβουνο ⚫", correct: false }
+            ]
+          },
+          {
+            prompt: "Τι χρώμα έχουν οι εντολές κίνησης (όπως βήματα και στροφές);",
+            sub: "Δες τα τουβλάκια με τα βέλη:",
+            type: "choice",
+            stageSetup: { danceType: "spin", badge: "🔵 Μπλε Χρώμα" },
+            blockPreview: [{ type: "single", cmd: "➡️ ↷", label: "Μπλε Κινήσεις" }],
+            options: [
+              { text: "Είναι ΜΠΛΕ! 🔵", correct: true },
+              { text: "Είναι πράσινες σαν μαρούλι 🥬", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το τουβλάκι «Επανάλαβε για Πάντα» έχει έντονο ΚΟΚΚΙΝΟ χρώμα.",
+            sub: "Όπως μας δείχνει ο πίνακας της σελίδας 34:",
+            type: "tf",
+            stageSetup: { danceType: "forever", badge: "🔴 Κόκκινο Χρώμα" },
+            blockPreview: [{ type: "forever", label: "Κόκκινο Μπλοκ" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 8. Μεγάλη Επιβράβευση: Ο DJ του Πάρτι! (σελ. 34)
+      {
+        title: "Ο DJ του Σχολικού Πάρτι!",
+        category: "Συγχαρητήρια!",
+        substeps: [
+          {
+            prompt: "Ποιο είναι το μυστικό για να χορεύουν όλοι μαζί συντονισμένα;",
+            sub: "Διάλεξε τον χρυσό κανόνα που έμαθες:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "👑 Σούπερ DJ" },
+            blockPreview: [{ type: "start", label: "Σημαία" }, { type: "forever", label: "Για Πάντα" }],
+            options: [
+              { text: "Πράσινη σημαία στην αρχή και επανάληψη στις φιγούρες! 🌟", correct: true },
+              { text: "Να πατάμε όλα τα κουμπιά στην τύχη", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσες εντολές έμαθες συνολικά μέχρι και το Μάθημα 7;",
+            sub: "Όπως βλέπουμε στον πίνακα της σελίδας 34:",
+            type: "choice",
+            stageSetup: { danceType: "jump", badge: "🏆 7 Σούπερ Εντολές!" },
+            blockPreview: [{ type: "single", cmd: "⭐", label: "Πήδα, Στρίψε, Ταχύτητα, Σημαία!" }],
+            options: [
+              { text: "Πολλές σπουδαίες εντολές: Πήδα, Στρίψε, Σημαία, Επανάληψη! 🚀", correct: true },
+              { text: "Καμία εντολή", correct: false }
+            ]
+          },
+          {
+            prompt: "Είσαι έτοιμος να φτιάξεις το δικό σου πάρτι χορού στον υπολογιστή της τάξης;",
+            sub: "Διάλεξε πόσο τέλεια τα κατάφερες σήμερα:",
+            type: "choice",
+            stageSetup: { danceType: "twist", badge: "🎉 24/24 Αστέρια!" },
+            blockPreview: [{ type: "repeat", count: 5, inner: ["🪩 Πάρτι!", "👑 DJ Αστέρι!"] }],
+            options: [
+              { text: "🌟 Ναι! Είμαι ο καλύτερος προγραμματιστής πάρτι!", correct: true },
+              { text: "👍 Ήταν σούπερ διασκεδαστικό και εύκολο!", correct: true },
+              { text: "🎉 Κέρδισα όλα τα αστέρια με την πρώτη!", correct: true }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    let starsCount = 0;
+    const answeredSteps = new Set();
+    let isTransitioning = false;
+    let isPartyDancing = false;
+    let danceInterval = null;
+
+    window.onload = function() {
+      renderNav();
+      loadCurrentQuestion();
+    };
+
+    function renderNav() {
+      const navContainer = document.getElementById('navBubbles');
+      navContainer.innerHTML = '';
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `act-bubble-${idx}`;
+        const isActive = idx === currentActIndex;
+        btn.className = `py-2 px-1 rounded-2xl font-black text-sm sm:text-base border-3 transition flex flex-col items-center justify-center gap-0.5 ${
+          isActive 
+            ? 'bg-indigo-600 text-white border-indigo-800 shadow-md scale-105' 
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-indigo-50'
+        }`;
+        btn.innerHTML = `
+          <span>Δρ.${idx + 1}</span>
+          <span class="text-xs ${isActive ? 'text-white' : 'text-indigo-900'}">${getActProgressIcon(idx)}</span>
+        `;
+        btn.onclick = () => {
+          if (isTransitioning) return;
+          stopPartyDance();
+          playSound('click');
+          currentActIndex = idx;
+          currentSubIndex = 0;
+          renderNav();
+          loadCurrentQuestion();
+        };
+        navContainer.appendChild(btn);
+      });
+
+      const dotContainer = document.getElementById('substepDots');
+      dotContainer.innerHTML = '';
+      for (let s = 0; s < 3; s++) {
+        const dot = document.createElement('div');
+        const isCurrent = s === currentSubIndex;
+        const isDone = answeredSteps.has(`${currentActIndex}-${s}`);
+        dot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-base sm:text-lg border-2 transition ${
+          isCurrent 
+            ? 'bg-indigo-600 text-white border-indigo-800 shadow scale-110' 
+            : isDone 
+              ? 'bg-emerald-400 text-white border-emerald-600' 
+              : 'bg-gray-100 text-gray-400 border-gray-300'
+        }`;
+        dot.textContent = isDone ? '✓' : (s + 1);
+        dotContainer.appendChild(dot);
+      }
+
+      document.getElementById('actIndicator').textContent = `Δραστηριότητα ${currentActIndex + 1} από 8: ${activities[currentActIndex].title}`;
+      document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+    }
+
+    function getActProgressIcon(actIdx) {
+      const c1 = answeredSteps.has(`${actIdx}-0`);
+      const c2 = answeredSteps.has(`${actIdx}-1`);
+      const c3 = answeredSteps.has(`${actIdx}-2`);
+      if (c1 && c2 && c3) return '⭐⭐⭐';
+      if ((c1 && c2) || (c2 && c3) || (c1 && c3)) return '⭐⭐';
+      if (c1 || c2 || c3) return '⭐';
+      return '⚪';
+    }
+
+    function loadCurrentQuestion() {
+      isTransitioning = false;
+      const act = activities[currentActIndex];
+      const q = act.substeps[currentSubIndex];
+
+      document.getElementById('actCategory').textContent = act.category;
+      document.getElementById('questionPrompt').textContent = q.prompt;
+      document.getElementById('questionSub').textContent = q.sub;
+
+      // Update stage badge
+      document.getElementById('eventBadge').textContent = q.stageSetup.badge || '🚩 Πράσινη Σημαία';
+
+      // Setup Dancers
+      resetDancers();
+
+      // Render Code Blocks
+      renderCodeVisual(q.blockPreview);
+
+      // Reset Feedback Box
+      const fbBox = document.getElementById('feedbackContainer');
+      fbBox.className = 'p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]';
+      document.getElementById('feedbackText').innerHTML = `<span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+
+      // Render Answers
+      const container = document.getElementById('questionInteractiveArea');
+      container.innerHTML = '';
+
+      if (q.type === 'choice') {
+        const shuffled = shuffle(q.options);
+        const letters = ['Α', 'Β', 'Γ'];
+        shuffled.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-4 sm:p-5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 active:scale-[0.99] border-3 border-indigo-200 hover:border-indigo-400 font-black text-xl sm:text-2xl text-gray-800 transition flex items-center gap-4 shadow-sm';
+          btn.innerHTML = `
+            <span class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow">
+              ${letters[optIdx] || '•'}
+            </span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.correct);
+          container.appendChild(btn);
+        });
+      } else if (q.type === 'tf') {
+        const tfOptions = shuffle([
+          { text: "ΣΩΣΤΟ 👍", val: true, bg: "bg-emerald-100 hover:bg-emerald-200 border-emerald-400 text-emerald-950" },
+          { text: "ΛΑΘΟΣ 👎", val: false, bg: "bg-rose-100 hover:bg-rose-200 border-rose-400 text-rose-950" }
+        ]);
+
+        const tfGrid = document.createElement('div');
+        tfGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+        tfOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = `p-6 sm:p-8 rounded-3xl border-4 font-black text-3xl sm:text-4xl text-center shadow transition transform active:scale-95 ${opt.bg}`;
+          btn.textContent = opt.text;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.val === q.correctAnswer);
+          tfGrid.appendChild(btn);
+        });
+        container.appendChild(tfGrid);
+      }
+    }
+
+    function resetDancers() {
+      stopPartyDance();
+      const d1 = document.getElementById('dancer1');
+      const d2 = document.getElementById('dancer2');
+      const d3 = document.getElementById('dancer3');
+
+      [d1, d2, d3].forEach(d => {
+        d.className = 'flex flex-col items-center z-10 select-none transition-transform duration-300';
+      });
+    }
+
+    function renderCodeVisual(blocks) {
+      const box = document.getElementById('codeVisualBlocks');
+      box.innerHTML = '';
+      if (!blocks || !blocks.length) return;
+
+      blocks.forEach(b => {
+        if (b.type === 'start') {
+          const startWrap = document.createElement('div');
+          startWrap.className = 'scratch-start px-3 py-1.5 text-amber-950 font-black text-base sm:text-lg shadow-md flex items-center gap-1.5';
+          startWrap.innerHTML = `<span>🚩</span> <span>${b.label}</span>`;
+          box.appendChild(startWrap);
+        } else if (b.type === 'forever') {
+          const fWrap = document.createElement('div');
+          fWrap.className = 'scratch-forever px-3 py-1.5 text-white font-black text-base sm:text-lg shadow-md flex items-center gap-1.5';
+          fWrap.innerHTML = `<span>🔁</span> <span>${b.label}</span>`;
+          box.appendChild(fWrap);
+        } else if (b.type === 'repeat') {
+          const wrap = document.createElement('div');
+          wrap.className = 'bg-orange-500 border-2 border-orange-700 rounded-2xl p-2 px-3 text-white flex items-center gap-2 shadow-md';
+          let innerHtml = '';
+          b.inner.forEach(cmd => {
+            innerHtml += `<span class="scratch-motion px-2 py-0.5 text-white font-black text-sm sm:text-base">${cmd}</span>`;
+          });
+          wrap.innerHTML = `
+            <div class="flex items-center gap-1 font-black text-sm sm:text-base">
+              <span>🔁</span> <span>Επανάλαβε</span>
+            </div>
+            <div class="flex items-center gap-1 bg-white/25 p-1 rounded-xl">${innerHtml}</div>
+            <div class="w-8 h-8 rounded-full bg-white text-orange-950 font-black text-lg flex items-center justify-center shadow">${b.count}</div>
+          `;
+          box.appendChild(wrap);
+        } else if (b.type === 'single') {
+          const singleWrap = document.createElement('div');
+          singleWrap.className = 'scratch-motion px-3 py-1.5 text-white font-black text-base sm:text-lg shadow-md flex items-center gap-1.5';
+          singleWrap.innerHTML = `<span>${b.cmd}</span> <span class="text-xs bg-white/20 px-1.5 py-0.5 rounded-lg">${b.label}</span>`;
+          box.appendChild(singleWrap);
+        }
+      });
+    }
+
+    // Dance Animation Demo
+    function runPartyDance() {
+      if (isPartyDancing) return;
+      isPartyDancing = true;
+
+      const q = activities[currentActIndex].substeps[currentSubIndex];
+      const dType = q.stageSetup.danceType;
+      const d1 = document.getElementById('dancer1');
+      const d2 = document.getElementById('dancer2');
+      const d3 = document.getElementById('dancer3');
+
+      playSound('music');
+
+      if (dType === 'spin') {
+        playSound('spin');
+        d1.classList.add('dancer-spin');
+        d2.classList.add('dancer-twist');
+        d3.classList.add('dancer-spin');
+      } else if (dType === 'bell') {
+        playSound('bell');
+        d1.classList.add('dancer-jump');
+        d2.classList.add('dancer-jump');
+        d3.classList.add('dancer-jump');
+      } else if (dType === 'forever') {
+        d1.classList.add('dancer-twist');
+        d2.classList.add('dancer-spin');
+        d3.classList.add('dancer-jump');
+        // Dances continuous until user stops or 4 sec
+      } else {
+        d1.classList.add('dancer-twist');
+        d2.classList.add('dancer-jump');
+        d3.classList.add('dancer-twist');
+      }
+
+      setTimeout(() => {
+        if (dType !== 'forever') {
+          stopPartyDance();
+        }
+      }, 2500);
+    }
+
+    function stopPartyDance() {
+      isPartyDancing = false;
+      const d1 = document.getElementById('dancer1');
+      const d2 = document.getElementById('dancer2');
+      const d3 = document.getElementById('dancer3');
+
+      [d1, d2, d3].forEach(d => {
+        d.classList.remove('dancer-twist', 'dancer-jump', 'dancer-spin');
+      });
+    }
+
+    function handleChoiceAnswer(btnElement, isCorrect) {
+      if (isTransitioning) return;
+
+      const fbBox = document.getElementById('feedbackContainer');
+      const fbText = document.getElementById('feedbackText');
+      const timerIndicator = document.getElementById('autoNextTimer');
+
+      if (isCorrect) {
+        isTransitioning = true;
+        playSound('correct');
+
+        btnElement.classList.remove('bg-indigo-50', 'hover:bg-indigo-100', 'border-indigo-200');
+        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'scale-[1.02]', 'shadow-lg');
+
+        const key = `${currentActIndex}-${currentSubIndex}`;
+        if (!answeredSteps.has(key)) {
+          answeredSteps.add(key);
+          starsCount++;
+          document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+        }
+
+        fbBox.className = 'p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-4xl">🎉</span> <span class="text-emerald-800 text-xl sm:text-2xl font-black">Μπράβο! Όλοι στην πίστα! 🪩</span>`;
+        timerIndicator.classList.remove('hidden');
+
+        // Automatic dance trigger to reward children!
+        runPartyDance();
+
+        setTimeout(() => {
+          advanceToNext();
+        }, 1250);
+
+      } else {
+        playSound('wrong');
+        btnElement.classList.add('bg-rose-100', 'border-rose-400');
+        fbBox.className = 'p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-3xl">🤔</span> <span class="text-rose-800 font-black">Δοκίμασε ξανά! Δες την πίστα στα αριστερά!</span>`;
+      }
+    }
+
+    function advanceToNext() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+      } else {
+        if (currentActIndex < activities.length - 1) {
+          currentActIndex++;
+          currentSubIndex = 0;
+        } else {
+          showFinalCelebration();
+          return;
+        }
+      }
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function showFinalCelebration() {
+      renderNav();
+      const area = document.getElementById('questionInteractiveArea');
+      document.getElementById('questionPrompt').textContent = "🏆 Είσαι ο Βασιλιάς του Πάρτι Χορού!";
+      document.getElementById('questionSub').textContent = "Έμαθες να προγραμματίζεις όλους τους χορευτές με σημαία, στροφές και επανάληψη!";
+
+      area.innerHTML = `
+        <div class="bg-gradient-to-r from-purple-200 via-pink-200 to-indigo-200 p-6 rounded-3xl text-center border-4 border-indigo-400 flex flex-col items-center gap-4">
+          <span class="text-6xl animate-bounce">👑 🪩 👧 🤖 👦 ⭐</span>
+          <h4 class="text-2xl sm:text-3xl font-black text-indigo-950">
+            Κέρδισες και τα 24 Αστέρια!
+          </h4>
+          <p class="text-lg sm:text-xl font-bold text-gray-800 max-w-lg">
+            Μπορείς τώρα να αποθηκεύσεις το παιχνίδι στον υπολογιστή σου για να παίζεις όποτε θες χωρίς internet!
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="downloadHTML()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-emerald-800 transition transform active:scale-95">
+              💾 Αποθήκευση Αρχείου
+            </button>
+            <button onclick="restartAll()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-indigo-800 transition transform active:scale-95">
+              🔄 Παίξε Ξανά
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('feedbackText').innerHTML = `<span>🌟</span> <span class="text-indigo-900 font-black">Τέλεια 24/24! Σούπερ DJ!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+    }
+
+    function restartAll() {
+      currentActIndex = 0;
+      currentSubIndex = 0;
+      starsCount = 0;
+      answeredSteps.clear();
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function downloadHTML() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pliroforiki_B_Dimotikou_Mathima7_Parti_Xorou.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
