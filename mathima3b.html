@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 3: Η εντολή επανάληψης - Πληροφορική Β΄ Δημοτικού</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      font-size: 1.25rem;
+    }
+    .bounce-hover:hover {
+      transform: translateY(-4px) scale(1.02);
+      transition: all 0.2s ease-in-out;
+    }
+    .jiggle {
+      animation: jiggle 0.5s ease-in-out;
+    }
+    @keyframes jiggle {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.08) rotate(-4deg); }
+      75% { transform: scale(1.08) rotate(4deg); }
+    }
+    .pop-in {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.88); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    /* Στυλ τουβλάκια ScratchJr */
+    .block-repeat {
+      background: linear-gradient(135deg, #fb923c, #f97316);
+      border: 3px solid #c2410c;
+      box-shadow: 0 6px 0 #9a3412, 0 8px 15px rgba(0,0,0,0.15);
+    }
+    .block-motion {
+      background: linear-gradient(135deg, #38bdf8, #0284c7);
+      border: 3px solid #0369a1;
+      box-shadow: 0 5px 0 #075985, 0 6px 12px rgba(0,0,0,0.15);
+    }
+    .grid-pond {
+      background: radial-gradient(circle at 50% 50%, #bae6fd, #38bdf8);
+      border: 5px solid #0284c7;
+      box-shadow: inset 0 0 20px rgba(2, 132, 199, 0.4), 0 10px 25px rgba(2, 132, 199, 0.25);
+    }
+    .cell-pond {
+      aspect-ratio: 1 / 1;
+      border: 2px dashed rgba(2, 132, 199, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .cell-pond.has-pad {
+      background: rgba(167, 243, 208, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-100 via-sky-100 to-amber-100 min-h-screen text-slate-800 flex flex-col justify-between">
+
+  <!-- ΠΑΝΩ ΜΠΑΡΑ / HEADER -->
+  <header class="bg-white/95 backdrop-blur shadow-md border-b-4 border-emerald-400 sticky top-0 z-40 px-4 sm:px-6 py-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Τίτλος & Ήρωες -->
+      <div class="flex items-center gap-3">
+        <div class="text-4xl sm:text-5xl">🐸 🪷 🟧</div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-emerald-800 leading-tight">
+            Πληροφορική Β΄ Δημοτικού • Μάθημα 3
+          </h1>
+          <p class="text-base sm:text-lg lg:text-xl font-bold text-orange-600">
+            «Η εντολή επανάληψης στη λιμνούλα» με τον Φρίξο, την Υπατία & τον Ήρωνα
+          </p>
+        </div>
+      </div>
+
+      <!-- Αστέρια & Κουμπί Κατεβάσματος -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Σκορ με αστέρια -->
+        <div class="flex items-center gap-2 bg-amber-50 border-3 border-amber-400 px-4 py-2 rounded-full shadow-md">
+          <span class="text-3xl animate-pulse">⭐</span>
+          <span id="star-count" class="font-black text-amber-700 text-2xl sm:text-3xl">0</span>
+          <span class="text-base sm:text-lg font-extrabold text-amber-600">/ 24</span>
+        </div>
+
+        <!-- Download Button -->
+        <button onclick="downloadSelf()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base sm:text-lg px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-lg transition-all active:scale-95" title="Κατέβασε αυτό το αρχείο στον υπολογιστή σου">
+          <span class="text-2xl">💾</span>
+          <span class="hidden sm:inline">Κατέβασμα HTML</span>
+          <span class="sm:hidden">Αποθήκευση</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ΚΥΡΙΟ ΠΕΡΙΕΧΟΜΕΝΟ -->
+  <main class="max-w-7xl mx-auto p-4 sm:p-6 w-full flex-grow">
+    
+    <!-- ΜΠΑΡΑ ΕΠΙΛΟΓΗΣ 8 ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ -->
+    <div class="mb-5">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-base sm:text-xl font-extrabold uppercase tracking-wide text-emerald-950">Διάλεξε Δραστηριότητα (1-8):</span>
+        <span id="activity-badge" class="text-sm sm:text-lg font-black bg-emerald-600 text-white px-4 py-1.5 rounded-full shadow-md">
+          Δραστηριότητα 1 από 8
+        </span>
+      </div>
+
+      <!-- Πλέγμα 8 μεγάλων κουμπιών -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2.5" id="activity-tabs">
+        <!-- Δυναμικά tabs -->
+      </div>
+    </div>
+
+    <!-- ΔΙΣΤΗΛΗ ΔΙΑΤΑΞΗ (SPLIT SCREEN): ΜΟΝΙΜΗ ΛΙΜΝΟΥΛΑ ΑΡΙΣΤΕΡΑ + ΕΡΩΤΗΣΕΙΣ ΔΕΞΙΑ -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- ΑΡΙΣΤΕΡΗ ΣΤΗΛΗ: ΜΟΝΙΜΗ ΔΙΑΔΡΑΣΤΙΚΗ ΛΙΜΝΟΥΛΑ 5x5 -->
+      <div class="lg:col-span-5 bg-white rounded-3xl shadow-xl border-4 border-sky-300 p-5 flex flex-col items-center justify-between gap-4 sticky lg:top-24 z-20">
+        
+        <div class="w-full flex items-center justify-between border-b-2 border-sky-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-3xl">🪷</span>
+            <span class="text-xl sm:text-2xl font-black text-sky-900">Η Λιμνούλα μας (5x5)</span>
+          </div>
+          <span id="pond-step-indicator" class="text-xs sm:text-sm font-black bg-sky-100 text-sky-800 px-3 py-1 rounded-full">
+            Έτοιμο
+          </span>
+        </div>
+
+        <!-- Πλέγμα Λιμνούλας 5x5 -->
+        <div class="grid-pond rounded-3xl p-2.5 shadow-2xl grid grid-cols-5 gap-1.5 sm:gap-2 w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96" id="permanent-pond-grid">
+          <!-- 25 κελιά λιμνούλας πάντα παρόντα -->
+        </div>
+
+        <!-- Κουμπιά & Επεξήγηση Λιμνούλας -->
+        <div class="w-full flex flex-col items-center gap-2.5">
+          <div class="flex items-center gap-3 w-full">
+            <button onclick="runFrogSimulation()" id="run-sim-btn" class="bounce-hover flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg sm:text-xl py-3 px-4 rounded-2xl shadow-lg border-b-4 border-emerald-700 flex items-center justify-center gap-2 active:scale-95">
+              <span>▶️</span>
+              <span>Δες το στη λιμνούλα!</span>
+            </button>
+            <button onclick="resetFrogPosition()" class="p-3 bg-sky-100 hover:bg-sky-200 text-sky-800 font-black rounded-2xl border-2 border-sky-300 shadow active:scale-95 transition" title="Επιστροφή βατράχου στην αρχή">
+              🔄
+            </button>
+          </div>
+          <p id="pond-hint-text" class="text-sm sm:text-base font-bold text-sky-900 text-center leading-snug">
+            💡 Το βατραχάκι Φρίξος ακολουθεί τις εντολές επανάληψης πάνω στα νούφαρα!
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ΔΕΞΙΑ ΣΤΗΛΗ: ΚΑΡΤΑ ΤΡΕΧΟΥΣΑΣ ΕΡΩΤΗΣΗΣ & ΕΝΤΟΛΩΝ -->
+      <div class="lg:col-span-7 bg-white rounded-3xl shadow-xl border-4 border-emerald-300 overflow-hidden relative flex flex-col justify-between min-h-[580px]">
+        
+        <!-- Τίτλος & Περιγραφή Δραστηριότητας -->
+        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 text-white p-5 sm:p-6 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-4">
+            <span id="act-icon" class="text-4xl sm:text-5xl drop-shadow">🐸</span>
+            <div>
+              <h2 id="act-title" class="text-xl sm:text-2xl lg:text-3xl font-black">1. Το Βατραχάκι στη Λιμνούλα</h2>
+              <p id="act-desc" class="text-sm sm:text-base text-emerald-100 font-semibold mt-0.5">
+                Βοηθάμε τον Φρίξο να πηδήξει στα νούφαρα με λιγότερες εντολές!
+              </p>
+            </div>
+          </div>
+
+          <!-- 3 Βηματικά Κυκλάκια (Sub-tasks 1, 2, 3) -->
+          <div class="flex items-center gap-2 bg-white/20 p-2 rounded-2xl">
+            <button onclick="setSubTask(0)" id="sub-dot-0" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-amber-400 text-slate-900 shadow">1</button>
+            <button onclick="setSubTask(1)" id="sub-dot-1" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-white/40 text-white">2</button>
+            <button onclick="setSubTask(2)" id="sub-dot-2" class="w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-white/40 text-white">3</button>
+          </div>
+        </div>
+
+        <!-- ΠΕΡΙΟΧΗ ΥΠΟ-ΔΡΑΣΤΗΡΙΟΤΗΤΑΣ (DYNAMIC CONTAINER) -->
+        <div class="p-5 sm:p-7 flex-grow flex flex-col justify-between" id="quiz-area">
+          <!-- Περιεχόμενο ερώτησης -->
+        </div>
+
+        <!-- ΜΠΑΡΑ ΠΛΟΗΓΗΣΗΣ ΥΠΟ-ΕΡΩΤΗΣΕΩΝ -->
+        <div class="bg-slate-50 border-t-2 border-slate-200 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+          <button id="prev-sub-btn" onclick="prevSubTask()" class="px-5 py-2.5 rounded-2xl font-black bg-slate-200 hover:bg-slate-300 text-slate-800 text-base sm:text-lg transition active:scale-95 flex items-center gap-2">
+            ⬅️ Προηγούμενο
+          </button>
+
+          <div id="sub-indicator" class="text-base sm:text-lg font-black text-slate-600">
+            Υπο-δραστηριότητα 1 από 3
+          </div>
+
+          <button id="next-sub-btn" onclick="nextSubTask()" class="px-5 py-2.5 rounded-2xl font-black bg-emerald-600 hover:bg-emerald-700 text-white text-base sm:text-lg shadow-md transition active:scale-95 flex items-center gap-2">
+            Επόμενο ➡️
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ΜΗΝΥΜΑ ΟΛΟΚΛΗΡΩΣΗΣ ΟΛΩΝ (MODAL) -->
+    <div id="finish-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 sm:p-10 max-w-lg w-full text-center shadow-2xl border-4 border-amber-400 pop-in">
+        <div class="text-7xl mb-4 animate-bounce">🏆 🐸 🌟</div>
+        <h3 class="text-2xl sm:text-4xl font-black text-emerald-900 mb-3">Είσαι Αστέρι του Προγραμματισμού!</h3>
+        <p class="text-slate-700 text-lg sm:text-2xl font-bold mb-8 leading-relaxed">
+          Ολοκλήρωσες και τις <span class="font-black text-orange-600">8 δραστηριότητες</span> του 3ου μαθήματος! Τώρα ξέρεις πώς να χρησιμοποιείς την εντολή επανάληψης σαν αληθινός προγραμματιστής!
+        </p>
+        <div class="flex flex-col gap-3">
+          <button onclick="downloadSelf()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl rounded-2xl shadow-lg transition">
+            💾 Κατέβασε το παιχνίδι σου
+          </button>
+          <button onclick="restartAll()" class="w-full py-4 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-extrabold text-lg rounded-2xl transition">
+            🔄 Παίξε ξανά από την αρχή
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white/80 border-t border-slate-200 py-3 text-center text-sm sm:text-base font-semibold text-slate-600">
+    <p>Διαδραστικό Υλικό Πληροφορικής Β΄ Δημοτικού • Μάθημα 3: Η εντολή επανάληψης • Κατάλληλο για διαδραστικούς πίνακες & τάμπλετ</p>
+  </footer>
+
+  <!-- SCRIPT ΕΦΑΡΜΟΓΗΣ -->
+  <script>
+    // --- ΗΧΗΤΙΚΑ ΕΦΕ ΜΕ WEB AUDIO API ---
+    let audioCtx = null;
+    function playBeep(type) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'jump') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(420, now + 0.15);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'fanfare') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0.15, now + idx * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+            o.start(now + idx * 0.1);
+            o.stop(now + idx * 0.1 + 0.3);
+          });
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(140, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {}
+    }
+
+    // --- ΔΕΔΟΜΕΝΑ 8 ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ (ΜΑΘΗΜΑ 3) ΜΕ ΣΤΟΙΧΕΙΑ ΓΙΑ ΤΗ ΜΟΝΙΜΗ ΛΙΜΝΟΥΛΑ ---
+    const activities = [
+      {
+        id: 1,
+        title: "1. Το Βατραχάκι στη Λιμνούλα",
+        icon: "🐸",
+        desc: "Βοηθάμε τον Φρίξο να πηδήξει στα νούφαρα με λιγότερες εντολές!",
+        pondContext: {
+          start: { r: 4, c: 0 },
+          lilypads: [{ r: 4, c: 1 }, { r: 3, c: 1 }, { r: 3, c: 2 }, { r: 2, c: 2 }],
+          demoMoves: ['right', 'up', 'right', 'up'],
+          hint: "Δες τα 4 νούφαρα! Το βατραχάκι κάνει: Δεξιά ➡️, Πάνω ⬆️, Δεξιά ➡️, Πάνω ⬆️."
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Κοίταξε τη λιμνούλα αριστερά! Το βατραχάκι θέλει να φτάσει στο τελευταίο νούφαρο. Ποιο μπλοκ επανάληψης κάνει τη δουλειά;",
+            blockPreview: { rep: 2, moves: ['➡️ 1', '⬆️ 1'] },
+            options: [
+              { text: "🔁 Επανάλαβε 2 φορές: [ ➡️ 1, ⬆️ 1 ]", correct: true, feedback: "Μπράβο! Κάνει 2 φορές το ζευγάρι (δεξιά, πάνω) και φτάνει ακριβώς στο νούφαρο!" },
+              { text: "🔁 Επανάλαβε 10 φορές: [ ➡️ 1 ]", correct: false, feedback: "Όχι, έτσι θα έβγαινε έξω από τη λιμνούλα στα δεξιά!" },
+              { text: "🔁 Επανάλαβε 1 φορά: [ ⬇️ 1 ]", correct: false, feedback: "Προς τα κάτω δεν υπάρχουν νούφαρα!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Πόσες εντολές κίνησης βάλαμε ΜΕΣΑ στο πορτοκαλί τουβλάκι της επανάληψης;",
+            options: [
+              { text: "✌️ 2 εντολές: [ ➡️ Δεξιά 1 ] και [ ⬆️ Πάνω 1 ]", correct: true, feedback: "Τέλεια! Μόνο 2 εντολές, που εκτελούνται 2 φορές (σύνολο 4 άλματα)!" },
+              { text: "🔟 4 εντολές", correct: false, feedback: "4 είναι τα άλματα, αλλά οι εντολές μέσα στην επανάληψη είναι μόνο 2!" },
+              { text: "0 εντολές", correct: false, feedback: "Αν είχε 0 εντολές, το βατραχάκι δεν θα κινούνταν!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Σωστό ή Λάθος: Η εντολή επανάληψης περιέχει πάντοτε μία ή περισσότερες εντολές;",
+            statement: "«Η εντολή επανάληψης περιέχει πάντοτε μία ή περισσότερες εντολές που γίνονται ξανά και ξανά.»",
+            correctAnswer: true,
+            feedbackTrue: "Πολύ σωστά! Όπως ακριβώς αναφέρει το βιβλίο μας στη σελίδα 17!",
+            feedbackFalse: "Είναι Σωστό! Χωρίς εντολές μέσα, η επανάληψη δεν έχει τι να εκτελέσει!"
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "2. Ο Μαγικός Αριθμός Επανάληψης",
+        icon: "🔢",
+        desc: "Βάζουμε τον σωστό αριθμό στο κυκλάκι της επανάληψης!",
+        pondContext: {
+          start: { r: 4, c: 0 },
+          lilypads: [{ r: 4, c: 1 }, { r: 4, c: 2 }, { r: 4, c: 3 }, { r: 4, c: 4 }],
+          demoMoves: ['right', 'right', 'right', 'right'],
+          hint: "Κοίταξε τα 4 νούφαρα σε ευθεία γραμμή προς τα δεξιά ➡️!"
+        },
+        subTasks: [
+          {
+            type: "fill_number",
+            prompt: "Δες τα νούφαρα σε ευθεία γραμμή στη λιμνούλα! Για να πηδήξει 4 φορές δεξιά ➡️, ποιον αριθμό βάζουμε στο κυκλάκι;",
+            targetNumber: 4,
+            options: [4, 2, 8, 1],
+            unitLabel: "φορές"
+          },
+          {
+            type: "choice",
+            prompt: "Τι θα συμβεί αν αλλάξεις τον αριθμό στο κυκλάκι της επανάληψης από 4 σε 6;",
+            options: [
+              { text: "🦘 Το βατραχάκι θα κάνει περισσότερες επαναλήψεις (6 άλματα)", correct: true, feedback: "Ακριβώς! Αν αλλάξεις τον αριθμό, αλλάζει και ο αριθμός των επαναλήψεων!" },
+              { text: "🛑 Το βατραχάκι θα σταματήσει για πάντα", correct: false, feedback: "Όχι, θα συνεχίσει να πηδάει 6 φορές!" },
+              { text: "🎨 Θα αλλάξει χρώμα το νερό", correct: false, feedback: "Ο αριθμός καθορίζει μόνο πόσες φορές εκτελείται η εντολή!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Αν στο κυκλάκι της επανάληψης βάλουμε το 1, οι εντολές θα εκτελεστούν μόνο μία φορά;",
+            statement: "«Ο αριθμός στο κουτάκι λέει στον υπολογιστή πόσες ακριβώς φορές θα εκτελέσει τις εντολές.»",
+            correctAnswer: true,
+            feedbackTrue: "Σωστά! Ο αριθμός είναι το αφεντικό της επανάληψης!",
+            feedbackFalse: "Κι όμως είναι Σωστό! 1 σημαίνει ακριβώς 1 φορά!"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "3. Μαγικό Μίκρεμα Κώδικα (4 vs 2)",
+        icon: "🪄",
+        desc: "Ανακαλύπτουμε πώς η επανάληψη κάνει τα προγράμματα πιο μικρά!",
+        pondContext: {
+          start: { r: 4, c: 0 },
+          lilypads: [{ r: 4, c: 1 }, { r: 3, c: 1 }, { r: 3, c: 2 }, { r: 2, c: 2 }],
+          demoMoves: ['right', 'up', 'right', 'up'],
+          hint: "Παράδειγμα 1 βιβλίου: 4 εντολές γίνονται 1 επανάληψη με 2 εντολές!"
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Στο Παράδειγμα 1 του βιβλίου, αντί να δώσεις 4 ξεχωριστές εντολές [ ➡️, ⬆️, ➡️, ⬆️ ], τι μπορείς να δώσεις;",
+            options: [
+              { text: "🟧 1 εντολή επανάληψης που περιέχει μόνο 2 εντολές: [ ➡️, ⬆️ ] x 2 φορές", correct: true, feedback: "Μπράβο! Αντί για 4 κουραστικές γραμμές, γράφουμε μόνο 1 έξυπνη επανάληψη!" },
+              { text: "📜 100 διαφορετικές εντολές", correct: false, feedback: "Αυτό θα έκανε το πρόγραμμα τεράστιο!" },
+              { text: "❌ Καμία εντολή", correct: false, feedback: "Το βατραχάκι χρειάζεται οδηγίες για να κινηθεί στα νούφαρα!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Γιατί μας εξυπηρετεί να γράφουμε μικρότερα προγράμματα;",
+            options: [
+              { text: "✨ Γράφονται και διαβάζονται πολύ πιο εύκολα, χωρίς λάθη!", correct: true, feedback: "Ακριβώς! Αυτό είναι το μεγάλο μυστικό των προγραμματιστών!" },
+              { text: "🔋 Για να μην κουραστεί το πληκτρολόγιο", correct: false, feedback: "Το όφελος είναι η καθαρή και απλή λογική!" },
+              { text: "📺 Για να κλείσει πιο γρήγορα η οθόνη", correct: false, feedback: "Μας βοηθάει να καταλαβαίνουμε αμέσως τι κάνει το πρόγραμμα!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Σωστό ή Λάθος: Με την εντολή επανάληψης, χρησιμοποιείς λιγότερες εντολές;",
+            statement: "«Με την εντολή επανάληψης χρησιμοποιείς λιγότερες εντολές και έτσι τα προγράμματά σου γράφονται ευκολότερα.»",
+            correctAnswer: true,
+            feedbackTrue: "Άριστα! Είναι ο χρυσός κανόνας της σελίδας 18 του βιβλίου!",
+            feedbackFalse: "Είναι Σωστό! Η επανάληψη μικραίνει και απλοποιεί τον κώδικα!"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "4. Το Μεγάλο Μονοπάτι (8 vs 2)",
+        icon: "🪷",
+        desc: "Παράδειγμα 2 του βιβλίου: Μεγάλη διαδρομή 8 αλμάτων στα νούφαρα!",
+        pondContext: {
+          start: { r: 4, c: 0 },
+          lilypads: [{ r: 4, c: 1 }, { r: 3, c: 1 }, { r: 3, c: 2 }, { r: 2, c: 2 }, { r: 2, c: 3 }, { r: 1, c: 3 }, { r: 1, c: 4 }, { r: 0, c: 4 }],
+          demoMoves: ['right', 'up', 'right', 'up', 'right', 'up', 'right', 'up'],
+          hint: "Δες τη σκάλα με τα 8 νούφαρα που ανεβαίνει ψηλά δεξιά!"
+        },
+        subTasks: [
+          {
+            type: "fill_number",
+            prompt: "Κοίταξε τη μεγάλη σκάλα νούφαρων στη λιμνούλα (8 βήματα). Πόσες φορές επαναλαμβάνεται το ζευγάρι [ ➡️ Δεξιά, ⬆️ Πάνω ];",
+            targetNumber: 4,
+            options: [4, 8, 2, 6],
+            unitLabel: "επαναλήψεις"
+          },
+          {
+            type: "choice",
+            prompt: "Αν ΔΕΝ είχαμε εντολή επανάληψης για αυτά τα 8 νούφαρα, πόσες εντολές θα γράφαμε μία-μία;",
+            options: [
+              { text: "8 ολόκληρες εντολές στη σειρά!", correct: true, feedback: "Σωστά! Θα χρειαζόμασταν 8 εντολές, ενώ με επανάληψη γράφουμε μόνο 2 εντολές!" },
+              { text: "Μόνο 1 εντολή", correct: false, feedback: "Κάθε άλμα είναι ξεχωριστή εντολή αν δεν έχεις επανάληψη!" },
+              { text: "20 εντολές", correct: false, feedback: "Τα νούφαρα είναι 8, άρα 8 εντολές!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Πόσες εντολές ΓΛΙΤΩΣΑΜΕ χάρη στην εντολή επανάληψης; (8 εντολές χωρίς επανάληψη μείον 2 με επανάληψη)",
+            options: [
+              { text: "🎉 Γλιτώσαμε 6 ολόκληρες εντολές!", correct: true, feedback: "Μπράβο σου! 8 - 2 = 6 εντολές λιγότερο γράψιμο!" },
+              { text: "Γλιτώσαμε 1 εντολή", correct: false, feedback: "Αντί για 8 γράψαμε μόνο 2, άρα κερδίσαμε 6!" },
+              { text: "Δεν κερδίσαμε τίποτα", correct: false, feedback: "Κερδίσαμε πάρα πολύ χρόνο και καθαρό κώδικα!" }
+            ]
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "5. Παράδειγμα 3 του Βιβλίου (Σελίδα 19)",
+        icon: "🎯",
+        desc: "Υπολογίζουμε εντολές για [ ➡️ 1, ⬇️ 2 ] με επανάληψη 2!",
+        pondContext: {
+          start: { r: 0, c: 0 },
+          lilypads: [{ r: 0, c: 1 }, { r: 1, c: 1 }, { r: 2, c: 1 }, { r: 2, c: 2 }, { r: 3, c: 2 }, { r: 4, c: 2 }],
+          demoMoves: ['right', 'down', 'down', 'right', 'down', 'down'],
+          hint: "Το βατραχάκι ξεκινάει από πάνω αριστερά και κατεβαίνει: [ ➡️ 1, ⬇️ 2 ] x 2!"
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Κοίταξε τη διαδρομή στη λιμνούλα! Με [ ➡️ 1 ] και [ ⬇️ 2 ] x 2 φορές, πόσες εντολές θα χρειαζόμασταν ΧΩΡΙΣ επανάληψη;",
+            options: [
+              { text: "📝 6 εντολές: (1 δεξιά + 2 κάτω) + (1 δεξιά + 2 κάτω)", correct: true, feedback: "Φανταστικά! 3 κινήσεις x 2 φορές = 6 εντολές χωρίς επανάληψη!" },
+              { text: "2 εντολές", correct: false, feedback: "Πρόσεξε, το βελάκι κάτω έχει τον αριθμό 2!" },
+              { text: "12 εντολές", correct: false, feedback: "Είναι 3 κινήσεις που γίνονται 2 φορές, άρα 6!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Προς ποια κατεύθυνση κινείται το βατραχάκι στη δεύτερη μπλε εντολή;",
+            options: [
+              { text: "⬇️ Προς τα κάτω (2 άλματα)", correct: true, feedback: "Μπράβο! Το βελάκι δείχνει καθαρά προς τα κάτω!" },
+              { text: "⬆️ Προς τα πάνω", correct: false, feedback: "Όχι, το βελάκι κοιτάζει προς τα κάτω!" },
+              { text: "⬅️ Προς τα αριστερά", correct: false, feedback: "Κοίταξε τη φορά του βέλους: είναι προς τα κάτω!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Σωστό ή Λάθος: Μέσα στο μπλοκ επανάληψης μπορούμε να βάλουμε εντολή με 2 βήματα (όπως ⬇️ 2);",
+            statement: "«Κάθε μπλε εντολή μέσα στην επανάληψη μπορεί να έχει τον δικό της αριθμό βημάτων (π.χ. 1 βήμα δεξιά, 2 βήματα κάτω).»",
+            correctAnswer: true,
+            feedbackTrue: "Ακριβώς! Συνδυάζουμε βήματα και επαναλήψεις ελεύθερα!",
+            feedbackFalse: "Είναι Σωστό! Κάθε εντολή μπορεί να έχει διαφορετικό αριθμό βημάτων!"
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "6. Βρες το Σωστό Βελάκι Κατεύθυνσης!",
+        icon: "🧭",
+        desc: "Διαλέγουμε το σωστό βέλος κίνησης για το βατραχάκι στη λιμνούλα!",
+        pondContext: {
+          start: { r: 2, c: 2 },
+          lilypads: [{ r: 2, c: 3 }, { r: 2, c: 4 }, { r: 1, c: 2 }, { r: 3, c: 2 }],
+          demoMoves: ['right', 'right'],
+          hint: "Ο Φρίξος βρίσκεται στο κέντρο της λιμνούλας!"
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Αν το βατραχάκι θέλει να κινηθεί προς τα δεξιά νούφαρα, ποια μπλε εντολή διαλέγουμε;",
+            options: [
+              { text: "➡️ Μπλε εντολή με βέλος προς τα Δεξιά", correct: true, feedback: "Σωστά! Το βελάκι προς τα δεξιά κινεί τον ήρωα δεξιά!" },
+              { text: "⬅️ Μπλε εντολή με βέλος προς τα Αριστερά", correct: false, feedback: "Αυτό θα το πήγαινε προς τα πίσω (αριστερά)!" },
+              { text: "🛑 Κόκκινο κουμπί στοπ", correct: false, feedback: "Το στοπ σταματάει το πρόγραμμα, δεν κινεί τον ήρωα!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Αν θέλουμε το βατραχάκι να ανέβει προς τα πάνω νούφαρα, ποιο βέλος διαλέγουμε;",
+            options: [
+              { text: "⬆️ Βέλος προς τα Πάνω", correct: true, feedback: "Άψογα! Το πάνω βελάκι το ανεβάζει ψηλά!" },
+              { text: "⬇️ Βέλος προς τα Κάτω", correct: false, feedback: "Αυτό θα το κατέβαζε χαμηλά!" },
+              { text: "🔄 Βέλος περιστροφής", correct: false, feedback: "Αυτό θα το έστριβε γύρω-γύρω!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Τα μπλοκ κίνησης στο ScratchJr έχουν μπλε χρώμα και τα μπλοκ επανάληψης πορτοκαλί;",
+            statement: "«Στο ScratchJr οι εντολές κίνησης είναι ΜΠΛΕ και η εντολή επανάληψης είναι ΠΟΡΤΟΚΑΛΙ.»",
+            correctAnswer: true,
+            feedbackTrue: "Μπράβο! Έμαθες τα χρώματα των εντολών τέλεια!",
+            feedbackFalse: "Είναι Σωστό! Μπλε για κίνηση, πορτοκαλί για επανάληψη!"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "7. Διόρθωσε το Λάθος στο Μπλοκ!",
+        icon: "🔍",
+        desc: "Βρίσκουμε το λάθος στον αριθμό επανάληψης!",
+        pondContext: {
+          start: { r: 4, c: 1 },
+          lilypads: [{ r: 3, c: 1 }, { r: 2, c: 1 }, { r: 1, c: 1 }],
+          demoMoves: ['up', 'up', 'up'],
+          hint: "Δες: υπάρχουν ακριβώς 3 νούφαρα προς τα πάνω ⬆️!"
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Δες τη λιμνούλα! Υπάρχουν 3 νούφαρα προς τα πάνω. Ο Ήρωνας έβαλε κατά λάθος αριθμό 10 στην επανάληψη. Τι θα γίνει;",
+            options: [
+              { text: "💦 Θα πηδήξει έξω από τη λιμνούλα γιατί 10 είναι πάρα πολλά άλματα!", correct: true, feedback: "Σωστά! Πρέπει να διορθώσουμε τον αριθμό σε 3 για να μη βγει έξω!" },
+              { text: "🐸 Θα γίνει αληθινός πρίγκιπας", correct: false, feedback: "Όχι, απλά θα συνεχίσει να πηδάει έξω από το νερό!" },
+              { text: "✨ Δεν θα συμβεί απολύτως τίποτα", correct: false, feedback: "Ο υπολογιστής θα προσπαθήσει να κάνει και τα 10 άλματα!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Ποιος είναι ο σωστός αριθμός επανάληψης για τα 3 νούφαρα προς τα πάνω;",
+            options: [
+              { text: "3 επαναλήψεις", correct: true, feedback: "Τέλεια! 3 νούφαρα = αριθμός 3 στο κυκλάκι!" },
+              { text: "0 επαναλήψεις", correct: false, feedback: "Με 0 δεν θα ξεκινήσει καν!" },
+              { text: "50 επαναλήψεις", correct: false, feedback: "50 είναι πάρα πολλά!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Όταν ένα πρόγραμμα κάνει λάθος, μπορούμε να αλλάξουμε τον αριθμό στο κουτάκι για να το διορθώσουμε;",
+            statement: "«Μπορούμε οποιαδήποτε στιγμή να κάνουμε κλικ στον αριθμό της επανάληψης και να βάλουμε τον σωστό!»",
+            correctAnswer: true,
+            feedbackTrue: "Σωστά! Αυτό λέγεται διόρθωση σφαλμάτων (debugging)!",
+            feedbackFalse: "Είναι Σωστό! Οι προγραμματιστές δοκιμάζουν και διορθώνουν!"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "8. Ο Σούπερ Προγραμματιστής της Λίμνης",
+        icon: "🏆",
+        desc: "Δοκιμασία γνώσεων για την εντολή επανάληψης!",
+        pondContext: {
+          start: { r: 4, c: 0 },
+          lilypads: [{ r: 4, c: 1 }, { r: 4, c: 2 }, { r: 3, c: 2 }, { r: 2, c: 2 }, { r: 2, c: 3 }, { r: 2, c: 4 }],
+          demoMoves: ['right', 'right', 'up', 'up', 'right', 'right'],
+          hint: "Ο Φρίξος ξέρει πλέον όλες τις διαδρομές της λιμνούλας!"
+        },
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Ποια είναι η πιο σωστή περιγραφή για την εντολή επανάληψης;",
+            options: [
+              { text: "🔁 Ένα μαγικό πορτοκαλί κουτί που εκτελεί τις εντολές του ξανά και ξανά!", correct: true, feedback: "Ακριβώς! Αυτή είναι η δύναμη της επανάληψης!" },
+              { text: "🗑️ Ένας κάδος ανακύκλωσης", correct: false, feedback: "Όχι, είναι μία από τις πιο σημαντικές εντολές προγραμματισμού!" },
+              { text: "🎨 Ένα πινέλο για ζωγραφική", correct: false, feedback: "Είναι εντολή που δίνει οδηγίες κίνησης και λογικής!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Χωρίς την εντολή επανάληψης, θα έπρεπε να γράφουμε τις ίδιες εντολές ξανά και ξανά με τα χέρια;",
+            statement: "«Χωρίς την επανάληψη, τα προγράμματα θα ήταν τεράστια και θα κουραζόμασταν πολύ να τα γράψουμε.»",
+            correctAnswer: true,
+            feedbackTrue: "Μπράβο! Η επανάληψη μας γλιτώνει κόπο και χρόνο!",
+            feedbackFalse: "Είναι Σωστό! Σκέψου να έγραφες 100 φορές το ίδιο βήμα!"
+          },
+          {
+            type: "choice",
+            prompt: "Τι νιώθεις τώρα που έμαθες την εντολή επανάληψης;",
+            options: [
+              { text: "🚀 Έτοιμος να φτιάξω τα δικά μου προγράμματα στο ScratchJr!", correct: true, feedback: "Συγχαρητήρια! Είσαι πανέτοιμος για σπουδαία προγράμματα!" },
+              { text: "🐢 Θέλω να γράφω 1.000 εντολές μία-μία", correct: false, feedback: "Μα τώρα ξέρεις το κόλπο της επανάληψης!" },
+              { text: "😴 Νυστάζω", correct: false, feedback: "Ο προγραμματισμός είναι γεμάτος περιπέτεια και παιχνίδι!" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // --- ΚΑΤΑΣΤΑΣΗ ΕΦΑΡΜΟΓΗΣ (STATE) ---
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    const completedTasks = Array.from({ length: 8 }, () => [false, false, false]);
+    let currentShuffledOptions = [];
+
+    // Θέση βατράχου στη μόνιμη λιμνούλα
+    let frogPos = { r: 4, c: 0 };
+    let isAnimating = false;
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Αρχικοποίηση 8 tabs
+    function initActivityTabs() {
+      const container = document.getElementById('activity-tabs');
+      container.innerHTML = '';
+
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `tab-btn-${idx}`;
+        btn.className = `p-2 rounded-2xl font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 border-2 transition-all shadow-sm ${
+          idx === currentActIndex 
+            ? 'bg-emerald-600 text-white border-emerald-700 shadow-md scale-105' 
+            : 'bg-white text-slate-700 border-emerald-100 hover:bg-emerald-50'
+        }`;
+        btn.onclick = () => selectActivity(idx);
+
+        const allDone = completedTasks[idx].every(val => val === true);
+        const starBadge = allDone ? '⭐' : `${idx + 1}`;
+
+        btn.innerHTML = `
+          <span class="text-2xl sm:text-3xl">${act.icon}</span>
+          <span class="leading-none text-sm sm:text-base font-black">${starBadge}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectActivity(actIdx) {
+      currentActIndex = actIdx;
+      currentSubIndex = 0;
+      updateHeader();
+      updatePondGrid();
+      renderSubTask();
+      updateTabsUI();
+    }
+
+    function updateHeader() {
+      const act = activities[currentActIndex];
+      document.getElementById('act-icon').innerText = act.icon;
+      document.getElementById('act-title').innerText = act.title;
+      document.getElementById('act-desc').innerText = act.desc;
+      document.getElementById('activity-badge').innerText = `Δραστηριότητα ${currentActIndex + 1} από 8`;
+      updateSubDotsUI();
+    }
+
+    function updateTabsUI() {
+      activities.forEach((act, idx) => {
+        const btn = document.getElementById(`tab-btn-${idx}`);
+        if (!btn) return;
+        const allDone = completedTasks[idx].every(val => val === true);
+        const starBadge = allDone ? '⭐' : `${idx + 1}`;
+
+        if (idx === currentActIndex) {
+          btn.className = 'p-2 rounded-2xl font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 border-3 transition-all shadow-md scale-105 bg-emerald-600 text-white border-emerald-700';
+        } else {
+          btn.className = 'p-2 rounded-2xl font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 border-2 transition-all shadow-sm bg-white text-slate-700 border-emerald-100 hover:bg-emerald-50';
+        }
+        btn.querySelector('span:last-child').innerText = starBadge;
+      });
+    }
+
+    function updateSubDotsUI() {
+      for (let i = 0; i < 3; i++) {
+        const dot = document.getElementById(`sub-dot-${i}`);
+        const isDone = completedTasks[currentActIndex][i];
+
+        if (i === currentSubIndex) {
+          dot.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-amber-400 text-slate-900 ring-4 ring-white shadow';
+        } else if (isDone) {
+          dot.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-emerald-400 text-white shadow-sm';
+          dot.innerText = '✓';
+        } else {
+          dot.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-full font-black text-lg flex items-center justify-center transition-all bg-white/30 text-white';
+          dot.innerText = `${i + 1}`;
+        }
+      }
+
+      document.getElementById('sub-indicator').innerText = `Υπο-δραστηριότητα ${currentSubIndex + 1} από 3`;
+      document.getElementById('prev-sub-btn').disabled = (currentActIndex === 0 && currentSubIndex === 0);
+    }
+
+    // --- ΜΟΝΙΜΗ ΛΙΜΝΟΥΛΑ: ΣΧΕΔΙΑΣΜΟΣ & ΕΝΗΜΕΡΩΣΗ ---
+    function updatePondGrid() {
+      const act = activities[currentActIndex];
+      const context = act.pondContext;
+      frogPos = { ...context.start };
+      isAnimating = false;
+
+      document.getElementById('pond-hint-text').innerText = context.hint;
+      document.getElementById('pond-step-indicator').innerText = `Θέση: [${frogPos.r + 1}, ${frogPos.c + 1}]`;
+      const runBtn = document.getElementById('run-sim-btn');
+      if (runBtn) runBtn.disabled = false;
+
+      drawPermanentPond();
+    }
+
+    function resetFrogPosition() {
+      if (isAnimating) return;
+      const act = activities[currentActIndex];
+      frogPos = { ...act.pondContext.start };
+      document.getElementById('pond-step-indicator').innerText = `Αρχή: [${frogPos.r + 1}, ${frogPos.c + 1}]`;
+      drawPermanentPond();
+      playBeep('jump');
+    }
+
+    function drawPermanentPond() {
+      const grid = document.getElementById('permanent-pond-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const act = activities[currentActIndex];
+      const lilypads = act.pondContext.lilypads;
+
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          cell.id = `perm-cell-${r}-${c}`;
+          
+          const isLily = lilypads.some(l => l.r === r && l.c === c);
+          const isFrog = (frogPos.r === r && frogPos.c === c);
+
+          cell.className = `cell-pond rounded-xl ${isLily ? 'has-pad' : 'bg-sky-200/40'}`;
+
+          if (isLily) {
+            cell.innerHTML += '<span class="text-2xl sm:text-3xl opacity-85 drop-shadow">🪷</span>';
+          }
+
+          if (isFrog) {
+            cell.innerHTML += '<span id="frog-icon" class="text-3xl sm:text-4xl absolute jiggle drop-shadow-lg">🐸</span>';
+          }
+
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function runFrogSimulation() {
+      if (isAnimating) return;
+      isAnimating = true;
+      const runBtn = document.getElementById('run-sim-btn');
+      if (runBtn) runBtn.disabled = true;
+
+      const act = activities[currentActIndex];
+      const moves = [...act.pondContext.demoMoves];
+      frogPos = { ...act.pondContext.start };
+      drawPermanentPond();
+
+      let step = 0;
+      const interval = setInterval(() => {
+        if (step >= moves.length) {
+          clearInterval(interval);
+          isAnimating = false;
+          if (runBtn) runBtn.disabled = false;
+          playBeep('correct');
+          document.getElementById('pond-step-indicator').innerText = '🎉 Έφτασε!';
+          return;
+        }
+
+        const move = moves[step];
+        if (move === 'right') frogPos.c = Math.min(4, frogPos.c + 1);
+        if (move === 'up') frogPos.r = Math.max(0, frogPos.r - 1);
+        if (move === 'down') frogPos.r = Math.min(4, frogPos.r + 1);
+        if (move === 'left') frogPos.c = Math.max(0, frogPos.c - 1);
+
+        playBeep('jump');
+        document.getElementById('pond-step-indicator').innerText = `Βήμα ${step + 1}/${moves.length}`;
+        drawPermanentPond();
+        step++;
+      }, 420);
+    }
+
+    // --- RENDER SUB-TASK ΣΤΗ ΔΕΞΙΑ ΣΤΗΛΗ ---
+    function renderSubTask() {
+      updateSubDotsUI();
+      const task = activities[currentActIndex].subTasks[currentSubIndex];
+      const container = document.getElementById('quiz-area');
+
+      // 1. Συμπλήρωση Αριθμού Επανάληψης (fill_number)
+      if (task.type === "fill_number") {
+        renderFillNumberTask(task, container);
+        return;
+      }
+
+      // 2. Σωστό / Λάθος (tf)
+      if (task.type === "tf") {
+        renderTFTask(task, container);
+        return;
+      }
+
+      // 3. Πολλαπλή Επιλογή (choice)
+      renderChoiceTask(task, container);
+    }
+
+    // Render Fill Number
+    function renderFillNumberTask(task, container) {
+      const shuffledOptions = shuffleArray(task.options);
+
+      let html = `
+        <div class="pop-in space-y-5">
+          <div class="bg-amber-50 border-3 border-amber-300 p-4 sm:p-5 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-3xl sm:text-4xl">🟧</span>
+            <div>
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-700">Συμπλήρωσε το Μπλοκ (Βήμα ${currentSubIndex + 1}):</span>
+              <p class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-0.5 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          <!-- Αναπαράσταση ScratchJr Repeat Block με κενό κύκλο -->
+          <div class="flex items-center justify-center my-3">
+            <div class="block-repeat rounded-3xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 text-white font-black text-lg sm:text-2xl shadow-xl">
+              <span>🔁 ΕΠΑΝΑΛΑΒΕ</span>
+              <div id="target-number-circle" class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-white text-orange-600 border-4 border-dashed border-orange-400 flex items-center justify-center text-2xl sm:text-4xl font-black shadow-inner animate-pulse">
+                ?
+              </div>
+              <span class="text-base sm:text-xl text-orange-100">${task.unitLabel}</span>
+            </div>
+          </div>
+
+          <!-- Μεγάλα Κουμπιά Επιλογής Αριθμού -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-xl mx-auto" id="number-options">
+      `;
+
+      shuffledOptions.forEach((num) => {
+        html += `
+          <button onclick="checkNumberAnswer(${num}, ${task.targetNumber}, this)" class="bounce-hover p-4 sm:p-5 rounded-2xl border-3 border-amber-300 bg-white hover:bg-amber-100 text-amber-900 font-black text-2xl sm:text-3xl shadow-md transition text-center active:scale-95">
+            ${num}
+          </button>
+        `;
+      });
+
+      html += `
+          </div>
+          <div id="feedback-box" class="hidden p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function checkNumberAnswer(userNum, targetNum, btnElem) {
+      const feedbackBox = document.getElementById('feedback-box');
+      document.querySelectorAll('#number-options button').forEach(b => b.onclick = null);
+
+      if (userNum === targetNum) {
+        playBeep('correct');
+        document.getElementById('target-number-circle').innerText = userNum;
+        document.getElementById('target-number-circle').classList.remove('border-dashed', 'animate-pulse');
+        document.getElementById('target-number-circle').classList.add('border-solid', 'bg-emerald-100', 'text-emerald-700', 'jiggle');
+
+        btnElem.classList.remove('bg-white');
+        btnElem.classList.add('bg-emerald-200', 'border-emerald-500', 'text-emerald-950', 'jiggle');
+
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>🌟</span> <span>Σωστά! Έβαλες τον αριθμό ${userNum}! <b>Πάμε κατευθείαν στην επόμενη!</b></span>`;
+        feedbackBox.classList.remove('hidden');
+
+        if (!completedTasks[currentActIndex][currentSubIndex]) {
+          completedTasks[currentActIndex][currentSubIndex] = true;
+          updateTotalStars();
+        }
+        updateSubDotsUI();
+        updateTabsUI();
+
+        setTimeout(() => { autoAdvance(); }, 1100);
+
+      } else {
+        playBeep('wrong');
+        btnElem.classList.remove('bg-white');
+        btnElem.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-950');
+
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-rose-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>💡</span> <span>Κοίταξε ξανά τη λιμνούλα αριστερά και ξαναπροσπάθησε!</span>`;
+        feedbackBox.classList.remove('hidden');
+
+        setTimeout(() => {
+          document.querySelectorAll('#number-options button').forEach(b => {
+            const numVal = parseInt(b.innerText);
+            b.onclick = () => checkNumberAnswer(numVal, targetNum, b);
+          });
+        }, 700);
+      }
+    }
+
+    // Render True / False
+    function renderTFTask(task, container) {
+      let html = `
+        <div class="pop-in space-y-5">
+          <div class="bg-emerald-50 border-3 border-emerald-200 p-4 sm:p-5 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-3xl sm:text-4xl">⚖️</span>
+            <div>
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-700">Σωστό ή Λάθος; (Βήμα ${currentSubIndex + 1}):</span>
+              <p class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-0.5 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border-2 border-amber-300 p-4 rounded-2xl text-center">
+            <p class="text-lg sm:text-xl font-bold text-slate-800 italic">${task.statement}</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto" id="tf-options">
+      `;
+
+      const tfChoices = shuffleArray([
+        { label: "✅ ΣΩΣΤΟ", val: true },
+        { label: "❌ ΛΑΘΟΣ", val: false }
+      ]);
+
+      tfChoices.forEach((choice, idx) => {
+        const bgColors = choice.val 
+          ? "bg-emerald-50 hover:bg-emerald-100 border-emerald-400 text-emerald-800"
+          : "bg-rose-50 hover:bg-rose-100 border-rose-400 text-rose-800";
+
+        html += `
+          <button onclick="checkTFAnswer(${choice.val}, ${task.correctAnswer})" id="tf-btn-${idx}" class="bounce-hover p-4 sm:p-5 rounded-2xl border-3 ${bgColors} font-black text-xl sm:text-2xl shadow-md transition-all text-center active:scale-95">
+            ${choice.label}
+          </button>
+        `;
+      });
+
+      html += `
+          </div>
+          <div id="feedback-box" class="hidden p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function checkTFAnswer(userVal, correctVal) {
+      const task = activities[currentActIndex].subTasks[currentSubIndex];
+      const feedbackBox = document.getElementById('feedback-box');
+      document.querySelectorAll('#tf-options button').forEach(b => b.onclick = null);
+
+      if (userVal === correctVal) {
+        playBeep('correct');
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>🌟</span> <span>${userVal ? task.feedbackTrue : task.feedbackFalse} <b>Προχωράμε αμέσως!</b></span>`;
+        feedbackBox.classList.remove('hidden');
+
+        if (!completedTasks[currentActIndex][currentSubIndex]) {
+          completedTasks[currentActIndex][currentSubIndex] = true;
+          updateTotalStars();
+        }
+        updateSubDotsUI();
+        updateTabsUI();
+
+        setTimeout(() => { autoAdvance(); }, 1100);
+      } else {
+        playBeep('wrong');
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-rose-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>💡</span> <span>Δεν πειράζει! Ξανασκέψου το και δοκίμασε ξανά!</span>`;
+        feedbackBox.classList.remove('hidden');
+
+        setTimeout(() => {
+          document.querySelectorAll('#tf-options button').forEach((b) => {
+            const isTrue = b.innerText.includes('ΣΩΣΤΟ');
+            b.onclick = () => checkTFAnswer(isTrue, correctVal);
+          });
+        }, 700);
+      }
+    }
+
+    // Render Choice
+    function renderChoiceTask(task, container) {
+      currentShuffledOptions = shuffleArray(task.options);
+
+      let blockSnippet = '';
+      if (task.blockPreview) {
+        blockSnippet = `
+          <div class="flex items-center justify-center my-2">
+            <div class="block-repeat rounded-2xl p-2.5 flex items-center gap-2 text-white font-black text-sm sm:text-base shadow">
+              <span>🔁 ΕΠΑΝΑΛΑΒΕ</span>
+              <span class="bg-white text-orange-600 w-7 h-7 rounded-full flex items-center justify-center text-base font-black">${task.blockPreview.rep}</span>
+              <div class="flex items-center gap-1 bg-white/20 p-1 rounded-lg">
+                ${task.blockPreview.moves.map(m => `<span class="block-motion text-white px-2 py-0.5 rounded text-xs sm:text-sm font-bold">${m}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      let html = `
+        <div class="pop-in space-y-4">
+          <div class="bg-emerald-50 border-3 border-emerald-200 p-4 sm:p-5 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-3xl sm:text-4xl">❓</span>
+            <div>
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-700">Ερώτηση ${currentSubIndex + 1}:</span>
+              <p class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-0.5 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          ${blockSnippet}
+
+          <div class="grid grid-cols-1 gap-3 max-w-2xl mx-auto" id="options-box">
+      `;
+
+      currentShuffledOptions.forEach((opt, oIdx) => {
+        html += `
+          <button onclick="checkChoiceAnswer(${oIdx})" id="opt-btn-${oIdx}" class="bounce-hover w-full text-left p-4 sm:p-5 rounded-2xl border-3 border-slate-200 bg-white hover:border-emerald-400 hover:bg-emerald-50/60 shadow-md transition-all font-bold text-slate-800 text-base sm:text-xl lg:text-2xl flex items-center justify-between group active:scale-98">
+            <span class="flex items-center gap-3">
+              <span class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-emerald-100 text-emerald-800 font-black flex items-center justify-center text-sm sm:text-lg group-hover:bg-emerald-600 group-hover:text-white transition shadow-sm">
+                ${String.fromCharCode(65 + oIdx)}
+              </span>
+              <span class="leading-snug">${opt.text}</span>
+            </span>
+            <span id="opt-status-${oIdx}" class="text-2xl"></span>
+          </button>
+        `;
+      });
+
+      html += `
+          </div>
+          <div id="feedback-box" class="hidden p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function checkChoiceAnswer(chosenIdx) {
+      const opt = currentShuffledOptions[chosenIdx];
+      const feedbackBox = document.getElementById('feedback-box');
+
+      currentShuffledOptions.forEach((_, idx) => {
+        const btn = document.getElementById(`opt-btn-${idx}`);
+        if (btn) btn.onclick = null;
+      });
+
+      if (opt.correct) {
+        playBeep('correct');
+        const chosenBtn = document.getElementById(`opt-btn-${chosenIdx}`);
+        chosenBtn.classList.remove('bg-white', 'border-slate-200');
+        chosenBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-950', 'jiggle');
+        document.getElementById(`opt-status-${chosenIdx}`).innerText = '🎉';
+
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>🌟</span> <span>${opt.feedback} <b>Πάμε κατευθείαν στην επόμενη!</b></span>`;
+        feedbackBox.classList.remove('hidden');
+
+        if (!completedTasks[currentActIndex][currentSubIndex]) {
+          completedTasks[currentActIndex][currentSubIndex] = true;
+          updateTotalStars();
+        }
+        updateSubDotsUI();
+        updateTabsUI();
+
+        setTimeout(() => { autoAdvance(); }, 1100);
+
+      } else {
+        playBeep('wrong');
+        const chosenBtn = document.getElementById(`opt-btn-${chosenIdx}`);
+        chosenBtn.classList.remove('bg-white', 'border-slate-200');
+        chosenBtn.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-950');
+        document.getElementById(`opt-status-${chosenIdx}`).innerText = '🤔';
+
+        feedbackBox.className = 'p-4 sm:p-5 rounded-3xl text-center font-black text-lg sm:text-xl pop-in shadow-xl bg-rose-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>💡</span> <span>${opt.feedback} Κοίταξε τη λιμνούλα αριστερά και ξαναπροσπάθησε!</span>`;
+        feedbackBox.classList.remove('hidden');
+
+        setTimeout(() => {
+          currentShuffledOptions.forEach((_, idx) => {
+            const btn = document.getElementById(`opt-btn-${idx}`);
+            if (btn) btn.onclick = () => checkChoiceAnswer(idx);
+          });
+        }, 700);
+      }
+    }
+
+    // --- ΑΥΤΟΜΑΤΗ ΜΕΤΑΒΑΣΗ & ΠΛΟΗΓΗΣΗ ---
+    function autoAdvance() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+        renderSubTask();
+      } else if (currentActIndex < 7) {
+        currentActIndex++;
+        currentSubIndex = 0;
+        updateHeader();
+        updatePondGrid();
+        renderSubTask();
+        updateTabsUI();
+      } else {
+        checkIfAllFinished();
+      }
+    }
+
+    function setSubTask(index) {
+      currentSubIndex = index;
+      renderSubTask();
+    }
+
+    function prevSubTask() {
+      if (currentSubIndex > 0) {
+        currentSubIndex--;
+        renderSubTask();
+      } else if (currentActIndex > 0) {
+        currentActIndex--;
+        currentSubIndex = 2;
+        updateHeader();
+        updatePondGrid();
+        renderSubTask();
+        updateTabsUI();
+      }
+    }
+
+    function nextSubTask() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+        renderSubTask();
+      } else if (currentActIndex < 7) {
+        currentActIndex++;
+        currentSubIndex = 0;
+        updateHeader();
+        updatePondGrid();
+        renderSubTask();
+        updateTabsUI();
+      } else {
+        checkIfAllFinished();
+      }
+    }
+
+    function updateTotalStars() {
+      let stars = 0;
+      completedTasks.forEach(act => {
+        act.forEach(done => {
+          if (done) stars++;
+        });
+      });
+      document.getElementById('star-count').innerText = stars;
+
+      if (stars === 24) {
+        setTimeout(() => {
+          playBeep('fanfare');
+          document.getElementById('finish-modal').classList.remove('hidden');
+        }, 800);
+      }
+    }
+
+    function checkIfAllFinished() {
+      let stars = 0;
+      completedTasks.forEach(act => act.forEach(done => { if (done) stars++; }));
+      if (stars === 24) {
+        playBeep('fanfare');
+        document.getElementById('finish-modal').classList.remove('hidden');
+      }
+    }
+
+    function restartAll() {
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 3; j++) {
+          completedTasks[i][j] = false;
+        }
+      }
+      document.getElementById('finish-modal').classList.add('hidden');
+      updateTotalStars();
+      selectActivity(0);
+    }
+
+    // --- ΚΑΤΕΒΑΣΜΑ ΑΡΧΕΙΟΥ HTML (DOWNLOAD SELF) ---
+    function downloadSelf() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Pliroforiki_B_Dimotikou_Mathima3_Entoli_Epanalipsis.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    window.onload = function() {
+      initActivityTabs();
+      updateHeader();
+      updatePondGrid();
+      renderSubTask();
+    };
+  </script>
+</body>
+</html>
