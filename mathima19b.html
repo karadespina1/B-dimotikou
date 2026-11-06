@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 19: Ο Φυλλομετρητής - Διαδραστικές Δραστηριότητες</title>
+<style>
+  :root {
+    --primary: #4a90e2;
+    --success: #2ecc71;
+    --danger: #e74c3c;
+    --warning: #f39c12;
+    --bg: #f0f7ff;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+  }
+  body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px;
+    line-height: 1.5;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+    background: white;
+    padding: 26px 36px;
+    border-radius: 24px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    max-width: 900px;
+    width: 100%;
+    border: 5px solid #b3d7ff;
+  }
+  h1 {
+    color: #1f618d;
+    margin: 0 0 14px 0;
+    font-size: 32px;
+  }
+  p.subtitle {
+    font-size: 22px;
+    color: #566573;
+    margin: 0;
+  }
+  .score-banner {
+    margin-top: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #1e8449;
+    background: #e8f8f5;
+    padding: 12px 24px;
+    border-radius: 30px;
+    display: inline-block;
+    border: 2px solid #a3e4d7;
+  }
+  .activities-container {
+    max-width: 920px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  .act-card {
+    background: var(--card-bg);
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.07);
+    border: 4px solid #d4e6f1;
+  }
+  .act-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    border-bottom: 3px dashed #d4e6f1;
+    padding-bottom: 14px;
+  }
+  .act-badge {
+    background: #2980b9;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .act-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #1b4f72;
+  }
+  .sub-question {
+    background: #fdfefe;
+    border: 2px solid #ebf5fb;
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .sub-title {
+    font-size: 21px;
+    font-weight: bold;
+    color: #1a5276;
+    margin-bottom: 14px;
+  }
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .btn-opt {
+    background: #eaf2f8;
+    border: 3px solid #aed6f1;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: all 0.2s;
+    line-height: 1.4;
+    color: #2c3e50;
+  }
+  .btn-opt:hover {
+    background: #d4e6f1;
+    transform: translateY(-2px);
+  }
+  .btn-opt.correct {
+    background: #d4efdf !important;
+    border-color: #27ae60 !important;
+    color: #145a32 !important;
+    font-weight: bold;
+  }
+  .btn-opt.wrong {
+    background: #fadbd8 !important;
+    border-color: #cb4335 !important;
+    color: #78281f !important;
+  }
+  .feedback {
+    margin-top: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    min-height: 28px;
+  }
+  .feedback.success { color: #229954; }
+  .feedback.error { color: #cb4335; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌐 Μάθημα 19ο: Ο Φυλλομετρητής (Browser)</h1>
+  <p class="subtitle">8 Διασκεδαστικές Δραστηριότητες για μαθητές και μαθήτριες Β΄ Δημοτικού!</p>
+  <div class="score-banner">⭐ Αστέρια που μάζεψες: <span id="star-count">0</span> / 24</div>
+</header>
+
+<div class="activities-container">
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 1 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">1</div>
+      <div class="act-title">Τι είναι ο Φυλλομετρητής;</div>
+    </div>
+    
+    <div class="sub-question" id="q1_1">
+      <div class="sub-title">1.1. Με τον φυλλομετρητή (browser) στον υπολογιστή μπορούμε να:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_1')">🎨 Ζωγραφίσουμε όμορφες εικόνες</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q1_1')">🌍 Βλέπουμε ιστοσελίδες στο διαδίκτυο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_1')">🧮 Κάνουμε μόνο πράξεις αριθμητικής</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q1_2">
+      <div class="sub-title">1.2. Ποια ξένη λέξη χρησιμοποιούμε συχνά για τον φυλλομετρητή;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_2')">Monitor</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_2')">Keyboard</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q1_2')">Browser</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q1_3">
+      <div class="sub-title">1.3. Τι χρειαζόμαστε οπωσδήποτε για να δούμε ιστοσελίδες;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q1_3')">📡 Συσκευή με σύνδεση στο διαδίκτυο και φυλλομετρητή</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_3')">🖨️ Μόνο έναν εκτυπωτή χωρίς ρεύμα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q1_3')">🎮 Μόνο ένα τηλεχειριστήριο παιχνιδιού</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 2 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">2</div>
+      <div class="act-title">Πώς ανοίγουμε τον Φυλλομετρητή;</div>
+    </div>
+
+    <div class="sub-question" id="q2_1">
+      <div class="sub-title">2.1. Στον υπολογιστή με το ποντίκι, για να ανοίξουμε τον φυλλομετρητή κάνουμε:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_1')">🖱️ Απλό σύρσιμο στην οθόνη</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q2_1')">🖱️ Διπλό κλικ στο εικονίδιό του</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_1')">🖱️ Δεξί κλικ και κλείσιμο</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q2_2">
+      <div class="sub-title">2.2. Σε ένα tablet (ταμπλέτα) ή οθόνη αφής, πώς ανοίγουμε τον φυλλομετρητή;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_2')">⌨️ Πατάμε το πλήκτρο Enter</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_2')">🖱️ Κουνάμε το ποντίκι γρήγορα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q2_2')">👆 Πιέζουμε απαλά με το δάχτυλό μας στο εικονίδιο</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q2_3">
+      <div class="sub-title">2.3. Πού μπορούμε να βρούμε το εικονίδιο του φυλλομετρητή όταν ανοίγει ο υπολογιστής;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q2_3')">🖥️ Στην επιφάνεια εργασίας</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_3')">🖨️ Μέσα στον εκτυπωτή</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q2_3')">🔌 Πάνω στο καλώδιο ρεύματος</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 3 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">3</div>
+      <div class="act-title">Η Γραμμή Διεύθυνσης (Address Bar)</div>
+    </div>
+
+    <div class="sub-question" id="q3_1">
+      <div class="sub-title">3.1. Τι γράφουμε στη γραμμή διεύθυνσης του φυλλομετρητή;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_1')">📝 Μια έκθεση για τις διακοπές μας</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q3_1')">🔗 Τη διεύθυνση της ιστοσελίδας που θέλουμε να επισκεφτούμε</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_1')">🔢 Τον αριθμό των παπουτσιών μας</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q3_2">
+      <div class="sub-title">3.2. Ποιο από τα παρακάτω μοιάζει με διεύθυνση ιστοσελίδας;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_2')">🏠 Οδός Σχολείου 12, Αθήνα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q3_2')">🌐 www.example.gr</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_2')">📞 210-1234567</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q3_3">
+      <div class="sub-title">3.3. Σε ποιο μέρος του παραθύρου βρίσκεται συνήθως η γραμμή διεύθυνσης;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_3')">⬇️ Τέρμα κάτω στο πάτωμα της οθόνης</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q3_3')">👈 Κρυμμένη πίσω από το πληκτρολόγιο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q3_3')">⬆️ Στο πάνω μέρος του παραθύρου</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 4 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">4</div>
+      <div class="act-title">Τα Κουμπιά Πλοήγησης: Πίσω (Back) & Μπροστά</div>
+    </div>
+
+    <div class="sub-question" id="q4_1">
+      <div class="sub-title">4.1. Ποιο κουμπί πατάμε για να γυρίσουμε στην προηγούμενη ιστοσελίδα;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_1')">❌ Το κουμπί «Κλείσιμο» (Χ)</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q4_1')">⬅️ Το βελάκι «Πίσω» (Back)</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_1')">⭐ Το κουμπί «Σελιδοδείκτης»</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q4_2">
+      <div class="sub-title">4.2. Το βελάκι που δείχνει αριστερά (⬅️) συνήθως σημαίνει:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_2')">➡️ Πήγαινε μπροστά</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_2')">🔄 Σβήσε την οθόνη</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q4_2')">⬅️ Επιστροφή στην προηγούμενη σελίδα</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q4_3">
+      <div class="sub-title">4.3. Αν πατήσεις κατά λάθος έναν σύνδεσμο, πώς θα γυρίσεις πίσω εκεί που ήσουν;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q4_3')">🔙 Πατάς το κουμπί «Πίσω» (Back)</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_3')">🔌 Κλείνεις τον υπολογιστή από την πρίζα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q4_3')">⌨️ Πατάς όλα τα πλήκτρα μαζί</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 5 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">5</div>
+      <div class="act-title">Ανανέωση (Refresh) της Ιστοσελίδας</div>
+    </div>
+
+    <div class="sub-question" id="q5_1">
+      <div class="sub-title">5.1. Ποιο σύμβολο έχει συνήθως το κουμπί της Ανανέωσης (Refresh);</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_1')">⏹️ Ένα τετράγωνο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q5_1')">🔄 Ένα κυκλικό βελάκι</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_1')">✂️ Ένα ψαλιδάκι</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q5_2">
+      <div class="sub-title">5.2. Τι συμβαίνει όταν πατάμε το κουμπί Ανανέωση (Refresh);</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_2')">🗑️ Διαγράφεται ο φυλλομετρητής</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q5_2')">🔄 Φορτώνει ξανά από την αρχή η ιστοσελίδα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_2')">🔇 Κλείνει ο ήχος των ηχείων</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q5_3">
+      <div class="sub-title">5.3. Πότε είναι χρήσιμο να πατήσουμε Ανανέωση;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_3')">💤 Όταν θέλουμε να κοιμηθούμε</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q5_3')">🎨 Όταν θέλουμε να αλλάξουμε χρώμα στο ποντίκι</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q5_3')">⏳ Όταν μια σελίδα κόλλησε ή δεν φορτώνει καλά</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 6 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">6</div>
+      <div class="act-title">Καρτέλες (Tabs) και Πολλές Σελίδες</div>
+    </div>
+
+    <div class="sub-question" id="q6_1">
+      <div class="sub-title">6.1. Τι μας δείχνει η καρτέλα (Tab) στο πάνω μέρος;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_1')">🔋 Την μπαταρία του ποντικιού</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q6_1')">📑 Το όνομα της ιστοσελίδας που βλέπουμε</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_1')">🌡️ Τη θερμοκρασία στο δωμάτιο</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q6_2">
+      <div class="sub-title">6.2. Ποιο κουμπάκι πατάμε για να ανοίξουμε μια ΝΕΑ καρτέλα;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_2')">➖ Το κουμπί μείον</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_2')">❌ Το κουμπί Χ</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q6_2')">➕ Το σύμβολο συν (+) δίπλα στην καρτέλα</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q6_3">
+      <div class="sub-title">6.3. Μπορούμε να έχουμε ανοιχτές πολλές καρτέλες ταυτόχρονα στον φυλλομετρητή;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q6_3')">👍 Ναι, μπορούμε να έχουμε πολλές ανοιχτές καρτέλες</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_3')">👎 Όχι, επιτρέπεται μόνο μία καρτέλα πάντα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q6_3')">🤔 Μόνο τις Κυριακές</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 7 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">7</div>
+      <div class="act-title">Ο Σελιδοδείκτης (Bookmark / Αγαπημένα)</div>
+    </div>
+
+    <div class="sub-question" id="q7_1">
+      <div class="sub-title">7.1. Σε τι μας χρησιμεύει ο σελιδοδείκτης (αστεράκι ⭐);</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_1')">🎵 Να παίζει τραγούδια δυνατά</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q7_1')">⭐ Να αποθηκεύουμε την αγαπημένη μας ιστοσελίδα για να τη βρίσκουμε εύκολα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_1')">🗑️ Να σβήνουμε ό,τι γράφουμε</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q7_2">
+      <div class="sub-title">7.2. Στο βιβλίο μας, τι χρώμα παίρνει το αστεράκι όταν αποθηκευτεί η σελίδα;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_2')">🔴 Κόκκινο έντονο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_2')">🟢 Πράσινο σκούρο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q7_2')">🔵 Μπλε χρώμα</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q7_3">
+      <div class="sub-title">7.3. Ένας πραγματικός σελιδοδείκτης σε ένα παραμύθι μας θυμίζει πού σταματήσαμε. Στον φυλλομετρητή:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q7_3')">🔖 Μας βοηθάει να ξαναβρούμε τη σελίδα χωρίς να γράφουμε πάλι τη διεύθυνση</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_3')">✂️ Κόβει την οθόνη στα δύο</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q7_3')">📦 Κλείνει το καπάκι του υπολογιστή</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 8 -->
+  <div class="act-card">
+    <div class="act-header">
+      <div class="act-badge">8</div>
+      <div class="act-title">Κλείσιμο (Exit) και Ασφαλής Χρήση</div>
+    </div>
+
+    <div class="sub-question" id="q8_1">
+      <div class="sub-title">8.1. Ποιο κουμπί πατάμε πάνω δεξιά όταν θέλουμε να κλείσουμε τον φυλλομετρητή;</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_1')">🔲 Το κουμπί μεγέθυνσης</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q8_1')">❌ Το κουμπί «Χ» (Κλείσιμο / Exit)</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_1')">🔄 Το βελάκι ανανέωσης</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q8_2">
+      <div class="sub-title">8.2. Αν πατήσουμε το κουμπί με την παύλα «—» στο παράθυρο:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_2')">❌ Κλείνει οριστικά το πρόγραμμα</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_2')">🔊 Δυναμώνει ο ήχος</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q8_2')">🗕 Μικραίνει και κατεβαίνει στη γραμμή εργασιών</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="sub-question" id="q8_3">
+      <div class="sub-title">8.3. Όταν τελειώσουμε την εργασία μας στο διαδίκτυο στο σχολείο:</div>
+      <div class="options-grid">
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_3')">🏃 Φεύγουμε τρέχοντας αφήνοντας όλα ανοιχτά</button>
+        <button class="btn-opt" onclick="checkAnswer(this, true, 'q8_3')">🚪 Κλείνουμε σωστά τα παράθυρα και ακούμε τις οδηγίες της/του δασκάλας/ου</button>
+        <button class="btn-opt" onclick="checkAnswer(this, false, 'q8_3')">🔌 Τραβάμε τα καλώδια από τον τοίχο</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let stars = 0;
+  const answered = new Set();
+
+  function checkAnswer(btn, isCorrect, qId) {
+    const parent = document.getElementById(qId);
+    const feedback = parent.querySelector('.feedback');
+    const buttons = parent.querySelectorAll('.btn-opt');
+
+    if (answered.has(qId)) return;
+
+    if (isCorrect) {
+      btn.classList.add('correct');
+      feedback.textContent = '🎉 Μπράβο! Πολύ σωστά!';
+      feedback.className = 'feedback success';
+      answered.add(qId);
+      stars++;
+      document.getElementById('star-count').textContent = stars;
+      buttons.forEach(b => b.disabled = true);
+    } else {
+      btn.classList.add('wrong');
+      feedback.textContent = '🤔 Για ξαναπροσπάθησε! Μπορείς να το βρεις!';
+      feedback.className = 'feedback error';
+      setTimeout(() => {
+        btn.classList.remove('wrong');
+      }, 1200);
+    }
+  }
+</script>
+
+</body>
+</html>
