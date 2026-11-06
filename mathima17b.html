@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Εννοιολογικός Χάρτης στο ptyxiouxos.gr - Β΄ Δημοτικού</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      background: radial-gradient(circle at top, #dcfce7, #fef9c3, #e0f2fe);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .retro-shadow {
+      box-shadow: 0 10px 0 rgba(0,0,0,0.08), 0 20px 25px -5px rgba(0,0,0,0.08);
+    }
+    /* Web App toolbar style like ptyxiouxos.gr */
+    .tool-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 3px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      background: white;
+      box-shadow: 0 4px 0 #94a3b8;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .tool-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #94a3b8;
+    }
+    .tool-btn.active {
+      background: #fed7aa;
+      border-color: #f97316;
+      box-shadow: 0 4px 0 #ea580c;
+    }
+    /* Color Palette Circles */
+    .color-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .color-dot:hover {
+      transform: scale(1.2);
+    }
+    /* Card Node in Canvas */
+    .idea-card {
+      border-radius: 16px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border: 2px solid rgba(0,0,0,0.15);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .idea-card:hover {
+      transform: scale(1.05);
+    }
+    .idea-card.selected {
+      border: 3px solid #0284c7;
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+    }
+    .connector-line {
+      stroke: #94a3b8;
+      stroke-width: 3;
+      stroke-dasharray: 4;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 md:p-8 flex flex-col items-center">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 retro-shadow border-4 border-emerald-300 flex flex-col gap-5">
+
+    <!-- Header: ptyxiouxos.gr Theme -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-emerald-200 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-5xl sm:text-6xl animate-bounce">🎨</span>
+        <div>
+          <span class="bg-emerald-600 text-white font-black px-3.5 py-1 rounded-full text-base sm:text-lg uppercase shadow">
+            Μάθημα 17ο
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-black text-slate-800 tracking-tight mt-1">
+            Εννοιολογικός Χάρτης στο ptyxiouxos.gr! 💡
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="soundToggle" onclick="toggleSound()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-950 text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl border-2 border-emerald-300 transition">
+          🔊 Ήχος: <span id="soundStatus">ON</span>
+        </button>
+        <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl shadow border-2 border-emerald-600 transition flex items-center gap-2">
+          💾 <span>Αποθήκευση</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar: 8 Activities -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between text-lg sm:text-2xl font-black text-slate-800">
+        <span id="actIndicator" class="text-emerald-950">Δραστηριότητα 1 από 8</span>
+        <div class="flex items-center gap-2">
+          <span id="starCounter" class="text-2xl sm:text-3xl text-amber-500 font-black">⭐ 0/24</span>
+        </div>
+      </div>
+
+      <!-- 8 Activity Tabs -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="navBubbles"></div>
+
+      <!-- 3 Substep Dots -->
+      <div class="flex items-center justify-center gap-3 mt-1">
+        <span class="text-base sm:text-xl font-black text-emerald-900">Βήμα:</span>
+        <div id="substepDots" class="flex gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Workspace: ptyxiouxos.gr Interactive Simulator on Left, Questions on Right -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: Live Interactive ptyxiouxos.gr App Interface -->
+      <div class="lg:col-span-5 bg-gradient-to-b from-emerald-50 via-teal-50 to-amber-50 p-3.5 sm:p-4 rounded-3xl border-4 border-emerald-300 shadow-inner flex flex-col items-center gap-3">
+        
+        <!-- App Top Bar (like screenshot) -->
+        <div class="w-full bg-emerald-600 text-white rounded-2xl p-2 px-3 flex items-center justify-between shadow-sm text-xs sm:text-sm font-bold">
+          <div class="flex items-center gap-1.5">
+            <span>🏠</span>
+            <span class="bg-white/20 px-2 py-0.5 rounded-lg">ptyxiouxos.gr</span>
+          </div>
+          <span id="toolStatusText" class="text-amber-200 font-black">🖐️ Επιλογή!</span>
+        </div>
+
+        <!-- Main Interactive Layout: Toolbar on left, Canvas in center -->
+        <div class="w-full flex gap-2">
+          
+          <!-- Left Column Toolbar (like screenshot) -->
+          <div class="flex flex-col gap-2 bg-amber-50/90 p-2 rounded-2xl border-2 border-amber-200 shadow-sm">
+            <button id="toolHand" onclick="selectTool('hand')" class="tool-btn active" title="Επιλογή & Μετακίνηση (Χεράκι)">
+              🖐️
+            </button>
+            <button id="toolPlus" onclick="selectTool('plus')" class="tool-btn" title="Νέα Ιδέα (+)">
+              ➕
+            </button>
+            <button id="toolLink" onclick="selectTool('link')" class="tool-btn" title="Σύνδεση (Αλυσίδα)">
+              🔗
+            </button>
+            <button id="toolTrash" onclick="selectTool('trash')" class="tool-btn" title="Κάδος / Διαγραφή">
+              🗑️
+            </button>
+            <button id="toolSave" onclick="selectTool('save')" class="tool-btn" title="Αποθήκευση">
+              💾
+            </button>
+          </div>
+
+          <!-- Canvas Area with Tree of Ideas (Οι Εποχές) -->
+          <div class="flex-1 bg-white rounded-2xl border-2 border-slate-300 p-2 relative flex flex-col justify-between items-center min-h-[280px] overflow-hidden shadow-inner">
+            
+            <!-- SVG connector lines -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+              <line x1="50%" y1="20%" x2="50%" y2="40%" class="connector-line" />
+              <line x1="50%" y1="56%" x2="50%" y2="76%" class="connector-line" />
+            </svg>
+
+            <!-- Idea 1: Άνοιξη (Pink Card) -->
+            <div id="cardSpring" onclick="clickIdeaCard('spring')" class="idea-card bg-pink-200 text-pink-950 p-2 px-3 text-center z-10 w-32 shadow-sm" title="Ιδέα: Άνοιξη">
+              <span class="text-xs block text-pink-700">🌸</span>
+              <span class="text-xs sm:text-sm font-black">Άνοιξη</span>
+            </div>
+
+            <!-- Link Badge 1 -->
+            <div id="link1" class="bg-slate-100 border border-slate-400 rounded-full px-2 py-0.5 text-[10px] font-black text-slate-700 z-10 shadow-sm">
+              είναι ⬇️
+            </div>
+
+            <!-- Idea 2: Οι εποχές (Yellow Center Node) -->
+            <div id="cardSeasons" onclick="clickIdeaCard('seasons')" class="idea-card bg-amber-200 text-amber-950 p-2.5 px-4 text-center z-10 w-36 selected" title="Κεντρική Ιδέα: Οι εποχές">
+              <span class="text-sm block">📅</span>
+              <span class="text-sm sm:text-base font-black">Οι εποχές</span>
+            </div>
+
+            <!-- Link Badge 2 -->
+            <div id="link2" class="bg-slate-100 border border-slate-400 rounded-full px-2 py-0.5 text-[10px] font-black text-slate-700 z-10 shadow-sm">
+              είναι ⬇️
+            </div>
+
+            <!-- Idea 3: Φθινόπωρο (Orange Card) -->
+            <div id="cardAutumn" onclick="clickIdeaCard('autumn')" class="idea-card bg-orange-200 text-orange-950 p-2 px-3 text-center z-10 w-32 shadow-sm" title="Ιδέα: Φθινόπωρο">
+              <span class="text-xs block text-orange-700">🍂</span>
+              <span class="text-xs sm:text-sm font-black">Φθινόπωρο</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Palette of 8 Colors (like bottom of screenshot) -->
+        <div class="w-full bg-white p-2 rounded-2xl border-2 border-slate-200 flex items-center justify-around shadow-sm">
+          <div onclick="pickColor('#fef08a', 'Κίτρινο')" class="color-dot bg-yellow-200" title="Κίτρινο"></div>
+          <div onclick="pickColor('#fed7aa', 'Πορτοκαλί')" class="color-dot bg-orange-200" title="Πορτοκαλί"></div>
+          <div onclick="pickColor('#fbcfe8', 'Ροζ')" class="color-dot bg-pink-200" title="Ροζ"></div>
+          <div onclick="pickColor('#bae6fd', 'Γαλάζιο')" class="color-dot bg-sky-200" title="Γαλάζιο"></div>
+          <div onclick="pickColor('#bbf7d0', 'Πράσινο')" class="color-dot bg-emerald-200" title="Πράσινο"></div>
+          <div onclick="pickColor('#ddd6fe', 'Μωβ')" class="color-dot bg-purple-200" title="Μωβ"></div>
+          <div onclick="pickColor('#e2e8f0', 'Γκρι')" class="color-dot bg-slate-200" title="Γκρι"></div>
+          <div onclick="pickColor('#ef4444', 'Κόκκινο')" class="color-dot bg-red-400" title="Κόκκινο"></div>
+        </div>
+
+        <!-- Instructional Bubble (like screenshot text box) -->
+        <div class="w-full bg-white/90 p-2.5 rounded-2xl border-2 border-emerald-200 text-center shadow-sm">
+          <p id="appInstructionText" class="text-xs sm:text-sm font-bold text-slate-700">
+            🖱️ <b>Πάτα μια ιδέα</b> για να γράψεις μέσα της, ή σύρε την για να τη μετακινήσεις!
+          </p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Simplified Interactive Question Area -->
+      <div class="lg:col-span-7 bg-white p-5 sm:p-7 rounded-3xl border-4 border-emerald-200 shadow-sm flex flex-col gap-5 min-h-[460px] justify-between">
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <span id="actCategory" class="inline-block bg-emerald-100 text-emerald-950 font-black px-3.5 py-1 rounded-xl text-sm sm:text-base mb-2">
+              Κατηγορία
+            </span>
+            <h3 id="questionPrompt" class="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 leading-snug">
+              Ερώτηση...
+            </h3>
+            <p id="questionSub" class="text-lg sm:text-2xl text-emerald-700 font-bold mt-1">
+              Οδηγία...
+            </p>
+          </div>
+
+          <!-- Answers Container -->
+          <div id="questionInteractiveArea" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- Feedback & Auto Next -->
+        <div id="feedbackContainer" class="p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]">
+          <div id="feedbackText" class="text-lg sm:text-2xl font-black text-gray-700 flex items-center gap-2">
+            <span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>
+          </div>
+          <div id="autoNextTimer" class="hidden flex items-center gap-2 text-emerald-700 font-black text-lg">
+            <span>Μπράβο! Επόμενο...</span>
+            <div class="w-6 h-6 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-between text-xs sm:text-sm text-gray-500 border-t-2 border-gray-200 pt-3">
+      <span>Πληροφορική Β΄ Δημοτικού • Μάθημα 17ο</span>
+      <span class="font-black text-emerald-900">ptyxiouxos.gr 🎨 • Εννοιολογικός Χάρτης • Ιδέες 💡</span>
+    </footer>
+
+  </div>
+
+  <!-- Audio Synthesizer -->
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundStatus').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundToggle').classList.toggle('bg-gray-200', !soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'pop') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      } else if (type === 'paint') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(800, now + 0.08);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(170, now + 0.15);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+  </script>
+
+  <!-- Lesson 17 Data: Based on ptyxiouxos.gr screenshot -->
+  <script>
+    /*
+      ptyxiouxos.gr Concept Map Curriculum (based on screenshot):
+      - Tool: "Επιλογή" (Hand 🖐️) -> Click an idea to select it, drag to move.
+      - Click on an idea or arrow to write inside (πληκτρολόγιο).
+      - Tool: Plus (+) -> create a new idea card.
+      - Tool: Chain link (🔗) -> connect ideas with arrows and linking phrases ("είναι").
+      - Tool: Trash (🗑️) -> delete an idea card.
+      - Bottom palette of colorful circles -> change the color of the selected idea!
+      - Example Map: "Οι εποχές" connected with "είναι" -> "Άνοιξη", "Φθινόπωρο".
+    */
+
+    const activities = [
+      // 1. Το Κουμπί με το Χεράκι (🖐️ Επιλογή)
+      {
+        title: "Το Χεράκι της Επιλογής!",
+        category: "Εργαλείο Επιλογή",
+        substeps: [
+          {
+            prompt: "Τι κάνουμε με το πορτοκαλί κουμπί με το Χεράκι (🖐️);",
+            sub: "Δες τις οδηγίες στην οθόνη του ptyxiouxos.gr:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Πατάμε μια ιδέα για να τη διαλέξουμε ή τη σέρνουμε για να μετακινηθεί! 🖐️", correct: true },
+              { text: "Σβήνουμε τον υπολογιστή μας", correct: false }
+            ]
+          },
+          {
+            prompt: "Αν θέλουμε να γράψουμε μέσα σε μια ιδέα, τι κάνουμε με το ποντίκι;",
+            sub: "Κοίταξε τη δεύτερη γραμμή των οδηγιών:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Κάνουμε κλικ πάνω στην ιδέα για να γράψουμε! ⌨️", correct: true },
+              { text: "Χτυπάμε παλαμάκια στην τάξη 👏", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Στο ptyxiouxos.gr, σέρνοντας μια ιδέα με το ποντίκι την πηγαίνουμε όπου θέλουμε.",
+            sub: "Όπως λέει: «Σύρσιμο = μετακίνηση»:",
+            type: "tf",
+            activeTool: "hand",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 2. Το Κουμπί με το Συν (➕ Νέα Ιδέα)
+      {
+        title: "Φτιάξε Νέα Ιδέα!",
+        category: "Το Κουμπί Συν ➕",
+        substeps: [
+          {
+            prompt: "Ποιο κουμπί πατάμε στην αριστερή στήλη όταν θέλουμε να φτιάξουμε μια ΝΕΑ ιδέα;",
+            sub: "Κοίταξε το δεύτερο κουμπί της στήλης:",
+            type: "choice",
+            activeTool: "plus",
+            options: [
+              { text: "Το κουμπί με το σταυρουδάκι (Συν ➕)! ✨", correct: true },
+              { text: "Το κουμπί με το κουδούνι 🔔", correct: false }
+            ]
+          },
+          {
+            prompt: "Μόλις πατήσουμε το Συν (➕), τι εμφανίζεται στον χάρτη μας;",
+            sub: "Σκέψου τι προστίθεται στην οθόνη:",
+            type: "choice",
+            activeTool: "plus",
+            options: [
+              { text: "Ένα νέο χρωματιστό κουτάκι για να γράψουμε! 📦", correct: true },
+              { text: "Ένα μεγάλο φορτηγό 🚚", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να προσθέσουμε όσες νέες ιδέες χρειαζόμαστε για τον χάρτη μας.",
+            sub: "Πατώντας το κουμπί Συν ➕:",
+            type: "tf",
+            activeTool: "plus",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 3. Η Αλυσίδα (🔗 Ενώνω Ιδέες)
+      {
+        title: "Ενώνω με Βελάκια!",
+        category: "Η Αλυσίδα 🔗",
+        substeps: [
+          {
+            prompt: "Τι κάνει το κουμπί με την Αλυσίδα (🔗) στην εφαρμογή;",
+            sub: "Δες το σύμβολο της σύνδεσης:",
+            type: "choice",
+            activeTool: "link",
+            options: [
+              { text: "Ενώνει δύο ιδέες μεταξύ τους με βελάκια! 🔗➡️", correct: true },
+              { text: "Κλειδώνει την πόρτα της τάξης 🚪", correct: false }
+            ]
+          },
+          {
+            prompt: "Πάνω στο βελάκι που ενώνει «Οι εποχές» με την «Άνοιξη», τι λέξη γράφει;",
+            sub: "Κοίταξε το οβάλ κουτάκι ανάμεσά τους:",
+            type: "choice",
+            activeTool: "link",
+            options: [
+              { text: "Γράφει τη λέξη «είναι»! ⬇️", correct: true },
+              { text: "Γράφει «τρώνε παγωτό» 🍦", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Σύροντας τα μπλε βελάκια γύρω από μια ιδέα, την ενώνουμε εύκολα με μια άλλη.",
+            sub: "Όπως μας δείχνουν οι οδηγίες της εφαρμογής:",
+            type: "tf",
+            activeTool: "link",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 4. Ο Κάδος Απορριμμάτων (🗑️ Διαγραφή)
+      {
+        title: "Σβήσε ό,τι δεν χρειάζεσαι!",
+        category: "Ο Κάδος 🗑️",
+        substeps: [
+          {
+            prompt: "Αν φτιάξουμε κατά λάθος ένα κουτάκι που δεν θέλουμε, πώς το σβήνουμε;",
+            sub: "Κοίταξε το κουμπί κάτω από το Συν ➕:",
+            type: "choice",
+            activeTool: "trash",
+            options: [
+              { text: "Το επιλέγουμε και πατάμε τον Κάδο Απορριμμάτων (🗑️)! 🚮", correct: true },
+              { text: "Πλένουμε την οθόνη με νερό 🧼", correct: false }
+            ]
+          },
+          {
+            prompt: "Γιατί είναι πιο εύκολο να σβήνουμε στον υπολογιστή παρά στο χαρτί;",
+            sub: "Σκέψου αν αφήνει μουτζούρα:",
+            type: "choice",
+            activeTool: "trash",
+            options: [
+              { text: "Γιατί σβήνει αμέσως και η οθόνη μένει πεντακάθαρη! ✨", correct: true },
+              { text: "Γιατί τελειώνει η μπαταρία", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το κουμπί της αναίρεσης (↶) μας βοηθάει αν σβήσουμε κάτι κατά λάθος.",
+            sub: "Δες τα βελάκια που πάνε πίσω:",
+            type: "tf",
+            activeTool: "trash",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 5. Η Παλέτα των Χρωμάτων (Κάτω Κύκλοι)
+      {
+        title: "Χρωμάτισε τις Ιδέες σου!",
+        category: "Η Παλέτα Χρωμάτων 🎨",
+        substeps: [
+          {
+            prompt: "Τι είναι οι πολύχρωμοι κύκλοι στο κάτω μέρος της εφαρμογής;",
+            sub: "Δες τους κύκλους (κίτρινο, ροζ, γαλάζιο κ.ά.):",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Είναι η παλέτα για να αλλάζουμε χρώμα στα κουτάκια μας! 🎨", correct: true },
+              { text: "Είναι καραμέλες για φάγωμα 🍬", correct: false }
+            ]
+          },
+          {
+            prompt: "Στον χάρτη της εικόνας, τι χρώμα έχει η ιδέα «Άνοιξη»;",
+            sub: "Κοίταξε το πάνω κουτάκι με το λουλουδάκι 🌸:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Έχει όμορφο Ροζ χρώμα! 🌸", correct: true },
+              { text: "Έχει κατάμαυρο χρώμα ⚫", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να βάλουμε διαφορετικό χρώμα σε κάθε εποχή για να είναι ο χάρτης φωτεινός.",
+            sub: "Δοκίμασε να πατήσεις τα χρωματιστά κυκλάκια στα αριστερά:",
+            type: "tf",
+            activeTool: "hand",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 6. Ο Χάρτης των Εποχών
+      {
+        title: "Ο Χάρτης των Εποχών!",
+        category: "Οι Εποχές 📅",
+        substeps: [
+          {
+            prompt: "Ποια είναι η κεντρική ιδέα στον χάρτη του ptyxiouxos.gr;",
+            sub: "Κοίταξε το κεντρικό κίτρινο κουτάκι:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "«Οι εποχές»! 📅", correct: true },
+              { text: "«Τα διαστημόπλοια» 🚀", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποιες δύο εποχές βλέπουμε συνδεδεμένες στον χάρτη της εικόνας;",
+            sub: "Κοίταξε το πάνω και το κάτω κουτάκι:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Την Άνοιξη 🌸 και το Φθινόπωρο 🍂!", correct: true },
+              { text: "Το Σάββατο και την Κυριακή 🏖️", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να προσθέσουμε και το Καλοκαίρι ☀️ και τον Χειμώνα ❄️ για να είναι πλήρης ο χάρτης.",
+            sub: "Έτσι θα έχουμε και τις 4 εποχές:",
+            type: "tf",
+            activeTool: "plus",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 7. Το Κουμπί Αποθήκευσης (💾)
+      {
+        title: "Μην ξεχάσεις να Αποθηκεύσεις!",
+        category: "Αποθήκευση Έργου 💾",
+        substeps: [
+          {
+            prompt: "Όταν τελειώσουμε τον χάρτη μας στο ptyxiouxos.gr, ποιο κουμπί πατάμε;",
+            sub: "Κοίταξε το τελευταίο μπλε κουμπί κάτω αριστερά:",
+            type: "choice",
+            activeTool: "save",
+            options: [
+              { text: "Το κουμπί της Αποθήκευσης με τη δισκέτα (💾)! 💾", correct: true },
+              { text: "Κλείνουμε αμέσως το παράθυρο χωρίς να σώσουμε", correct: false }
+            ]
+          },
+          {
+            prompt: "Γιατί είναι σημαντικό να αποθηκεύουμε την εργασία μας;",
+            sub: "Σκέψου τι θα γίνει την επόμενη φορά στο εργαστήριο:",
+            type: "choice",
+            activeTool: "save",
+            options: [
+              { text: "Για να τη βρούμε έτοιμη και να τη δείξουμε στον δάσκαλο! 👨‍🏫", correct: true },
+              { text: "Για να σβηστεί από παντού", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Στο ptyxiouxos.gr μπορούμε να αποθηκεύσουμε τον χάρτη και ως εικόνα.",
+            sub: "Ώστε να τον εκτυπώσουμε ή να τον βάλουμε σε αφίσα:",
+            type: "tf",
+            activeTool: "save",
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 8. Μεγάλη Επιβράβευση: Σούπερ Δημιουργός!
+      {
+        title: "Σούπερ Δημιουργός Χαρτών!",
+        category: "Συγχαρητήρια!",
+        substeps: [
+          {
+            prompt: "Τι έμαθες σήμερα για την εφαρμογή εννοιολογικών χαρτών στο ptyxiouxos.gr;",
+            sub: "Διάλεξε όλα τα σπουδαία εργαλεία που γνώρισες:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Να επιλέγω με το χεράκι 🖐️, να φτιάχνω ιδέες ➕ και να ενώνω με αλυσίδα 🔗! 🌟", correct: true },
+              { text: "Τίποτα απολύτως", correct: false }
+            ]
+          },
+          {
+            prompt: "Είναι εύκολο και διασκεδαστικό να φτιάχνεις χάρτες στο ptyxiouxos.gr;",
+            sub: "Σκέψου πόσο φωτεινό και απλό είναι:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "Ναι! Είναι πανεύκολο και γεμάτο όμορφα χρώματα! 🎨✨", correct: true },
+              { text: "Όχι, προτιμώ να γράφω μόνο με κιμωλία", correct: false }
+            ]
+          },
+          {
+            prompt: "Συγχαρητήρια! Κέρδισες και τα 24 Αστέρια στο ptyxiouxos.gr;",
+            sub: "Διάλεξε πόσο αστέρι είσαι σήμερα:",
+            type: "choice",
+            activeTool: "hand",
+            options: [
+              { text: "🌟 Ναι! Είμαι ο καλύτερος δημιουργός εννοιολογικών χαρτών!", correct: true },
+              { text: "👍 Ήταν σούπερ διασκεδαστικό και πολύ χρήσιμο!", correct: true },
+              { text: "🎉 Μπράβο μου! Τα κατάφερα τέλεια!", correct: true }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    let starsCount = 0;
+    const answeredSteps = new Set();
+    let isTransitioning = false;
+    let currentSelectedCard = 'seasons';
+
+    window.onload = function() {
+      renderNav();
+      loadCurrentQuestion();
+    };
+
+    function renderNav() {
+      const navContainer = document.getElementById('navBubbles');
+      navContainer.innerHTML = '';
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `act-bubble-${idx}`;
+        const isActive = idx === currentActIndex;
+        btn.className = `py-2 px-1 rounded-2xl font-black text-sm sm:text-base border-3 transition flex flex-col items-center justify-center gap-0.5 ${
+          isActive 
+            ? 'bg-emerald-600 text-white border-emerald-800 shadow-md scale-105' 
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-emerald-50'
+        }`;
+        btn.innerHTML = `
+          <span>Δρ.${idx + 1}</span>
+          <span class="text-xs ${isActive ? 'text-white' : 'text-emerald-900'}">${getActProgressIcon(idx)}</span>
+        `;
+        btn.onclick = () => {
+          if (isTransitioning) return;
+          playSound('click');
+          currentActIndex = idx;
+          currentSubIndex = 0;
+          renderNav();
+          loadCurrentQuestion();
+        };
+        navContainer.appendChild(btn);
+      });
+
+      const dotContainer = document.getElementById('substepDots');
+      dotContainer.innerHTML = '';
+      for (let s = 0; s < 3; s++) {
+        const dot = document.createElement('div');
+        const isCurrent = s === currentSubIndex;
+        const isDone = answeredSteps.has(`${currentActIndex}-${s}`);
+        dot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-base sm:text-lg border-2 transition ${
+          isCurrent 
+            ? 'bg-emerald-600 text-white border-emerald-800 shadow scale-110' 
+            : isDone 
+              ? 'bg-emerald-400 text-white border-emerald-600' 
+              : 'bg-gray-100 text-gray-400 border-gray-300'
+        }`;
+        dot.textContent = isDone ? '✓' : (s + 1);
+        dotContainer.appendChild(dot);
+      }
+
+      document.getElementById('actIndicator').textContent = `Δραστηριότητα ${currentActIndex + 1} από 8: ${activities[currentActIndex].title}`;
+      document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+    }
+
+    function getActProgressIcon(actIdx) {
+      const c1 = answeredSteps.has(`${actIdx}-0`);
+      const c2 = answeredSteps.has(`${actIdx}-1`);
+      const c3 = answeredSteps.has(`${actIdx}-2`);
+      if (c1 && c2 && c3) return '⭐⭐⭐';
+      if ((c1 && c2) || (c2 && c3) || (c1 && c3)) return '⭐⭐';
+      if (c1 || c2 || c3) return '⭐';
+      return '⚪';
+    }
+
+    function loadCurrentQuestion() {
+      isTransitioning = false;
+      const act = activities[currentActIndex];
+      const q = act.substeps[currentSubIndex];
+
+      document.getElementById('actCategory').textContent = act.category;
+      document.getElementById('questionPrompt').textContent = q.prompt;
+      document.getElementById('questionSub').textContent = q.sub;
+
+      // Highlight active tool in simulator toolbar
+      highlightActiveTool(q.activeTool || 'hand');
+
+      // Reset Feedback Box
+      const fbBox = document.getElementById('feedbackContainer');
+      fbBox.className = 'p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]';
+      document.getElementById('feedbackText').innerHTML = `<span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+
+      // Render Answers
+      const container = document.getElementById('questionInteractiveArea');
+      container.innerHTML = '';
+
+      if (q.type === 'choice') {
+        const shuffled = shuffle(q.options);
+        const letters = ['Α', 'Β', 'Γ'];
+        shuffled.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-4 sm:p-5 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:scale-[0.99] border-3 border-emerald-200 hover:border-emerald-400 font-black text-xl sm:text-2xl text-gray-800 transition flex items-center gap-4 shadow-sm';
+          btn.innerHTML = `
+            <span class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow">
+              ${letters[optIdx] || '•'}
+            </span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.correct);
+          container.appendChild(btn);
+        });
+      } else if (q.type === 'tf') {
+        const tfOptions = shuffle([
+          { text: "ΣΩΣΤΟ 👍", val: true, bg: "bg-emerald-100 hover:bg-emerald-200 border-emerald-400 text-emerald-950" },
+          { text: "ΛΑΘΟΣ 👎", val: false, bg: "bg-rose-100 hover:bg-rose-200 border-rose-400 text-rose-950" }
+        ]);
+
+        const tfGrid = document.createElement('div');
+        tfGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+        tfOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = `p-6 sm:p-8 rounded-3xl border-4 font-black text-3xl sm:text-4xl text-center shadow transition transform active:scale-95 ${opt.bg}`;
+          btn.textContent = opt.text;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.val === q.correctAnswer);
+          tfGrid.appendChild(btn);
+        });
+        container.appendChild(tfGrid);
+      }
+    }
+
+    function highlightActiveTool(tool) {
+      const tools = {
+        hand: document.getElementById('toolHand'),
+        plus: document.getElementById('toolPlus'),
+        link: document.getElementById('toolLink'),
+        trash: document.getElementById('toolTrash'),
+        save: document.getElementById('toolSave')
+      };
+
+      Object.values(tools).forEach(b => b.classList.remove('active'));
+      if (tools[tool]) {
+        tools[tool].classList.add('active');
+      }
+
+      const status = document.getElementById('toolStatusText');
+      const hint = document.getElementById('appInstructionText');
+
+      if (tool === 'hand') {
+        status.textContent = '🖐️ Επιλογή!';
+        hint.innerHTML = '🖐️ <b>Χεράκι:</b> Πάτα μια ιδέα για να τη διαλέξεις ή σύρε την για να τη μετακινήσεις!';
+      } else if (tool === 'plus') {
+        status.textContent = '➕ Νέα Ιδέα!';
+        hint.innerHTML = '➕ <b>Συν:</b> Πατώντας το Συν, προσθέτεις ένα νέο κουτάκι ιδέας στον χάρτη!';
+      } else if (tool === 'link') {
+        status.textContent = '🔗 Σύνδεση!';
+        hint.innerHTML = '🔗 <b>Αλυσίδα:</b> Ενώνει δύο ιδέες με βελάκια και λέξεις σύνδεσης («είναι»)!';
+      } else if (tool === 'trash') {
+        status.textContent = '🗑️ Διαγραφή!';
+        hint.innerHTML = '🗑️ <b>Κάδος:</b> Σβήνει αμέσως την ιδέα που δεν χρειάζεσαι!';
+      } else if (tool === 'save') {
+        status.textContent = '💾 Αποθήκευση!';
+        hint.innerHTML = '💾 <b>Δισκέτα:</b> Σώζει τον χάρτη σου για να μην τον χάσεις ποτέ!';
+      }
+    }
+
+    function selectTool(tool) {
+      playSound('pop');
+      highlightActiveTool(tool);
+    }
+
+    function clickIdeaCard(cardId) {
+      playSound('pop');
+      currentSelectedCard = cardId;
+      const cSpring = document.getElementById('cardSpring');
+      const cSeasons = document.getElementById('cardSeasons');
+      const cAutumn = document.getElementById('cardAutumn');
+
+      [cSpring, cSeasons, cAutumn].forEach(c => c.classList.remove('selected'));
+
+      if (cardId === 'spring') cSpring.classList.add('selected');
+      if (cardId === 'seasons') cSeasons.classList.add('selected');
+      if (cardId === 'autumn') cAutumn.classList.add('selected');
+
+      document.getElementById('appInstructionText').innerHTML = `✨ Επέλεξες την ιδέα: <b>${cardId === 'spring' ? 'Άνοιξη 🌸' : cardId === 'seasons' ? 'Οι εποχές 📅' : 'Φθινόπωρο 🍂'}</b>! Διάλεξε χρώμα από κάτω!`;
+    }
+
+    function pickColor(colorHex, colorName) {
+      playSound('paint');
+      let targetEl = document.getElementById('cardSeasons');
+      if (currentSelectedCard === 'spring') targetEl = document.getElementById('cardSpring');
+      if (currentSelectedCard === 'autumn') targetEl = document.getElementById('cardAutumn');
+
+      targetEl.style.backgroundColor = colorHex;
+      document.getElementById('appInstructionText').innerHTML = `🎨 Άλλαξες το χρώμα σε <b>${colorName}</b>!`;
+    }
+
+    function handleChoiceAnswer(btnElement, isCorrect) {
+      if (isTransitioning) return;
+
+      const fbBox = document.getElementById('feedbackContainer');
+      const fbText = document.getElementById('feedbackText');
+      const timerIndicator = document.getElementById('autoNextTimer');
+
+      if (isCorrect) {
+        isTransitioning = true;
+        playSound('correct');
+
+        btnElement.classList.remove('bg-emerald-50', 'hover:bg-emerald-100', 'border-emerald-200');
+        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'scale-[1.02]', 'shadow-lg');
+
+        const key = `${currentActIndex}-${currentSubIndex}`;
+        if (!answeredSteps.has(key)) {
+          answeredSteps.add(key);
+          starsCount++;
+          document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+        }
+
+        fbBox.className = 'p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-4xl">🎉</span> <span class="text-emerald-800 text-xl sm:text-2xl font-black">Μπράβο! Το βρήκες τέλεια! 💡✨</span>`;
+        timerIndicator.classList.remove('hidden');
+
+        setTimeout(() => {
+          advanceToNext();
+        }, 1200);
+
+      } else {
+        playSound('wrong');
+        btnElement.classList.add('bg-rose-100', 'border-rose-400');
+        fbBox.className = 'p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-3xl">🤔</span> <span class="text-rose-800 font-black">Δοκίμασε ξανά! Δες την εφαρμογή στα αριστερά!</span>`;
+      }
+    }
+
+    function advanceToNext() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+      } else {
+        if (currentActIndex < activities.length - 1) {
+          currentActIndex++;
+          currentSubIndex = 0;
+        } else {
+          showFinalCelebration();
+          return;
+        }
+      }
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function showFinalCelebration() {
+      renderNav();
+      const area = document.getElementById('questionInteractiveArea');
+      document.getElementById('questionPrompt').textContent = "🏆 Σούπερ Δημιουργός στο ptyxiouxos.gr!";
+      document.getElementById('questionSub').textContent = "Έμαθες να χρησιμοποιείς όλα τα εργαλεία για εννοιολογικούς χάρτες!";
+
+      area.innerHTML = `
+        <div class="bg-gradient-to-r from-emerald-200 via-teal-200 to-amber-200 p-6 rounded-3xl text-center border-4 border-emerald-400 flex flex-col items-center gap-4">
+          <span class="text-6xl animate-bounce">👑 🎨 💡 🌸 🍂 ⭐</span>
+          <h4 class="text-2xl sm:text-3xl font-black text-slate-900">
+            Κέρδισες και τα 24 Αστέρια!
+          </h4>
+          <p class="text-lg sm:text-xl font-bold text-gray-800 max-w-lg">
+            Μπορείς τώρα να αποθηκεύσεις το παιχνίδι στον υπολογιστή σου για να παίζεις όποτε θες χωρίς internet!
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="downloadHTML()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-emerald-800 transition transform active:scale-95">
+              💾 Αποθήκευση Αρχείου
+            </button>
+            <button onclick="restartAll()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-amber-700 transition transform active:scale-95">
+              🔄 Παίξε Ξανά
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('feedbackText').innerHTML = `<span>🌟</span> <span class="text-emerald-900 font-black">Τέλεια 24/24! Αστέρι!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+    }
+
+    function restartAll() {
+      currentActIndex = 0;
+      currentSubIndex = 0;
+      starsCount = 0;
+      answeredSteps.clear();
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function downloadHTML() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pliroforiki_B_Dimotikou_Mathima17_ptyxiouxos.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
