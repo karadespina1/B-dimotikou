@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 8ο: Γνωρίζω το micro:bit - Β΄ Δημοτικού</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      background: radial-gradient(circle at top, #0f172a, #1e1b4b, #311042);
+      min-height: 100vh;
+      color: #f8fafc;
+      user-select: none;
+    }
+    .retro-shadow {
+      box-shadow: 0 10px 0 rgba(0,0,0,0.4), 0 25px 35px -5px rgba(0,0,0,0.5);
+    }
+    /* Micro:bit Physical Board Styling */
+    .microbit-board {
+      background: #111827;
+      border: 5px solid #374151;
+      border-radius: 28px;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.6);
+    }
+    /* 5x5 LED Matrix Grid */
+    .led-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: #374151;
+      transition: all 0.2s ease;
+    }
+    .led-dot.on {
+      background: #ef4444;
+      box-shadow: 0 0 10px #f87171, 0 0 18px #ef4444;
+    }
+    /* Golden Edge Connector Pins */
+    .gold-pin {
+      background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+      border-radius: 0 0 6px 6px;
+    }
+    /* Button styles on board */
+    .board-btn {
+      background: #1f2937;
+      border: 2px solid #4b5563;
+      border-radius: 8px;
+      box-shadow: 0 3px 0 #111827;
+      transition: all 0.1s ease;
+    }
+    .board-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #111827;
+    }
+    /* MakeCode Block Style */
+    .makecode-forever {
+      background: #2563eb;
+      border: 3px solid #1d4ed8;
+      border-radius: 14px;
+    }
+    .makecode-icon {
+      background: #3b82f6;
+      border: 2px solid #1d4ed8;
+      border-radius: 10px;
+    }
+    .glow-pulse {
+      animation: pulseGlow 1.2s infinite alternate ease-in-out;
+    }
+    @keyframes pulseGlow {
+      from { transform: scale(1); filter: drop-shadow(0 0 2px #ef4444); }
+      to { transform: scale(1.08); filter: drop-shadow(0 0 12px #ef4444); }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 md:p-8 flex flex-col items-center">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-5xl bg-slate-900/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 retro-shadow border-4 border-cyan-500/60 flex flex-col gap-5">
+
+    <!-- Header: Cyber Futuristic Lab Theme -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-cyan-900/60 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-5xl sm:text-6xl animate-pulse">💡</span>
+        <div>
+          <span class="bg-cyan-500 text-slate-950 font-black px-3.5 py-1 rounded-full text-base sm:text-lg uppercase shadow">
+            Μάθημα 8ο
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-black text-cyan-300 tracking-tight mt-1">
+            Γνωρίζω το micro:bit! 🤖✨
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="soundToggle" onclick="toggleSound()" class="bg-cyan-950 hover:bg-cyan-900 text-cyan-300 text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl border-2 border-cyan-600 transition">
+          🔊 Ήχος: <span id="soundStatus">ON</span>
+        </button>
+        <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl shadow border-2 border-emerald-400 transition flex items-center gap-2">
+          💾 <span>Αποθήκευση</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar: 8 Activities -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between text-lg sm:text-2xl font-black text-slate-200">
+        <span id="actIndicator" class="text-cyan-300">Δραστηριότητα 1 από 8</span>
+        <div class="flex items-center gap-2">
+          <span id="starCounter" class="text-2xl sm:text-3xl text-amber-400 font-black">⭐ 0/24</span>
+        </div>
+      </div>
+
+      <!-- 8 Activity Tabs -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="navBubbles"></div>
+
+      <!-- 3 Substep Dots -->
+      <div class="flex items-center justify-center gap-3 mt-1">
+        <span class="text-base sm:text-xl font-black text-cyan-400">Βήμα:</span>
+        <div id="substepDots" class="flex gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Interactive Workspace: Interactive Micro:bit Board on Left, Question on Right -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: Live Interactive Micro:bit Simulator -->
+      <div class="lg:col-span-5 bg-gradient-to-b from-slate-800 to-indigo-950 p-4 rounded-3xl border-4 border-cyan-600/50 shadow-inner flex flex-col items-center gap-3">
+        
+        <div class="w-full flex items-center justify-between">
+          <h2 class="text-xl sm:text-2xl font-black text-cyan-200 flex items-center gap-2">
+            <span>🔬</span> Ο Προσομοιωτής
+          </h2>
+          <span id="currentIconName" class="bg-cyan-900/80 text-cyan-300 font-black px-3 py-1 rounded-xl text-sm sm:text-base border border-cyan-600">
+            ❤️ Καρδιά
+          </span>
+        </div>
+
+        <!-- The Micro:bit Board Replica -->
+        <div class="microbit-board w-64 sm:w-72 h-52 sm:h-56 p-3 flex flex-col justify-between items-center relative overflow-hidden">
+          
+          <!-- Top Features: Logo & Mic Indicator -->
+          <div class="w-full flex items-center justify-between px-2 pt-1 text-xs text-slate-400">
+            <span class="font-bold text-slate-300">micro:bit</span>
+            <!-- Touch Logo Oval -->
+            <div id="boardLogo" class="w-9 h-5 rounded-full border-2 border-amber-400 bg-amber-500/40 flex items-center justify-center cursor-pointer hover:bg-amber-400/60" title="Λογότυπο (Αισθητήρας Αφής)">
+              <span class="text-[9px] text-amber-200 font-black">LOGO</span>
+            </div>
+            <span class="text-xs">🔴 MIC</span>
+          </div>
+
+          <!-- Middle Section: Button A, 5x5 LED Screen, Button B -->
+          <div class="w-full flex items-center justify-between px-1">
+            <!-- Button A -->
+            <button onclick="pressBoardButton('A')" class="board-btn w-9 h-9 sm:w-10 sm:h-10 flex flex-col items-center justify-center text-white font-black text-sm active:scale-90">
+              <span>A</span>
+            </button>
+
+            <!-- 5x5 LED Matrix Screen (25 LEDs) -->
+            <div id="ledGrid" class="grid grid-cols-5 gap-1.5 p-2 bg-slate-950/90 rounded-xl border-2 border-slate-700 shadow-inner">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Button B -->
+            <button onclick="pressBoardButton('B')" class="board-btn w-9 h-9 sm:w-10 sm:h-10 flex flex-col items-center justify-center text-white font-black text-sm active:scale-90">
+              <span>B</span>
+            </button>
+          </div>
+
+          <!-- Bottom Edge Pins: 0, 1, 2, 3V, GND -->
+          <div class="w-full flex justify-between gap-1 pt-1 border-t-2 border-slate-700">
+            <div class="gold-pin h-4 flex-1 text-center text-[9px] font-black text-slate-900">0</div>
+            <div class="gold-pin h-4 flex-1 text-center text-[9px] font-black text-slate-900">1</div>
+            <div class="gold-pin h-4 flex-1 text-center text-[9px] font-black text-slate-900">2</div>
+            <div class="gold-pin h-4 flex-1 text-center text-[9px] font-black text-slate-900">3V</div>
+            <div class="gold-pin h-4 flex-1 text-center text-[9px] font-black text-slate-900">GND</div>
+          </div>
+        </div>
+
+        <!-- Action Button: Toggle Animation or Download code to board -->
+        <button id="toggleAnimBtn" onclick="toggleLedAnimation()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-black text-xl py-3 px-4 rounded-2xl shadow-lg border-2 border-cyan-400 flex items-center justify-center gap-3 transition transform active:scale-95">
+          <span class="text-3xl">▶️</span>
+          <span>Δες τα φωτάκια LED!</span>
+        </button>
+
+        <!-- MakeCode Block Preview Box -->
+        <div class="w-full bg-slate-950/90 p-3 rounded-2xl border-2 border-cyan-500/40 flex flex-col items-center text-center shadow-sm">
+          <span class="text-xs sm:text-sm font-bold text-cyan-400 uppercase tracking-wide">Μπλοκ στο MakeCode:</span>
+          <div id="codeVisualBlocks" class="flex flex-wrap items-center justify-center gap-1.5 pt-2"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Question Area (Super simple Greek, big buttons) -->
+      <div class="lg:col-span-7 bg-slate-800/95 p-5 sm:p-7 rounded-3xl border-4 border-cyan-500/40 shadow-sm flex flex-col gap-5 min-h-[460px] justify-between">
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <span id="actCategory" class="inline-block bg-cyan-950 text-cyan-300 border border-cyan-600 font-black px-3.5 py-1 rounded-xl text-sm sm:text-base mb-2">
+              Κατηγορία
+            </span>
+            <h3 id="questionPrompt" class="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-snug">
+              Ερώτηση...
+            </h3>
+            <p id="questionSub" class="text-lg sm:text-2xl text-cyan-400 font-bold mt-1">
+              Οδηγία...
+            </p>
+          </div>
+
+          <!-- Answers Container -->
+          <div id="questionInteractiveArea" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- Feedback & Auto Next -->
+        <div id="feedbackContainer" class="p-4 rounded-2xl border-2 border-slate-700 bg-slate-900 flex items-center justify-between min-h-[72px]">
+          <div id="feedbackText" class="text-lg sm:text-2xl font-black text-slate-300 flex items-center gap-2">
+            <span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>
+          </div>
+          <div id="autoNextTimer" class="hidden flex items-center gap-2 text-emerald-400 font-black text-lg">
+            <span>Μπράβο! Επόμενο...</span>
+            <div class="w-6 h-6 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-between text-xs sm:text-sm text-slate-400 border-t-2 border-slate-800 pt-3">
+      <span>Πληροφορική Β΄ Δημοτικού • Μάθημα 8ο (σελ. 35-38)</span>
+      <span class="font-black text-cyan-400">micro:bit 🤖 • 25 Φωτάκια LED 💡 • «για πάντα» 🔁</span>
+    </footer>
+
+  </div>
+
+  <!-- Audio Synthesizer -->
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundStatus').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundToggle').classList.toggle('bg-slate-700', !soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'beep') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now); // A5 high beep
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'happy') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'sad') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.setValueAtTime(260, now + 0.18);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(170, now + 0.15);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+  </script>
+
+  <!-- Lesson 8 Data: 8 Activities x 3 Substeps = 24 Mini-Tasks -->
+  <script>
+    /*
+      Lesson 8: "Γνωρίζω το micro:bit" (σελ. 35-38)
+      - What is micro:bit: small programmable board with lights, buttons, mic, speaker (σελ. 35).
+      - It fits in your pocket, lacks screen/keyboard so we program it via computer (σελ. 35).
+      - MakeCode environment: Workspace, simulator, download button (σελ. 36).
+      - Deleting "κατά την έναρξη" and keeping the blue "για πάντα" repeat loop (σελ. 36-37).
+      - Category "Βασικά" -> command "εμφάνιση εικονιδίου" (σελ. 37).
+      - Happy face & Sad face alternating inside "για πάντα" (σελ. 37-38).
+      - Downloading to physical micro:bit with "Λήψη" (σελ. 38).
+    */
+
+    // LED Icons (5x5 binary matrix)
+    const LED_PATTERNS = {
+      heart: [
+        [0,1,0,1,0],
+        [1,1,1,1,1],
+        [1,1,1,1,1],
+        [0,1,1,1,0],
+        [0,0,1,0,0]
+      ],
+      happy: [
+        [0,0,0,0,0],
+        [0,1,0,1,0],
+        [0,0,0,0,0],
+        [1,0,0,0,1],
+        [0,1,1,1,0]
+      ],
+      sad: [
+        [0,0,0,0,0],
+        [0,1,0,1,0],
+        [0,0,0,0,0],
+        [0,1,1,1,0],
+        [1,0,0,0,1]
+      ],
+      yes: [
+        [0,0,0,0,0],
+        [0,0,0,0,1],
+        [0,0,0,1,0],
+        [1,0,1,0,0],
+        [0,1,0,0,0]
+      ],
+      sun: [
+        [1,0,1,0,1],
+        [0,1,1,1,0],
+        [1,1,1,1,1],
+        [0,1,1,1,0],
+        [1,0,1,0,1]
+      ],
+      off: [
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [0,0,0,0,0]
+      ]
+    };
+
+    const activities = [
+      // 1. Τι είναι το micro:bit; (σελ. 35)
+      {
+        title: "Τι είναι το micro:bit;",
+        category: "Γνωριμία με τη Συσκευή",
+        substeps: [
+          {
+            prompt: "Τι είναι το micro:bit που κρατάει η Υπατία στο χέρι της;",
+            sub: "Όπως μας λέει το βιβλίο στη σελίδα 35:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "❤️ Καρδιά", anim: "pulse" },
+            blockPreview: [{ type: "icon", label: "εμφάνιση εικονιδίου: ❤️" }],
+            options: [
+              { text: "Μια μικρή ηλεκτρονική συσκευή που προγραμματίζουμε! 🤖", correct: true },
+              { text: "Ένα κομμάτι πλαστελίνη για ζωγραφική 🎨", correct: false }
+            ]
+          },
+          {
+            prompt: "Είναι τόσο μικρό που μπορεί να χωρέσει:",
+            sub: "Σκέψου το μέγεθός του:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "❤️ Στην Τσέπη!", anim: "pulse" },
+            blockPreview: [{ type: "icon", label: "Μικρό & Μαγικό!" }],
+            options: [
+              { text: "Μέσα στην τσέπη μας! 👖", correct: true },
+              { text: "Μόνο σε ένα ολόκληρο φορτηγό 🚛", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το micro:bit έχει πάνω του φωτάκια LED που ανάβουν και κουμπιά που τα πατάμε.",
+            sub: "Δες το μπροστινό του μέρος στον προσομοιωτή:",
+            type: "tf",
+            boardSetup: { icon: "heart", name: "💡 Φωτάκια LED", anim: "pulse" },
+            blockPreview: [{ type: "icon", label: "25 Φωτάκια!" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 2. Πώς το Προγραμματίζουμε; (σελ. 35-36)
+      {
+        title: "Πώς το Προγραμματίζουμε;",
+        category: "Υπολογιστής & micro:bit",
+        substeps: [
+          {
+            prompt: "Επειδή το micro:bit είναι τόσο μικρό, δεν έχει οθόνη και πληκτρολόγιο. Πού γράφουμε το πρόγραμμα;",
+            sub: "Δες ποιο μηχάνημα χρησιμοποιούμε:",
+            type: "choice",
+            boardSetup: { icon: "yes", name: "💻 Υπολογιστής", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "MakeCode Web" }],
+            options: [
+              { text: "Στον υπολογιστή του εργαστηρίου! 💻", correct: true },
+              { text: "Στο ψυγείο του σπιτιού μας 🧊", correct: false }
+            ]
+          },
+          {
+            prompt: "Πού βλέπουμε τι θα κάνει το micro:bit ΠΡΙΝ το συνδέσουμε;",
+            sub: "Όπως στη σελίδα 36:",
+            type: "choice",
+            boardSetup: { icon: "yes", name: "🔬 Προσομοιωτής", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "Εικονικό micro:bit" }],
+            options: [
+              { text: "Στον προσομοιωτή στην αριστερή πλευρά της οθόνης! 🔬", correct: true },
+              { text: "Κοιτώντας έξω από το παράθυρο", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Στην ιστοσελίδα MakeCode φτιάχνουμε νέο έργο και του δίνουμε όνομα.",
+            sub: "Όπως μας δείχνει το παράθυρο «Δημιουργία Έργου»:",
+            type: "tf",
+            boardSetup: { icon: "yes", name: "✨ Νέο Έργο", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "Νέο Έργο ✅" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 3. Η Μπλε Εντολή «για πάντα» (σελ. 36-37)
+      {
+        title: "Η Εντολή «για πάντα»!",
+        category: "Επανάληψη στο micro:bit",
+        substeps: [
+          {
+            prompt: "Στο micro:bit, ποια μπλε εντολή είναι εντολή επανάληψης;",
+            sub: "Δες το όνομά της στη σελίδα 37:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "🔁 για πάντα", anim: "pulse" },
+            blockPreview: [{ type: "forever", label: "για πάντα" }],
+            options: [
+              { text: "Η εντολή «για πάντα»! 🔁", correct: true },
+              { text: "Η εντολή «καληνύχτα» 😴", correct: false }
+            ]
+          },
+          {
+            prompt: "Τι συμβαίνει με τις εντολές που βάζουμε ΜΕΣΑ στο «για πάντα»;",
+            sub: "Σκέψου πόσες φορές εκτελούνται:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "🔁 Συνέχεια!", anim: "pulse" },
+            blockPreview: [{ type: "forever", label: "για πάντα" }],
+            options: [
+              { text: "Εκτελούνται ξανά και ξανά χωρίς σταματημό! ⚡", correct: true },
+              { text: "Σβήνουν μετά από 1 δευτερόλεπτο", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Την εντολή «κατά την έναρξη» μπορούμε να τη σύρουμε πίσω στον κάδο αν δεν τη χρειαζόμαστε.",
+            sub: "Όπως κάναμε στη σελίδα 36:",
+            type: "tf",
+            boardSetup: { icon: "heart", name: "🗑️ Στον Κάδο", anim: "pulse" },
+            blockPreview: [{ type: "forever", label: "για πάντα" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 4. Εμφάνιση Εικονιδίου (σελ. 37)
+      {
+        title: "Φωτεινά Εικονίδια!",
+        category: "Η Κατηγορία «Βασικά»",
+        substeps: [
+          {
+            prompt: "Από ποια μπλε κατηγορία παίρνουμε την εντολή «εμφάνιση εικονιδίου»;",
+            sub: "Κοίταξε την πρώτη κατηγορία στη σελίδα 37:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "❤️ Καρδιά", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "εμφάνιση εικονιδίου ❤️" }],
+            options: [
+              { text: "Από την κατηγορία «Βασικά»! 🟦", correct: true },
+              { text: "Από τα φρούτα του σούπερ μάρκετ 🍎", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποιο είναι το πρώτο εικονίδιο που εμφανίζεται στην εντολή;",
+            sub: "Δες το σχήμα του:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "❤️ Καρδούλα", anim: "pulse" },
+            blockPreview: [{ type: "icon", label: "εμφάνιση εικονιδίου ❤️" }],
+            options: [
+              { text: "Μια όμορφη καρδούλα! ❤️", correct: true },
+              { text: "Μια πίτσα 🍕", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Πατώντας στο βελάκι δίπλα στην καρδούλα, ανοίγει ένας πίνακας με πολλά άλλα σχέδια.",
+            sub: "Όπως χαρούμενο πρόσωπο, ήλιος, τικ κ.ά.:",
+            type: "tf",
+            boardSetup: { icon: "sun", name: "☀️ Ήλιος", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "Πίνακας Εικονιδίων" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 5. Το Χαρούμενο Προσωπάκι! (σελ. 37)
+      {
+        title: "Χαμόγελο στο micro:bit!",
+        category: "Επιλογή Σχεδίου",
+        substeps: [
+          {
+            prompt: "Η Υπατία διάλεξε ένα προσωπάκι που χαμογελάει! Πώς λέγεται;",
+            sub: "Δες τα φωτάκια στον προσομοιωτή:",
+            type: "choice",
+            boardSetup: { icon: "happy", name: "😊 Χαρούμενο", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "εμφάνιση εικονιδίου 😊" }],
+            options: [
+              { text: "Το χαρωπό προσωπάκι! 😊", correct: true },
+              { text: "Το άγριο λιοντάρι 🦁", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσα κόκκινα φωτάκια LED έχει συνολικά η οθόνη του micro:bit;",
+            sub: "Μέτρησε: 5 σειρές με 5 φωτάκια (5 x 5):",
+            type: "choice",
+            boardSetup: { icon: "happy", name: "5 x 5 = 25 LEDs", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "25 Φωτάκια LED" }],
+            options: [
+              { text: "25 φωτάκια LED! 💡", correct: true },
+              { text: "Μόνο 2 φωτάκια", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Τα φωτάκια ανάβουν με κόκκινο χρώμα και σχηματίζουν το χαμόγελο.",
+            sub: "Κοίταξε την οθόνη του micro:bit στα αριστερά:",
+            type: "tf",
+            boardSetup: { icon: "happy", name: "😊 Χαμόγελο", anim: "steady" },
+            blockPreview: [{ type: "icon", label: "Κόκκινα LEDs" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 6. Χαρούμενο και Λυπημένο (σελ. 37-38)
+      {
+        title: "Αλλάζει Διάθεση!",
+        category: "Δύο Εντολές σε Επανάληψη",
+        substeps: [
+          {
+            prompt: "Βάζουμε μέσα στο «για πάντα»: πρώτα το χαρωπό προσωπάκι 😊 και μετά το λυπημένο 🙁. Τι θα συμβεί;",
+            sub: "Σκέψου πώς θα συμπεριφερθεί:",
+            type: "choice",
+            boardSetup: { icon: "happy-sad", name: "😊 ⇄ 🙁 Εναλλαγή", anim: "alternate" },
+            blockPreview: [{ type: "forever", inner: ["😊 Χαρούμενο", "🙁 Λυπημένο"] }],
+            options: [
+              { text: "Θα αναβοσβήνει πότε χαρούμενο και πότε λυπημένο! 🎭", correct: true },
+              { text: "Θα μείνει μαύρη η οθόνη για πάντα", correct: false }
+            ]
+          },
+          {
+            prompt: "Γιατί αλλάζει συνεχώς πρόσωπα χωρίς να σταματάει;",
+            sub: "Ποιο τουβλάκι κάνει αυτή τη μαγεία;",
+            type: "choice",
+            boardSetup: { icon: "happy-sad", name: "🔁 Λόγω του «για πάντα»", anim: "alternate" },
+            blockPreview: [{ type: "forever", label: "για πάντα" }],
+            options: [
+              { text: "Επειδή οι δύο εντολές είναι μέσα στο «για πάντα»! 🔁", correct: true },
+              { text: "Επειδή φύσηξε αέρας στην τάξη 💨", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μπορούμε να βάλουμε όποια άλλα εικονίδια θέλουμε (π.χ. καρδιά και ήλιο) και θα εναλλάσσονται!",
+            sub: "Πειραματίσου με διαφορετικά σχέδια:",
+            type: "tf",
+            boardSetup: { icon: "happy-sad", name: "✨ Συνδυασμοί", anim: "alternate" },
+            blockPreview: [{ type: "forever", inner: ["❤️ Καρδιά", "☀️ Ήλιος"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 7. Το Κουμπί «Λήψη» (σελ. 38)
+      {
+        title: "Μεταφορά στο Πραγματικό micro:bit!",
+        category: "Το Κουμπί Λήψη",
+        substeps: [
+          {
+            prompt: "Όταν τελειώσουμε το πρόγραμμα, ποιο μωβ κουμπί πατάμε για να το κατεβάσουμε στο πραγματικό micro:bit;",
+            sub: "Κοίταξε κάτω αριστερά στην οθόνη του MakeCode (σελ. 38):",
+            type: "choice",
+            boardSetup: { icon: "yes", name: "📥 Κουμπί Λήψη", anim: "pulse" },
+            blockPreview: [{ type: "single", cmd: "📥 Λήψη", label: "Μεταφορά" }],
+            options: [
+              { text: "Το μεγάλο κουμπί «Λήψη»! 📥", correct: true },
+              { text: "Το κουμπί «Σβήσε τα πάντα» ❌", correct: false }
+            ]
+          },
+          {
+            prompt: "Πώς συνδέουμε το micro:bit με τον υπολογιστή για να πάρει το πρόγραμμα;",
+            sub: "Με ποιο καλώδιο συνδέεται;",
+            type: "choice",
+            boardSetup: { icon: "yes", name: "🔌 Καλώδιο USB", anim: "steady" },
+            blockPreview: [{ type: "single", cmd: "🔌 USB", label: "Σύνδεση" }],
+            options: [
+              { text: "Με το καλώδιο USB! 🔌", correct: true },
+              { text: "Με ένα κορδόνι παπουτσιού 👟", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Μόλις ολοκληρωθεί η λήψη, το πραγματικό micro:bit αρχίζει να φωτίζει αμέσως!",
+            sub: "Και δουλεύει ακόμα κι αν το πάρουμε μαζί μας:",
+            type: "tf",
+            boardSetup: { icon: "happy", name: "🌟 Λειτουργεί!", anim: "pulse" },
+            blockPreview: [{ type: "single", cmd: "✨ Έτοιμο!", label: "Επιτυχία" }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 8. Μεγάλη Επιβράβευση: Φίλος με το micro:bit! (σελ. 38)
+      {
+        title: "Σούπερ Μηχανικός micro:bit!",
+        category: "Συγχαρητήρια!",
+        substeps: [
+          {
+            prompt: "Ο Ήρωνας πρόσθεσε μαλλιά στο micro:bit και το έκανε να χαμογελάει! Τι έμαθες σήμερα;",
+            sub: "Διάλεξε όλα τα καταπληκτικά πράγματα που κατάφερες:",
+            type: "choice",
+            boardSetup: { icon: "happy", name: "👑 Σούπερ Μηχανικός", anim: "pulse" },
+            blockPreview: [{ type: "forever", inner: ["💡 25 LEDs", "🔁 για πάντα"] }],
+            options: [
+              { text: "Να ανάβω τα φωτάκια του micro:bit με την εντολή «για πάντα»! 🌟", correct: true },
+              { text: "Να κοιτάζω το ταβάνι", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποια είναι τα δύο κουμπιά που βρίσκονται μπροστά στο micro:bit;",
+            sub: "Κοίταξε τα αριστερά και δεξιά από την οθόνη:",
+            type: "choice",
+            boardSetup: { icon: "heart", name: "Κουμπιά A & B", anim: "steady" },
+            blockPreview: [{ type: "single", cmd: "🔲 A & B", label: "Κουμπιά" }],
+            options: [
+              { text: "Το κουμπί A και το κουμπί B! 🅰️🅱️", correct: true },
+              { text: "Το κουμπί X και το κουμπί Z", correct: false }
+            ]
+          },
+          {
+            prompt: "Είσαι έτοιμος για το επόμενο μάθημα όπου θα προγραμματίσουμε τα κουμπιά για το παιχνίδι Πέτρα-Ψαλίδι-Χαρτί;",
+            sub: "Διάλεξε πόσο ενθουσιασμένος είσαι:",
+            type: "choice",
+            boardSetup: { icon: "sun", name: "🎉 24/24 Αστέρια!", anim: "pulse" },
+            blockPreview: [{ type: "forever", inner: ["✂️ Ψαλίδι", "📄 Χαρτί"] }],
+            options: [
+              { text: "🌟 Ναι! Είμαι πανέτοιμος για το Πέτρα-Ψαλίδι-Χαρτί!", correct: true },
+              { text: "👍 Τα κατάφερα τέλεια και κέρδισα όλα τα αστέρια!", correct: true },
+              { text: "🎉 Είμαι ο καλύτερος προγραμματιστής micro:bit!", correct: true }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    let starsCount = 0;
+    const answeredSteps = new Set();
+    let isTransitioning = false;
+    let animInterval = null;
+    let isHappyState = true;
+
+    window.onload = function() {
+      renderNav();
+      loadCurrentQuestion();
+    };
+
+    function renderNav() {
+      const navContainer = document.getElementById('navBubbles');
+      navContainer.innerHTML = '';
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `act-bubble-${idx}`;
+        const isActive = idx === currentActIndex;
+        btn.className = `py-2 px-1 rounded-2xl font-black text-sm sm:text-base border-3 transition flex flex-col items-center justify-center gap-0.5 ${
+          isActive 
+            ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-md scale-105' 
+            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+        }`;
+        btn.innerHTML = `
+          <span>Δρ.${idx + 1}</span>
+          <span class="text-xs ${isActive ? 'text-slate-950' : 'text-cyan-400'}">${getActProgressIcon(idx)}</span>
+        `;
+        btn.onclick = () => {
+          if (isTransitioning) return;
+          stopLedAnimation();
+          playSound('click');
+          currentActIndex = idx;
+          currentSubIndex = 0;
+          renderNav();
+          loadCurrentQuestion();
+        };
+        navContainer.appendChild(btn);
+      });
+
+      const dotContainer = document.getElementById('substepDots');
+      dotContainer.innerHTML = '';
+      for (let s = 0; s < 3; s++) {
+        const dot = document.createElement('div');
+        const isCurrent = s === currentSubIndex;
+        const isDone = answeredSteps.has(`${currentActIndex}-${s}`);
+        dot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-base sm:text-lg border-2 transition ${
+          isCurrent 
+            ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow scale-110' 
+            : isDone 
+              ? 'bg-emerald-500 text-white border-emerald-400' 
+              : 'bg-slate-800 text-slate-500 border-slate-700'
+        }`;
+        dot.textContent = isDone ? '✓' : (s + 1);
+        dotContainer.appendChild(dot);
+      }
+
+      document.getElementById('actIndicator').textContent = `Δραστηριότητα ${currentActIndex + 1} από 8: ${activities[currentActIndex].title}`;
+      document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+    }
+
+    function getActProgressIcon(actIdx) {
+      const c1 = answeredSteps.has(`${actIdx}-0`);
+      const c2 = answeredSteps.has(`${actIdx}-1`);
+      const c3 = answeredSteps.has(`${actIdx}-2`);
+      if (c1 && c2 && c3) return '⭐⭐⭐';
+      if ((c1 && c2) || (c2 && c3) || (c1 && c3)) return '⭐⭐';
+      if (c1 || c2 || c3) return '⭐';
+      return '⚪';
+    }
+
+    function loadCurrentQuestion() {
+      isTransitioning = false;
+      const act = activities[currentActIndex];
+      const q = act.substeps[currentSubIndex];
+
+      document.getElementById('actCategory').textContent = act.category;
+      document.getElementById('questionPrompt').textContent = q.prompt;
+      document.getElementById('questionSub').textContent = q.sub;
+      document.getElementById('currentIconName').textContent = q.boardSetup.name || 'micro:bit';
+
+      // Setup LEDs on board
+      setupBoardLeds(q.boardSetup);
+
+      // Render Code Blocks
+      renderCodeVisual(q.blockPreview);
+
+      // Reset Feedback Box
+      const fbBox = document.getElementById('feedbackContainer');
+      fbBox.className = 'p-4 rounded-2xl border-2 border-slate-700 bg-slate-900 flex items-center justify-between min-h-[72px]';
+      document.getElementById('feedbackText').innerHTML = `<span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+
+      // Render Answers
+      const container = document.getElementById('questionInteractiveArea');
+      container.innerHTML = '';
+
+      if (q.type === 'choice') {
+        const shuffled = shuffle(q.options);
+        const letters = ['Α', 'Β', 'Γ'];
+        shuffled.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-4 sm:p-5 rounded-2xl bg-slate-900 hover:bg-slate-750 active:scale-[0.99] border-3 border-cyan-700/60 hover:border-cyan-400 font-black text-xl sm:text-2xl text-slate-100 transition flex items-center gap-4 shadow-sm';
+          btn.innerHTML = `
+            <span class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-cyan-500 text-slate-950 flex items-center justify-center text-2xl font-black shrink-0 shadow">
+              ${letters[optIdx] || '•'}
+            </span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.correct);
+          container.appendChild(btn);
+        });
+      } else if (q.type === 'tf') {
+        const tfOptions = shuffle([
+          { text: "ΣΩΣΤΟ 👍", val: true, bg: "bg-emerald-950 hover:bg-emerald-900 border-emerald-500 text-emerald-200" },
+          { text: "ΛΑΘΟΣ 👎", val: false, bg: "bg-rose-950 hover:bg-rose-900 border-rose-500 text-rose-200" }
+        ]);
+
+        const tfGrid = document.createElement('div');
+        tfGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+        tfOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = `p-6 sm:p-8 rounded-3xl border-4 font-black text-3xl sm:text-4xl text-center shadow transition transform active:scale-95 ${opt.bg}`;
+          btn.textContent = opt.text;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.val === q.correctAnswer);
+          tfGrid.appendChild(btn);
+        });
+        container.appendChild(tfGrid);
+      }
+    }
+
+    function setupBoardLeds(setup) {
+      stopLedAnimation();
+      if (setup.icon === 'happy-sad') {
+        drawMatrix(LED_PATTERNS.happy);
+        // Start alternating animation automatically
+        animInterval = setInterval(() => {
+          isHappyState = !isHappyState;
+          drawMatrix(isHappyState ? LED_PATTERNS.happy : LED_PATTERNS.sad);
+          playSound(isHappyState ? 'happy' : 'sad');
+        }, 800);
+      } else {
+        const pattern = LED_PATTERNS[setup.icon] || LED_PATTERNS.heart;
+        drawMatrix(pattern);
+      }
+    }
+
+    function drawMatrix(pattern) {
+      const grid = document.getElementById('ledGrid');
+      grid.innerHTML = '';
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const dot = document.createElement('div');
+          dot.className = 'led-dot' + (pattern[r][c] === 1 ? ' on' : '');
+          grid.appendChild(dot);
+        }
+      }
+    }
+
+    function stopLedAnimation() {
+      if (animInterval) {
+        clearInterval(animInterval);
+        animInterval = null;
+      }
+    }
+
+    function toggleLedAnimation() {
+      const q = activities[currentActIndex].substeps[currentSubIndex];
+      playSound('beep');
+      if (animInterval) {
+        stopLedAnimation();
+        setupBoardLeds(q.boardSetup);
+      } else {
+        // Trigger lively blink
+        let count = 0;
+        animInterval = setInterval(() => {
+          count++;
+          if (count % 2 === 0) {
+            drawMatrix(LED_PATTERNS[q.boardSetup.icon] || LED_PATTERNS.heart);
+            playSound('beep');
+          } else {
+            drawMatrix(LED_PATTERNS.off);
+          }
+          if (count > 6) {
+            stopLedAnimation();
+            drawMatrix(LED_PATTERNS[q.boardSetup.icon] || LED_PATTERNS.heart);
+          }
+        }, 220);
+      }
+    }
+
+    function pressBoardButton(btnName) {
+      playSound('beep');
+      if (btnName === 'A') {
+        drawMatrix(LED_PATTERNS.happy);
+        playSound('happy');
+      } else if (btnName === 'B') {
+        drawMatrix(LED_PATTERNS.sad);
+        playSound('sad');
+      }
+    }
+
+    function renderCodeVisual(blocks) {
+      const box = document.getElementById('codeVisualBlocks');
+      box.innerHTML = '';
+      if (!blocks || !blocks.length) return;
+
+      blocks.forEach(b => {
+        if (b.type === 'forever') {
+          const fWrap = document.createElement('div');
+          fWrap.className = 'makecode-forever p-2 px-3 text-white flex items-center gap-2 shadow-md';
+          
+          let innerHtml = '';
+          if (b.inner && b.inner.length) {
+            b.inner.forEach(cmd => {
+              innerHtml += `<span class="makecode-icon px-2.5 py-1 text-white font-black text-sm sm:text-base">${cmd}</span>`;
+            });
+          } else {
+            innerHtml = `<span class="makecode-icon px-2.5 py-1 text-white font-black text-sm sm:text-base">εμφάνιση εικονιδίου ❤️</span>`;
+          }
+
+          fWrap.innerHTML = `
+            <div class="flex items-center gap-1 font-black text-sm sm:text-base">
+              <span>🔁</span> <span>για πάντα</span>
+            </div>
+            <div class="flex flex-col gap-1 bg-black/20 p-1 rounded-xl">${innerHtml}</div>
+          `;
+          box.appendChild(fWrap);
+        } else if (b.type === 'icon') {
+          const iWrap = document.createElement('div');
+          iWrap.className = 'makecode-icon px-3 py-1.5 text-white font-black text-base sm:text-lg shadow-md flex items-center gap-1.5';
+          iWrap.innerHTML = `<span>💡</span> <span>${b.label}</span>`;
+          box.appendChild(iWrap);
+        } else if (b.type === 'single') {
+          const sWrap = document.createElement('div');
+          sWrap.className = 'bg-indigo-600 px-3 py-1.5 rounded-xl border border-indigo-400 text-white font-black text-base sm:text-lg shadow flex items-center gap-1.5';
+          sWrap.innerHTML = `<span>${b.cmd}</span> <span class="text-xs bg-white/20 px-1.5 py-0.5 rounded-lg">${b.label}</span>`;
+          box.appendChild(sWrap);
+        }
+      });
+    }
+
+    function handleChoiceAnswer(btnElement, isCorrect) {
+      if (isTransitioning) return;
+
+      const fbBox = document.getElementById('feedbackContainer');
+      const fbText = document.getElementById('feedbackText');
+      const timerIndicator = document.getElementById('autoNextTimer');
+
+      if (isCorrect) {
+        isTransitioning = true;
+        playSound('correct');
+
+        btnElement.classList.remove('bg-slate-900', 'border-cyan-700/60');
+        btnElement.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400', 'scale-[1.02]', 'shadow-lg');
+
+        const key = `${currentActIndex}-${currentSubIndex}`;
+        if (!answeredSteps.has(key)) {
+          answeredSteps.add(key);
+          starsCount++;
+          document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+        }
+
+        fbBox.className = 'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-950 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-4xl">🎉</span> <span class="text-emerald-300 text-xl sm:text-2xl font-black">Μπράβο! Το micro:bit φωτίζει! 💡</span>`;
+        timerIndicator.classList.remove('hidden');
+
+        // Trigger celebratory blink on board
+        toggleLedAnimation();
+
+        setTimeout(() => {
+          advanceToNext();
+        }, 1250);
+
+      } else {
+        playSound('wrong');
+        btnElement.classList.add('bg-rose-950', 'border-rose-500');
+        fbBox.className = 'p-4 rounded-2xl border-2 border-rose-500 bg-rose-950 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-3xl">🤔</span> <span class="text-rose-300 font-black">Δοκίμασε ξανά! Δες το micro:bit στα αριστερά!</span>`;
+      }
+    }
+
+    function advanceToNext() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+      } else {
+        if (currentActIndex < activities.length - 1) {
+          currentActIndex++;
+          currentSubIndex = 0;
+        } else {
+          showFinalCelebration();
+          return;
+        }
+      }
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function showFinalCelebration() {
+      renderNav();
+      const area = document.getElementById('questionInteractiveArea');
+      document.getElementById('questionPrompt').textContent = "🏆 Είσαι ο Μεγάλος Μηχανικός του micro:bit!";
+      document.getElementById('questionSub').textContent = "Έμαθες να προγραμματίζεις τα 25 φωτάκια LED με την εντολή «για πάντα»!";
+
+      area.innerHTML = `
+        <div class="bg-gradient-to-r from-cyan-950 via-slate-900 to-indigo-950 p-6 rounded-3xl text-center border-4 border-cyan-400 flex flex-col items-center gap-4">
+          <span class="text-6xl animate-bounce">👑 🤖 💡 ❤️ ⭐</span>
+          <h4 class="text-2xl sm:text-3xl font-black text-cyan-300">
+            Κέρδισες και τα 24 Αστέρια!
+          </h4>
+          <p class="text-lg sm:text-xl font-bold text-slate-200 max-w-lg">
+            Μπορείς τώρα να αποθηκεύσεις το παιχνίδι στον υπολογιστή σου για να παίζεις όποτε θες χωρίς internet!
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-emerald-300 transition transform active:scale-95">
+              💾 Αποθήκευση Αρχείου
+            </button>
+            <button onclick="restartAll()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-cyan-400 transition transform active:scale-95">
+              🔄 Παίξε Ξανά
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('feedbackText').innerHTML = `<span>🌟</span> <span class="text-cyan-300 font-black">Τέλεια 24/24! Σούπερ Επιστήμονας!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+    }
+
+    function restartAll() {
+      currentActIndex = 0;
+      currentSubIndex = 0;
+      starsCount = 0;
+      answeredSteps.clear();
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function downloadHTML() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pliroforiki_B_Dimotikou_Mathima8_Microbit.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
