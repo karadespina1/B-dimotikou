@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Μάθημα 20: Οι Ψηφιακοί Πόροι μιας Ιστοσελίδας - Παιχνιδοχώρα</title>
+<style>
+  :root {
+    --bg-main: #f3f9ff;
+    --card-bg: #ffffff;
+    --accent-blue: #3498db;
+    --accent-green: #2ecc71;
+    --accent-purple: #9b59b6;
+    --accent-orange: #e67e22;
+    --accent-pink: #fd79a8;
+    --text-dark: #2c3e50;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', sans-serif, system-ui;
+    background: var(--bg-main);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 20px;
+  }
+  .main-wrapper {
+    max-width: 950px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+  }
+  .hero-card {
+    background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 28px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(63, 43, 150, 0.2);
+  }
+  .hero-card h1 {
+    margin: 0 0 10px 0;
+    font-size: 34px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+  }
+  .hero-card p {
+    font-size: 22px;
+    margin: 0;
+    opacity: 0.95;
+  }
+  .badge-reward {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.25);
+    padding: 8px 20px;
+    border-radius: 50px;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 22px;
+  }
+  .game-container {
+    background: var(--card-bg);
+    border-radius: 26px;
+    border: 4px solid #d0e1fd;
+    padding: 26px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .game-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 3px dashed #d0e1fd;
+    padding-bottom: 12px;
+  }
+  .game-num {
+    background: #e67e22;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+  }
+  .game-title {
+    font-size: 25px;
+    font-weight: bold;
+    color: #1a5276;
+  }
+  .sub-mission {
+    background: #f8fbff;
+    border: 3px solid #e1ecf7;
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .mission-label {
+    font-size: 21px;
+    font-weight: bold;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  /* Interactive elements */
+  .interactive-zone {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .choice-chip {
+    background: white;
+    border: 3px solid #aed6f1;
+    color: #2c3e50;
+    padding: 12px 20px;
+    border-radius: 18px;
+    font-size: 20px;
+    font-family: inherit;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .choice-chip:hover {
+    background: #e8f4fc;
+    transform: scale(1.03);
+    border-color: #3498db;
+  }
+  .choice-chip.active-correct {
+    background: #d4efdf !important;
+    border-color: #27ae60 !important;
+    color: #1e8449 !important;
+    transform: none;
+  }
+  .choice-chip.active-wrong {
+    background: #fadbd8 !important;
+    border-color: #e74c3c !important;
+    color: #922b21 !important;
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .tf-row {
+    display: flex;
+    gap: 15px;
+  }
+  .tf-btn {
+    flex: 1;
+    text-align: center;
+    padding: 14px;
+    font-size: 21px;
+    border-radius: 16px;
+    border: 3px solid #bdc3c7;
+    cursor: pointer;
+    font-weight: bold;
+    background: white;
+  }
+  .interactive-box {
+    background: #edf2f7;
+    border: 3px dashed #a0aec0;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .interactive-box:hover {
+    background: #e2e8f0;
+  }
+  .feedback-banner {
+    font-size: 20px;
+    font-weight: bold;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feedback-banner.success { color: #27ae60; }
+  .feedback-banner.fail { color: #e74c3c; }
+  /* Sorting & slots */
+  .drop-targets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+  }
+  .basket {
+    background: #fdfefe;
+    border: 3px solid #b2bec3;
+    border-radius: 18px;
+    padding: 14px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .basket-title {
+    font-weight: bold;
+    font-size: 20px;
+    color: #4b6584;
+    border-bottom: 2px solid #dfe6e9;
+    width: 100%;
+    text-align: center;
+    padding-bottom: 6px;
+  }
+  .sort-item {
+    background: #e0f2fe;
+    border: 2px solid #7dd3fc;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 19px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="main-wrapper">
+
+  <div class="hero-card">
+    <h1>🎈 Μάθημα 20: Οι Ψηφιακοί Πόροι μιας Ιστοσελίδας</h1>
+    <p>Εξερευνούμε τα μυστικά του διαδικτύου μέσα από 8 διασκεδαστικές αποστολές!</p>
+    <div class="badge-reward">
+      🏆 Κέρδισε Αστέρια Εξερευνητή: <span id="total-stars">0</span> / 24
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 1: ΝΤΕΤΕΚΤΙΒ ΨΗΦΙΑΚΩΝ ΠΟΡΩΝ (Κλικ για Εντοπισμό) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #9b59b6;">1</div>
+      <div class="game-title">🕵️ Ο Ντετέκτιβ των Ψηφιακών Πόρων (Βρες τον τύπο)</div>
+    </div>
+
+    <div class="sub-mission" id="m1_1">
+      <div class="mission-label">1.1. Ο Ήρωνας βλέπει ένα τραγουδάκι που ακούγεται αλλά ΔΕΝ έχει εικόνα. Τι πόρος είναι;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm1_1', false)">🖼️ Εικόνα</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_1', true)">🎵 Ήχος</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_1', false)">📜 Κείμενο</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m1_2">
+      <div class="mission-label">1.2. Η Υπατία διαβάζει στην οθόνη: «Η καφέ αρκούδα ζει στο δάσος». Τι πόρος είναι;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm1_2', false)">🎬 Βίντεο</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_2', false)">🎵 Ήχος</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_2', true)">📝 Κείμενο</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m1_3">
+      <div class="mission-label">1.3. Στην ιστοσελίδα εμφανίζεται ένα κουνελάκι που κουνάει τα αυτιά του και τρέχει! Τι είναι;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm1_3', true)">🎬 Βίντεο</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_3', false)">📝 Κείμενο</div>
+        <div class="choice-chip" onclick="solve(this, 'm1_3', false)">🖨️ Εκτυπωτής</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 2: ΣΩΣΤΟ Ή ΛΑΘΟΣ (Διαδραστικά Κουμπιά) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #e67e22;">2</div>
+      <div class="game-title">⚖️ Σωστό ή Λάθος στην Οθόνη;</div>
+    </div>
+
+    <div class="sub-mission" id="m2_1">
+      <div class="mission-label">2.1. «Σε ένα βίντεο μπορούμε να δούμε κινούμενη εικόνα ΚΑΙ να ακούσουμε ήχο ταυτόχρονα.»</div>
+      <div class="tf-row">
+        <button class="tf-btn" onclick="solve(this, 'm2_1', false)">❌ Λάθος</button>
+        <button class="tf-btn" onclick="solve(this, 'm2_1', true)">✅ Σωστό</button>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m2_2">
+      <div class="mission-label">2.2. «Για να ακούσουμε έναν ήχο σε μια ιστοσελίδα, πρέπει να έχουμε κλειστά τα ηχεία μας.»</div>
+      <div class="tf-row">
+        <button class="tf-btn" onclick="solve(this, 'm2_2', true)">❌ Λάθος</button>
+        <button class="tf-btn" onclick="solve(this, 'm2_2', false)">✅ Σωστό</button>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m2_3">
+      <div class="mission-label">2.3. «Μία ιστοσελίδα μπορεί να έχει μέσα και κείμενο και εικόνες και βίντεο.»</div>
+      <div class="tf-row">
+        <button class="tf-btn" onclick="solve(this, 'm2_3', false)">❌ Λάθος</button>
+        <button class="tf-btn" onclick="solve(this, 'm2_3', true)">✅ Σωστό</button>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 3: ΤΟ ΜΑΓΙΚΟ ΚΟΥΜΠΙ PLAY / PAUSE (Στάση & Ξεκίνημα) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #27ae60;">3</div>
+      <div class="game-title">⏯️ Τα Σύμβολα του Βίντεο και του Ήχου</div>
+    </div>
+
+    <div class="sub-mission" id="m3_1">
+      <div class="mission-label">3.1. Ποιο κουμπί πατάμε για να ΞΕΚΙΝΗΣΕΙ ένα βίντεο (Αναπαραγωγή / Play);</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm3_1', false)">⏹️ Τετράγωνο (Stop)</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_1', false)">❌ Σταυρός (Exit)</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_1', true)">▶️ Τριγωνάκι (Play)</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m3_2">
+      <div class="mission-label">3.2. Όταν παίζει το βίντεο, το κουμπί αλλάζει και γίνεται «Παύση» (Pause). Πώς μοιάζει;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm3_2', true)">⏸️ Δύο όρθιες γραμμές</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_2', false)">⭐ Ένα αστέρι</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_2', false)">🔄 Ένας κύκλος</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m3_3">
+      <div class="mission-label">3.3. Τι μας δείχνουν οι αριθμοί κάτω από το βίντεο, όπως «00:21»;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm3_3', false)">🌡️ Τη θερμοκρασία του υπολογιστή</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_3', true)">⏱️ Τη διάρκεια του βίντεο (χρόνο)</div>
+        <div class="choice-chip" onclick="solve(this, 'm3_3', false)">📅 Την ημερομηνία των γενεθλίων μας</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 4: Ο ΜΥΣΤΙΚΟΣ ΥΠΕΡΣΥΝΔΕΣΜΟΣ (Hyperlink & Χεράκι) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #3498db;">4</div>
+      <div class="game-title">👆 Το Μαγικό Χεράκι (Υπερσύνδεσμοι)</div>
+    </div>
+
+    <div class="sub-mission" id="m4_1">
+      <div class="mission-label">4.1. Όταν περνάμε το ποντίκι πάνω από μια εικόνα με σύνδεσμο, πώς γίνεται ο δείκτης;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm4_1', false)">⏳ Κλεψύδρα που γυρνάει</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_1', true)">👆 Χεράκι με τεντωμένο δάχτυλο</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_1', false)">🏹 Τόξο κυνηγού</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m4_2">
+      <div class="mission-label">4.2. Αν κάνουμε κλικ πάνω στην εικόνα της αρκούδας όταν εμφανιστεί το χεράκι:</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm4_2', false)">🗑️ Η εικόνα σβήνει για πάντα</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_2', true)">🔍 Ανοίγει η εικόνα μεγαλύτερη ή σε νέα σελίδα</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_2', false)">🔊 Αρχίζει να γαβγίζει</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m4_3">
+      <div class="mission-label">4.3. Πώς λέγεται η «γέφυρα» που μας μεταφέρει σε άλλη σελίδα ή εικόνα;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm4_3', true)">🔗 Υπερσύνδεσμος (Link)</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_3', false)">🔌 Καλώδιο ρεύματος</div>
+        <div class="choice-chip" onclick="solve(this, 'm4_3', false)">📁 Φάκελος αρχείων</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 5: Ο ΕΛΕΓΚΤΗΣ ΕΝΤΑΣΗΣ ΚΑΙ ΣΙΓΑΣΗΣ -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #e84393;">5</div>
+      <div class="game-title">🔊 Το Μεγαφωνάκι και η Σίγαση (Mute)</div>
+    </div>
+
+    <div class="sub-mission" id="m5_1">
+      <div class="mission-label">5.1. Ποιο εικονίδιο πατάμε όταν ο ήχος είναι πολύ δυνατός ή θέλουμε ησυχία;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm5_1', false)">📷 Φωτογραφική μηχανή</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_1', false)">🎨 Πινέλο ζωγραφικής</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_1', true)">🔊 Εικονίδιο έντασης / ηχείου</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m5_2">
+      <div class="mission-label">5.2. Τι σημαίνει όταν το μεγαφωνάκι έχει μια γραμμή πάνω του (🔇);</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm5_2', true)">🤫 Σίγαση (δεν ακούγεται καθόλου ήχος)</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_2', false)">🎉 Ο υπολογιστής τραγουδάει μόνος του</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_2', false)">⚡ Χάλασε η οθόνη</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m5_3">
+      <div class="mission-label">5.3. Πώς επαναφέρουμε τον ήχο αν είναι σε σίγαση (🔇);</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm5_3', false)">🔌 Βγάζουμε το καλώδιο</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_3', true)">👆 Πατάμε ξανά το εικονίδιο του ηχείου</div>
+        <div class="choice-chip" onclick="solve(this, 'm5_3', false)">🚪 Κλείνουμε την πόρτα της τάξης</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 6: ΠΟΙΟ ΕΙΝΑΙ ΤΟ ΠΑΡΑΞΕΝΟ ΣΤΗ ΣΕΛΙΔΑ; (Odd One Out) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #16a085;">6</div>
+      <div class="game-title">🧩 Βρες το Αταίριαστο! (Ποιο δεν είναι ψηφιακός πόρος;)</div>
+    </div>
+
+    <div class="sub-mission" id="m6_1">
+      <div class="mission-label">6.1. Ποιο από τα παρακάτω ΔΕΝ μπορεί να υπάρχει μέσα σε μια ιστοσελίδα;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm6_1', false)">🖼️ Μια φωτογραφία σκύλου</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_1', false)">🎵 Το νιαούρισμα μιας γάτας</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_1', true)">🍎 Ένα αληθινό μήλο που μπορούμε να φάμε</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m6_2">
+      <div class="mission-label">6.2. Ποιο από τα 3 αντικείμενα είναι πραγματική συσκευή και ΟΧΙ ψηφιακός πόρος;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm6_2', true)">🖱️ Το πλαστικό ποντίκι στο γραφείο</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_2', false)">🎬 Ένα βίντεο με κουνελάκια</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_2', false)">📝 Οι οδηγίες του μαθήματος</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m6_3">
+      <div class="mission-label">6.3. Ποιο από τα παρακάτω αρχεία περιέχει ΜΟΝΟ ήχους;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm6_3', false)">📺 Ταινία κινουμένων σχεδίων</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_3', true)">📻 Ηχογραφημένη φωνή που λέει ένα παραμύθι</div>
+        <div class="choice-chip" onclick="solve(this, 'm6_3', false)">📸 Φωτογραφία της τάξης</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 7: ΣΥΜΠΛΗΡΩΣΕ ΤΟ ΜΥΣΤΙΚΟ ΜΗΝΥΜΑ (Cloze Activity) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #2c3e50;">7</div>
+      <div class="game-title">✍️ Συμπλήρωσε τις Λέξεις που Λείπουν</div>
+    </div>
+
+    <div class="sub-mission" id="m7_1">
+      <div class="mission-label">7.1. «Σε μια ιστοσελίδα, για να ακούσω μουσική χρειάζομαι τα ________ του υπολογιστή.»</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm7_1', false)">μολύβια</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_1', true)">ηχεία</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_1', false)">χαρτιά</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m7_2">
+      <div class="mission-label">7.2. «Όταν πατάμε το Play σε ένα βίντεο, βλέπουμε ________ εικόνες.»</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm7_2', false)">παγωμένες</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_2', false)">ζωγραφισμένες στο θρανίο</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_2', true)">κινούμενες</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m7_3">
+      <div class="mission-label">7.3. «Η ιστοσελίδα του σχολείου μας έχει χρήσιμες ________ για τους μαθητές.»</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm7_3', true)">πληροφορίες</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_3', false)">ομπρέλες</div>
+        <div class="choice-chip" onclick="solve(this, 'm7_3', false)">παντόφλες</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+  <!-- ΔΡΑΣΤΗΡΙΟΤΗΤΑ 8: ΤΑΞΙΝΟΜΗΣΗ ΣΤΑ ΚΑΛΑΘΙΑ (Διαδραστικό Ταξινόμησης) -->
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-num" style="background: #d35400;">8</div>
+      <div class="game-title">🧺 Βάλε στο Σωστό Καλάθι! (Αντιστοίχιση Αισθήσεων)</div>
+    </div>
+
+    <div class="sub-mission" id="m8_1">
+      <div class="mission-label">8.1. Με ποια αίσθηση απολαμβάνουμε έναν ψηφιακό πόρο ΉΧΟΥ;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm8_1', false)">👅 Με τη γεύση</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_1', true)">👂 Με την ακοή (αυτιά)</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_1', false)">👃 Με την όσφρηση</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m8_2">
+      <div class="mission-label">8.2. Με ποια αίσθηση διαβάζουμε ένα ΚΕΙΜΕΝΟ ή βλέπουμε μια ΕΙΚΟΝΑ;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm8_2', true)">👀 Με την όραση (μάτια)</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_2', false)">👂 Μόνο με τα αυτιά</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_2', false)">🦶 Με τα πόδια</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+
+    <div class="sub-mission" id="m8_3">
+      <div class="mission-label">8.3. Ποιος ψηφιακός πόρος χρειάζεται ΚΑΙ μάτια ΚΑΙ αυτιά για να τον χαρούμε πλήρως;</div>
+      <div class="interactive-zone">
+        <div class="choice-chip" onclick="solve(this, 'm8_3', false)">🖼️ Μια απλή φωτογραφία</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_3', false)">📝 Μια μικρή παράγραφος</div>
+        <div class="choice-chip" onclick="solve(this, 'm8_3', true)">🎬 Ένα βίντεο με ήχο</div>
+      </div>
+      <div class="feedback-banner"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let totalScore = 0;
+  const completedMissions = new Set();
+
+  function solve(el, missionId, isRight) {
+    if (completedMissions.has(missionId)) return;
+
+    const mission = document.getElementById(missionId);
+    const feedback = mission.querySelector('.feedback-banner');
+    const allChips = mission.querySelectorAll('.choice-chip, .tf-btn');
+
+    if (isRight) {
+      el.classList.add('active-correct');
+      feedback.textContent = '🌟 Εξαιρετικά! Το βρήκες!';
+      feedback.className = 'feedback-banner success';
+      completedMissions.add(missionId);
+      totalScore++;
+      document.getElementById('total-stars').textContent = totalScore;
+      allChips.forEach(c => {
+        if (c !== el) c.style.opacity = '0.5';
+        c.style.pointerEvents = 'none';
+      });
+    } else {
+      el.classList.add('active-wrong');
+      feedback.textContent = '❌ Όχι ακριβώς, κάνε άλλη μια δοκιμή!';
+      feedback.className = 'feedback-banner fail';
+      setTimeout(() => {
+        el.classList.remove('active-wrong');
+      }, 800);
+    }
+  }
+</script>
+
+</body>
+</html>
