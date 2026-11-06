@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 4ο: Μοτίβα και Εντολή Επανάληψης - Β΄ Δημοτικού (Απλή Έκδοση)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      background: radial-gradient(circle at top, #fef08a, #bae6fd, #bbf7d0);
+      min-height: 100vh;
+      user-select: none;
+    }
+    .retro-shadow {
+      box-shadow: 0 10px 0 rgba(0,0,0,0.1), 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .frog-cell {
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .frog-bounce {
+      animation: bounceFrog 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes bounceFrog {
+      from { transform: translateY(0) scale(1); }
+      to { transform: translateY(-8px) scale(1.12); }
+    }
+    .sparkle-anim {
+      animation: popSparkle 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popSparkle {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .block-repeat {
+      background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+      border: 3px solid #c2410c;
+    }
+    .block-motion {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      border: 3px solid #0369a1;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-5 md:p-8 flex flex-col items-center">
+
+  <!-- Main Box -->
+  <div class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-3xl p-4 sm:p-7 retro-shadow border-4 border-amber-300 flex flex-col gap-5">
+
+    <!-- Header -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-4 border-amber-200 pb-4">
+      <div class="flex items-center gap-3">
+        <span class="text-5xl sm:text-6xl animate-bounce">🐸</span>
+        <div>
+          <span class="bg-amber-400 text-amber-950 font-black px-3 py-1 rounded-full text-base sm:text-lg uppercase">
+            Μάθημα 4ο
+          </span>
+          <h1 class="text-2xl sm:text-4xl font-black text-teal-800 tracking-tight mt-1">
+            Μοτίβα & Επανάληψη!
+          </h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="soundToggle" onclick="toggleSound()" class="bg-teal-100 hover:bg-teal-200 text-teal-900 text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl border-2 border-teal-300 transition">
+          🔊 Ήχος: <span id="soundStatus">ON</span>
+        </button>
+        <button onclick="downloadHTML()" class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-lg sm:text-xl font-black px-4 py-2.5 rounded-2xl shadow border-2 border-emerald-600 transition flex items-center gap-2">
+          💾 <span>Αποθήκευση</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bars (8 Activities) -->
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center justify-between text-lg sm:text-2xl font-black text-gray-700">
+        <span id="actIndicator" class="text-teal-900">Δραστηριότητα 1 από 8</span>
+        <div class="flex items-center gap-2">
+          <span id="starCounter" class="text-2xl sm:text-3xl text-amber-500 font-black">⭐ 0/24</span>
+        </div>
+      </div>
+
+      <!-- 8 Activity Buttons -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="navBubbles"></div>
+
+      <!-- 3 Steps (1, 2, 3) -->
+      <div class="flex items-center justify-center gap-3 mt-1">
+        <span class="text-base sm:text-xl font-black text-teal-800">Βήμα:</span>
+        <div id="substepDots" class="flex gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Workspace: Pond on Left, Question on Right -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT: Simple 5x5 Pond -->
+      <div class="lg:col-span-5 bg-gradient-to-b from-sky-100 to-emerald-100 p-4 rounded-3xl border-4 border-sky-300 shadow-inner flex flex-col items-center gap-3">
+        <div class="w-full flex items-center justify-between">
+          <h2 class="text-xl sm:text-2xl font-black text-sky-950 flex items-center gap-2">
+            <span>🌊</span> Η Λιμνούλα μας
+          </h2>
+          <span class="bg-sky-200 text-sky-900 font-black px-3 py-1 rounded-xl text-sm sm:text-base border border-sky-400">
+            5 x 5
+          </span>
+        </div>
+
+        <!-- 5x5 Grid -->
+        <div id="pondGrid" class="grid grid-cols-5 gap-1.5 sm:gap-2 bg-emerald-300/80 p-2 rounded-2xl border-4 border-emerald-400 shadow-md"></div>
+
+        <!-- Big Play Button -->
+        <button id="runJumpBtn" onclick="animateFrogPath()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-xl py-3.5 px-4 rounded-2xl shadow-lg border-2 border-emerald-600 flex items-center justify-center gap-3 transition transform active:scale-95">
+          <span class="text-3xl">▶️</span>
+          <span>Δες το άλμα!</span>
+        </button>
+
+        <!-- ScratchJr Code block -->
+        <div class="w-full bg-white p-3 rounded-2xl border-2 border-amber-300 flex flex-col items-center text-center shadow-sm">
+          <span class="text-xs sm:text-sm font-bold text-amber-800 uppercase tracking-wide">Το τουβλάκι της εντολής:</span>
+          <div id="codeVisualBlocks" class="flex flex-wrap items-center justify-center gap-2 pt-1.5"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Question Area (Very simple Greek, big buttons) -->
+      <div class="lg:col-span-7 bg-white p-5 sm:p-7 rounded-3xl border-4 border-teal-200 shadow-sm flex flex-col gap-5 min-h-[460px] justify-between">
+
+        <div class="flex flex-col gap-4">
+          <div>
+            <span id="actCategory" class="inline-block bg-teal-100 text-teal-800 font-black px-3 py-1 rounded-xl text-sm sm:text-base mb-2">
+              Κατηγορία
+            </span>
+            <h3 id="questionPrompt" class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 leading-snug">
+              Ερώτηση...
+            </h3>
+            <p id="questionSub" class="text-lg sm:text-2xl text-teal-700 font-bold mt-1">
+              Οδηγία...
+            </p>
+          </div>
+
+          <!-- Answers -->
+          <div id="questionInteractiveArea" class="flex flex-col gap-3"></div>
+        </div>
+
+        <!-- Feedback & Auto next -->
+        <div id="feedbackContainer" class="p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]">
+          <div id="feedbackText" class="text-lg sm:text-2xl font-black text-gray-700 flex items-center gap-2">
+            <span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>
+          </div>
+          <div id="autoNextTimer" class="hidden flex items-center gap-2 text-emerald-700 font-black text-lg">
+            <span>Μπράβο! Επόμενο...</span>
+            <div class="w-6 h-6 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="flex items-center justify-between text-xs sm:text-sm text-gray-500 border-t-2 border-gray-200 pt-3">
+      <span>Πληροφορική Β΄ Δημοτικού • Μάθημα 4ο</span>
+      <span class="font-black text-teal-700">Φρίξος 🐸 • Υπατία 👧 • Ήρωνας 👦</span>
+    </footer>
+
+  </div>
+
+  <!-- Sound Synthesizer -->
+  <script>
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundStatus').textContent = soundEnabled ? 'ON' : 'OFF';
+      document.getElementById('soundToggle').classList.toggle('bg-gray-200', !soundEnabled);
+      if (soundEnabled) playSound('click');
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.1);
+        osc.frequency.setValueAtTime(783.99, now + 0.2);
+        osc.frequency.setValueAtTime(1046.50, now + 0.3);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+        osc.start(now);
+        osc.stop(now + 0.55);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.setValueAtTime(180, now + 0.15);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.18);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+  </script>
+
+  <!-- Simplified Data for 2nd Graders -->
+  <script>
+    const activities = [
+      // 1. Το Πορτοκαλί Τουβλάκι
+      {
+        title: "Το Πορτοκαλί Τουβλάκι",
+        category: "Τι είναι η Επανάληψη;",
+        substeps: [
+          {
+            prompt: "Τι μας δείχνει ο αριθμός στο άσπρο κυκλάκι;",
+            sub: "Κοίταξε το τουβλάκι της επανάληψης:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [3,1], lilies: [[2,1],[3,1]], path: [[2,1],[3,1]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Πόσες φορές θα γίνει το άλμα! 🔁", correct: true },
+              { text: "Πόση ώρα είναι το διάλειμμα ⏰", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποιο βελάκι είναι μέσα στην αγκαλιά του;",
+            sub: "Δες το μπλε τουβλάκι:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [3,1], lilies: [[2,1],[3,1]], path: [[2,1],[3,1]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Το βελάκι Δεξιά ➡️", correct: true },
+              { text: "Το βελάκι Κάτω ⬇️", correct: false }
+            ]
+          },
+          {
+            prompt: "Η επανάληψη μας βοηθάει να γράφουμε λιγότερες εντολές;",
+            sub: "Σκέψου αν γίνεται πιο απλό το πρόγραμμα:",
+            type: "tf",
+            gridSetup: { start: [1,1], target: [3,1], lilies: [[2,1],[3,1]], path: [[2,1],[3,1]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 2. Το Βατραχάκι πάει Δεξιά
+      {
+        title: "Πάμε Δεξιά!",
+        category: "Άσκηση 2 Βιβλίου (σελ. 20)",
+        substeps: [
+          {
+            prompt: "Το πρόγραμμα λέει: Επανάλαβε 4 [➡️ 1]. Προς τα πού θα πάει το βατραχάκι;",
+            sub: "Κοίταξε το βελάκι ➡️:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [5,1], lilies: [[2,1],[3,1],[4,1],[5,1]], path: [[2,1],[3,1],[4,1],[5,1]] },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Προς τα Δεξιά! ➡️", correct: true },
+              { text: "Προς τα Κάτω! ⬇️", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσα άλματα δεξιά θα κάνει συνολικά;",
+            sub: "Δες τον αριθμό στο κυκλάκι:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [5,1], lilies: [[2,1],[3,1],[4,1],[5,1]], path: [[2,1],[3,1],[4,1],[5,1]] },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 1"] }],
+            options: [
+              { text: "4 άλματα! 🪷", correct: true },
+              { text: "1 μόνο άλμα", correct: false },
+              { text: "8 άλματα", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το βατραχάκι θα φτάσει στο τέρμα δεξιά (στο νούφαρο με τη σημαία 🏁).",
+            sub: "Πάτα και το πράσινο κουμπί «Δες το άλμα!» για να δεις:",
+            type: "tf",
+            gridSetup: { start: [1,1], target: [5,1], lilies: [[2,1],[3,1],[4,1],[5,1]], path: [[2,1],[3,1],[4,1],[5,1]] },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["➡️ 1"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 3. Το Βατραχάκι πάει Κάτω
+      {
+        title: "Πάμε Κάτω!",
+        category: "Άσκηση 1 Βιβλίου (σελ. 20)",
+        substeps: [
+          {
+            prompt: "Το πρόγραμμα λέει: [⬇️ 2] με επανάληψη 2. Προς τα πού δείχνει το βέλος;",
+            sub: "Δες το βελάκι στο μπλε τουβλάκι:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [1,5], lilies: [[1,3],[1,5]], path: [[1,3],[1,5]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["⬇️ 2"] }],
+            options: [
+              { text: "Δείχνει προς τα Κάτω! ⬇️", correct: true },
+              { text: "Δείχνει προς τα Πάνω! ⬆️", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσες φορές θα επαναληφθεί το άλμα;",
+            sub: "Δες το κυκλάκι:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [1,5], lilies: [[1,3],[1,5]], path: [[1,3],[1,5]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["⬇️ 2"] }],
+            options: [
+              { text: "2 φορές! ✌️", correct: true },
+              { text: "5 φορές! 🖐️", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το βατραχάκι πηγαίνει προς τα κάτω στη λιμνούλα.",
+            sub: "Παρατήρησε την κίνηση:",
+            type: "tf",
+            gridSetup: { start: [1,1], target: [1,5], lilies: [[1,3],[1,5]], path: [[1,3],[1,5]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["⬇️ 2"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 4. Σκαλοπατάκια
+      {
+        title: "Σκαλοπατάκια!",
+        category: "Άσκηση 3 Βιβλίου (σελ. 21)",
+        substeps: [
+          {
+            prompt: "Μέσα στην επανάληψη έχει δύο εντολές: [➡️ 1] και [⬇️ 1]. Πώς μοιάζει η πορεία του;",
+            sub: "Κάνει: 1 δεξιά, 1 κάτω, 1 δεξιά, 1 κάτω:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [3,3], lilies: [[2,1],[2,2],[3,2],[3,3]], path: [[2,1],[2,2],[3,2],[3,3]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1", "⬇️ 1"] }],
+            options: [
+              { text: "Σαν σκαλοπατάκια! 🪜", correct: true },
+              { text: "Σαν ίσια γραμμή ➖", correct: false }
+            ]
+          },
+          {
+            prompt: "Πρώτα πάει δεξιά ➡️. Αμέσως μετά πού πάει;",
+            sub: "Κοίταξε τη δεύτερη μπλε εντολή:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [3,3], lilies: [[2,1],[2,2],[3,2],[3,3]], path: [[2,1],[2,2],[3,2],[3,3]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1", "⬇️ 1"] }],
+            options: [
+              { text: "Πάει κάτω ⬇️", correct: true },
+              { text: "Πάει πίσω ⬅️", correct: false }
+            ]
+          },
+          {
+            prompt: "Πόσα σκαλοπατάκια θα κατέβει συνολικά;",
+            sub: "Κοίτα τον αριθμό 2 στο πορτοκαλί κυκλάκι:",
+            type: "choice",
+            gridSetup: { start: [1,1], target: [3,3], lilies: [[2,1],[2,2],[3,2],[3,3]], path: [[2,1],[2,2],[3,2],[3,3]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1", "⬇️ 1"] }],
+            options: [
+              { text: "2 σκαλοπατάκια!", correct: true },
+              { text: "10 σκαλοπατάκια!", correct: false }
+            ]
+          }
+        ]
+      },
+
+      // 5. Βρες το Ζευγάρι
+      {
+        title: "Βρες το Ζευγάρι!",
+        category: "Αντιστοίχιση Βιβλίου (σελ. 22)",
+        substeps: [
+          {
+            prompt: "Έχουμε δύο εντολές στη σειρά: [➡️ 1] [➡️ 1]. Ποιο τουβλάκι είναι ολόιδιο;",
+            sub: "Βρες την επανάληψη:",
+            type: "choice",
+            gridSetup: { start: [1,2], target: [3,2], lilies: [[2,2],[3,2]], path: [[2,2],[3,2]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Επανάλαβε 2 [➡️ 1]", correct: true },
+              { text: "Επανάλαβε 5 [⬇️ 1]", correct: false }
+            ]
+          },
+          {
+            prompt: "Έχουμε τρεις εντολές: [⬇️ 2] [⬇️ 2] [⬇️ 2]. Πόσες επαναλήψεις χρειαζόμαστε;",
+            sub: "Μέτρησε πόσες φορές το βλέπεις (1, 2, 3):",
+            type: "choice",
+            gridSetup: { start: [2,1], target: [2,4], lilies: [[2,2],[2,3],[2,4]], path: [[2,2],[2,3],[2,4]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["⬇️ 2"] }],
+            options: [
+              { text: "3 φορές! (γράφουμε 3 στο κυκλάκι)", correct: true },
+              { text: "1 μόνο φορά", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Το [⬆️ 2] [⬆️ 2] είναι το ίδιο με το: Επανάλαβε 2 [⬆️ 2].",
+            sub: "Έλεγξε αν κάνουν την ίδια ακριβώς δουλειά:",
+            type: "tf",
+            gridSetup: { start: [2,3], target: [2,1], lilies: [[2,2],[2,1]], path: [[2,2],[2,1]] },
+            blockPreview: [{ type: "repeat", count: 2, inner: ["⬆️ 2"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 6. Παιχνίδι Μοτίβου
+      {
+        title: "Παιχνίδι Μοτίβου!",
+        category: "Ανακάλυψε το Μοτίβο",
+        substeps: [
+          {
+            prompt: "Δες τα ζωάκια στη σειρά: 🐸 🦆 🐸 🦆 🐸 ... Ποιο έρχεται αμέσως μετά;",
+            sub: "Βάτραχος - Πάπια - Βάτραχος - Πάπια - Βάτραχος - ;",
+            type: "choice",
+            gridSetup: { start: [2,2], target: [4,2], lilies: [[3,2],[4,2]], path: [[3,2],[4,2]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["🐸 Βάτραχος", "🦆 Πάπια"] }],
+            options: [
+              { text: "🦆 Η Παπίτσα!", correct: true },
+              { text: "🦁 Το Λιοντάρι!", correct: false }
+            ]
+          },
+          {
+            prompt: "Ποιο είναι το μοτίβο που επαναλαμβάνεται ξανά και ξανά;",
+            sub: "Διάλεξε το σωστό ζευγάρι:",
+            type: "choice",
+            gridSetup: { start: [2,2], target: [4,2], lilies: [[3,2],[4,2]], path: [[3,2],[4,2]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["🐸 Βάτραχος", "🦆 Πάπια"] }],
+            options: [
+              { text: "Το ζευγάρι [🐸 Βάτραχος - 🦆 Πάπια]", correct: true },
+              { text: "Μόνο η πάπια 🦆", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Στο μοτίβο, τα πράγματα μπαίνουν με μια σειρά που επαναλαμβάνεται.",
+            sub: "Σκέψου αν υπάρχει κανόνας:",
+            type: "tf",
+            gridSetup: { start: [2,2], target: [4,2], lilies: [[3,2],[4,2]], path: [[3,2],[4,2]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["🐸", "🦆"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 7. Βρες το Λάθος!
+      {
+        title: "Βρες το Λάθος!",
+        category: "Μικρός Ντετέκτιβ",
+        substeps: [
+          {
+            prompt: "Θέλουμε 3 άλματα. Το παιδί έγραψε τον αριθμό 1 στο κυκλάκι. Τι πρέπει να βάλει;",
+            sub: "Διάλεξε τον σωστό αριθμό:",
+            type: "choice",
+            gridSetup: { start: [1,3], target: [4,3], lilies: [[2,3],[3,3],[4,3]], path: [[2,3],[3,3],[4,3]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Τον αριθμό 3! 🎯", correct: true },
+              { text: "Τον αριθμό 0!", correct: false }
+            ]
+          },
+          {
+            prompt: "Το βατραχάκι θέλει να πάει δεξιά ➡️ αλλά το παιδί έβαλε βελάκι κάτω ⬇️. Ποιο βελάκι είναι το σωστό;",
+            sub: "Διάλεξε την κατεύθυνση:",
+            type: "choice",
+            gridSetup: { start: [1,3], target: [4,3], lilies: [[2,3],[3,3],[4,3]], path: [[2,3],[3,3],[4,3]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["➡️ 1"] }],
+            options: [
+              { text: "Το βελάκι Δεξιά ➡️", correct: true },
+              { text: "Το βελάκι Πάνω ⬆️", correct: false }
+            ]
+          },
+          {
+            prompt: "Σωστό ή Λάθος: Όταν αλλάζουμε τον αριθμό στο κυκλάκι, αλλάζουν και οι φορές που θα γίνει η κίνηση.",
+            sub: "Σκέψου τι μάθαμε:",
+            type: "tf",
+            gridSetup: { start: [1,3], target: [4,3], lilies: [[2,3],[3,3],[4,3]], path: [[2,3],[3,3],[4,3]] },
+            blockPreview: [{ type: "repeat", count: 3, inner: ["➡️ 1"] }],
+            correctAnswer: true
+          }
+        ]
+      },
+
+      // 8. Μεγάλος Νικητής!
+      {
+        title: "Μεγάλος Νικητής!",
+        category: "Συγχαρητήρια!",
+        substeps: [
+          {
+            prompt: "Όταν βλέπουμε ένα πρόγραμμα επανάληψης, κοιτάμε πρώτα:",
+            sub: "Τι προσέχουμε πρώτο;",
+            type: "choice",
+            gridSetup: { start: [3,3], target: [3,3], lilies: [[3,3]], path: [[3,3]] },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["⭐ Μπράβο!"] }],
+            options: [
+              { text: "Ποιες εντολές είναι μέσα στην αγκαλιά του! 🧩", correct: true },
+              { text: "Το χρώμα του γραφείου μας 🎨", correct: false }
+            ]
+          },
+          {
+            prompt: "Και μετά κοιτάμε τον αριθμό στο κυκλάκι για να δούμε:",
+            sub: "Τι μας λέει ο αριθμός;",
+            type: "choice",
+            gridSetup: { start: [3,3], target: [3,3], lilies: [[3,3]], path: [[3,3]] },
+            blockPreview: [{ type: "repeat", count: 4, inner: ["⭐ Μπράβο!"] }],
+            options: [
+              { text: "Πόσες φορές θα γίνουν οι εντολές! 🔁", correct: true },
+              { text: "Πόσο χρονών είναι ο δάσκαλος 🎂", correct: false }
+            ]
+          },
+          {
+            prompt: "Είσαι έτοιμος να φτιάξεις τα δικά σου προγράμματα στο ScratchJr;",
+            sub: "Διάλεξε πόσο σούπερ τα πήγες σήμερα:",
+            type: "choice",
+            gridSetup: { start: [3,3], target: [3,3], lilies: [[3,3]], path: [[3,3]] },
+            blockPreview: [{ type: "repeat", count: 5, inner: ["🏆 Άριστα!"] }],
+            options: [
+              { text: "🌟 Ναι! Είμαι σούπερ προγραμματιστής!", correct: true },
+              { text: "👍 Τα κατάλαβα όλα πολύ εύκολα!", correct: true },
+              { text: "🎉 Ήταν πανεύκολο και διασκεδαστικό!", correct: true }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    let starsCount = 0;
+    const answeredSteps = new Set();
+    let isTransitioning = false;
+    let isAnimatingFrog = false;
+
+    window.onload = function() {
+      renderNav();
+      loadCurrentQuestion();
+    };
+
+    function renderNav() {
+      const navContainer = document.getElementById('navBubbles');
+      navContainer.innerHTML = '';
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `act-bubble-${idx}`;
+        const isActive = idx === currentActIndex;
+        btn.className = `py-2 px-1 rounded-2xl font-black text-sm sm:text-base border-3 transition flex flex-col items-center justify-center gap-0.5 ${
+          isActive 
+            ? 'bg-amber-400 text-amber-950 border-amber-600 shadow-md scale-105' 
+            : 'bg-white text-gray-700 border-gray-200 hover:bg-amber-50'
+        }`;
+        btn.innerHTML = `
+          <span>Δρ.${idx + 1}</span>
+          <span class="text-xs text-teal-800">${getActProgressIcon(idx)}</span>
+        `;
+        btn.onclick = () => {
+          if (isTransitioning || isAnimatingFrog) return;
+          playSound('click');
+          currentActIndex = idx;
+          currentSubIndex = 0;
+          renderNav();
+          loadCurrentQuestion();
+        };
+        navContainer.appendChild(btn);
+      });
+
+      const dotContainer = document.getElementById('substepDots');
+      dotContainer.innerHTML = '';
+      for (let s = 0; s < 3; s++) {
+        const dot = document.createElement('div');
+        const isCurrent = s === currentSubIndex;
+        const isDone = answeredSteps.has(`${currentActIndex}-${s}`);
+        dot.className = `w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-black text-base sm:text-lg border-2 transition ${
+          isCurrent 
+            ? 'bg-teal-600 text-white border-teal-800 shadow scale-110' 
+            : isDone 
+              ? 'bg-emerald-400 text-white border-emerald-600' 
+              : 'bg-gray-100 text-gray-400 border-gray-300'
+        }`;
+        dot.textContent = isDone ? '✓' : (s + 1);
+        dotContainer.appendChild(dot);
+      }
+
+      document.getElementById('actIndicator').textContent = `Δραστηριότητα ${currentActIndex + 1} από 8: ${activities[currentActIndex].title}`;
+      document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+    }
+
+    function getActProgressIcon(actIdx) {
+      const c1 = answeredSteps.has(`${actIdx}-0`);
+      const c2 = answeredSteps.has(`${actIdx}-1`);
+      const c3 = answeredSteps.has(`${actIdx}-2`);
+      if (c1 && c2 && c3) return '⭐⭐⭐';
+      if ((c1 && c2) || (c2 && c3) || (c1 && c3)) return '⭐⭐';
+      if (c1 || c2 || c3) return '⭐';
+      return '⚪';
+    }
+
+    function loadCurrentQuestion() {
+      isTransitioning = false;
+      const act = activities[currentActIndex];
+      const q = act.substeps[currentSubIndex];
+
+      document.getElementById('actCategory').textContent = act.category;
+      document.getElementById('questionPrompt').textContent = q.prompt;
+      document.getElementById('questionSub').textContent = q.sub;
+
+      renderPond(q.gridSetup);
+      renderCodeVisual(q.blockPreview);
+
+      const fbBox = document.getElementById('feedbackContainer');
+      fbBox.className = 'p-4 rounded-2xl border-2 border-gray-200 bg-gray-50 flex items-center justify-between min-h-[72px]';
+      document.getElementById('feedbackText').innerHTML = `<span>💡</span> <span>Πάτησε τη σωστή απάντηση!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+
+      const container = document.getElementById('questionInteractiveArea');
+      container.innerHTML = '';
+
+      if (q.type === 'choice') {
+        const shuffled = shuffle(q.options);
+        const letters = ['Α', 'Β', 'Γ'];
+        shuffled.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'w-full text-left p-4 sm:p-5 rounded-2xl bg-sky-50 hover:bg-sky-100 active:scale-[0.99] border-3 border-sky-200 hover:border-sky-400 font-black text-xl sm:text-2xl text-gray-800 transition flex items-center gap-4 shadow-sm';
+          btn.innerHTML = `
+            <span class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-500 text-white flex items-center justify-center text-2xl font-black shrink-0 shadow">
+              ${letters[optIdx] || '•'}
+            </span>
+            <span class="leading-snug">${opt.text}</span>
+          `;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.correct);
+          container.appendChild(btn);
+        });
+      } else if (q.type === 'tf') {
+        const tfOptions = shuffle([
+          { text: "ΣΩΣΤΟ 👍", val: true, bg: "bg-emerald-100 hover:bg-emerald-200 border-emerald-400 text-emerald-950" },
+          { text: "ΛΑΘΟΣ 👎", val: false, bg: "bg-rose-100 hover:bg-rose-200 border-rose-400 text-rose-950" }
+        ]);
+
+        const tfGrid = document.createElement('div');
+        tfGrid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4';
+        tfOptions.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = `p-6 sm:p-8 rounded-3xl border-4 font-black text-3xl sm:text-4xl text-center shadow transition transform active:scale-95 ${opt.bg}`;
+          btn.textContent = opt.text;
+          btn.onclick = () => handleChoiceAnswer(btn, opt.val === q.correctAnswer);
+          tfGrid.appendChild(btn);
+        });
+        container.appendChild(tfGrid);
+      }
+    }
+
+    function renderPond(setup) {
+      const gridEl = document.getElementById('pondGrid');
+      gridEl.innerHTML = '';
+
+      const startX = setup.start[0];
+      const startY = setup.start[1];
+      const targetX = setup.target[0];
+      const targetY = setup.target[1];
+
+      for (let y = 1; y <= 5; y++) {
+        for (let x = 1; x <= 5; x++) {
+          const cell = document.createElement('div');
+          cell.id = `cell-${x}-${y}`;
+          cell.className = 'frog-cell w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl border-2 border-emerald-300/80 bg-cyan-100/70 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-inner';
+
+          const isStart = (x === startX && y === startY);
+          const isTarget = (x === targetX && y === targetY);
+          const hasLily = setup.lilies.some(p => p[0] === x && p[1] === y);
+
+          let content = '';
+          if (hasLily) {
+            content += `<span class="text-xl sm:text-2xl z-0 select-none opacity-90">🪷</span>`;
+          }
+          if (isStart) {
+            content = `<span id="frogSprite" class="text-3xl sm:text-4xl md:text-5xl z-10 frog-bounce">🐸</span>`;
+          } else if (isTarget && !isStart) {
+            content = `<span class="text-2xl sm:text-3xl select-none">🏁</span>`;
+          }
+
+          cell.innerHTML = content;
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderCodeVisual(blocks) {
+      const box = document.getElementById('codeVisualBlocks');
+      box.innerHTML = '';
+      if (!blocks || !blocks.length) return;
+
+      blocks.forEach(b => {
+        if (b.type === 'repeat') {
+          const wrap = document.createElement('div');
+          wrap.className = 'block-repeat rounded-2xl p-2 px-3 text-white flex items-center gap-2 shadow-md';
+          
+          let innerHtml = '';
+          b.inner.forEach(cmd => {
+            innerHtml += `<span class="block-motion px-2.5 py-1 rounded-xl text-white font-black text-base sm:text-lg border border-sky-200 shadow-inner">${cmd}</span>`;
+          });
+
+          wrap.innerHTML = `
+            <div class="flex items-center gap-1 font-black text-base sm:text-lg">
+              <span>🔁</span>
+              <span>Επανάλαβε</span>
+            </div>
+            <div class="flex items-center gap-1 bg-white/25 p-1 rounded-xl">
+              ${innerHtml}
+            </div>
+            <div class="w-9 h-9 rounded-full bg-white text-orange-950 font-black text-xl flex items-center justify-center shadow">
+              ${b.count}
+            </div>
+          `;
+          box.appendChild(wrap);
+        }
+      });
+    }
+
+    async function animateFrogPath() {
+      if (isAnimatingFrog) return;
+      isAnimatingFrog = true;
+      const btn = document.getElementById('runJumpBtn');
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+      const q = activities[currentActIndex].substeps[currentSubIndex];
+      const path = q.gridSetup.path;
+      const start = q.gridSetup.start;
+
+      renderPond(q.gridSetup);
+      let currentPos = [...start];
+
+      for (let i = 0; i < path.length; i++) {
+        await new Promise(r => setTimeout(r, 450));
+        playSound('jump');
+
+        const next = path[i];
+        const oldCell = document.getElementById(`cell-${currentPos[0]}-${currentPos[1]}`);
+        const newCell = document.getElementById(`cell-${next[0]}-${next[1]}`);
+
+        if (oldCell) {
+          oldCell.innerHTML = `<span class="text-xl opacity-40">🟢</span>`;
+        }
+        if (newCell) {
+          newCell.innerHTML = `<span id="frogSprite" class="text-3xl sm:text-4xl md:text-5xl z-10 sparkle-anim">🐸</span>`;
+          newCell.classList.add('bg-emerald-200');
+        }
+        currentPos = [...next];
+      }
+
+      await new Promise(r => setTimeout(r, 250));
+      playSound('correct');
+      btn.classList.remove('opacity-75', 'cursor-not-allowed');
+      isAnimatingFrog = false;
+    }
+
+    function handleChoiceAnswer(btnElement, isCorrect) {
+      if (isTransitioning) return;
+
+      const fbBox = document.getElementById('feedbackContainer');
+      const fbText = document.getElementById('feedbackText');
+      const timerIndicator = document.getElementById('autoNextTimer');
+
+      if (isCorrect) {
+        isTransitioning = true;
+        playSound('correct');
+
+        btnElement.classList.remove('bg-sky-50', 'hover:bg-sky-100', 'border-sky-200');
+        btnElement.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600', 'scale-[1.02]', 'shadow-lg');
+
+        const key = `${currentActIndex}-${currentSubIndex}`;
+        if (!answeredSteps.has(key)) {
+          answeredSteps.add(key);
+          starsCount++;
+          document.getElementById('starCounter').textContent = `⭐ ${starsCount}/24`;
+        }
+
+        fbBox.className = 'p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-4xl">🎉</span> <span class="text-emerald-800 text-xl sm:text-2xl font-black">Μπράβο! Το βρήκες!</span>`;
+        timerIndicator.classList.remove('hidden');
+
+        setTimeout(() => {
+          advanceToNext();
+        }, 1100);
+
+      } else {
+        playSound('wrong');
+        btnElement.classList.add('bg-rose-100', 'border-rose-400');
+        fbBox.className = 'p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 flex items-center justify-between min-h-[72px]';
+        fbText.innerHTML = `<span class="text-3xl">🤔</span> <span class="text-rose-800 font-black">Δοκίμασε ξανά! Κοίταξε τη λιμνούλα!</span>`;
+      }
+    }
+
+    function advanceToNext() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+      } else {
+        if (currentActIndex < activities.length - 1) {
+          currentActIndex++;
+          currentSubIndex = 0;
+        } else {
+          showFinalCelebration();
+          return;
+        }
+      }
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function showFinalCelebration() {
+      renderNav();
+      const area = document.getElementById('questionInteractiveArea');
+      document.getElementById('questionPrompt').textContent = "🏆 Συγχαρητήρια! Είσαι Αστέρι!";
+      document.getElementById('questionSub').textContent = "Έμαθες τέλεια τα μοτίβα και τις επαναλήψεις!";
+
+      area.innerHTML = `
+        <div class="bg-gradient-to-r from-amber-200 via-emerald-200 to-sky-200 p-6 rounded-3xl text-center border-4 border-amber-400 flex flex-col items-center gap-4">
+          <span class="text-6xl animate-bounce">👑 🐸 ⭐</span>
+          <h4 class="text-2xl sm:text-3xl font-black text-teal-900">
+            Κέρδισες και τα 24 Αστέρια!
+          </h4>
+          <p class="text-lg sm:text-xl font-bold text-gray-800 max-w-lg">
+            Μπορείς τώρα να αποθηκεύσεις το παιχνίδι στον υπολογιστή σου!
+          </p>
+          <div class="flex flex-wrap gap-3 justify-center">
+            <button onclick="downloadHTML()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-emerald-800 transition transform active:scale-95">
+              💾 Αποθήκευση Αρχείου
+            </button>
+            <button onclick="restartAll()" class="bg-amber-500 hover:bg-amber-600 text-white font-black text-xl py-3 px-6 rounded-2xl shadow-lg border-2 border-amber-700 transition transform active:scale-95">
+              🔄 Παίξε Ξανά
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('feedbackText').innerHTML = `<span>🌟</span> <span class="text-amber-800 font-black">Τέλεια 24/24!</span>`;
+      document.getElementById('autoNextTimer').classList.add('hidden');
+    }
+
+    function restartAll() {
+      currentActIndex = 0;
+      currentSubIndex = 0;
+      starsCount = 0;
+      answeredSteps.clear();
+      renderNav();
+      loadCurrentQuestion();
+    }
+
+    function downloadHTML() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Pliroforiki_B_Dimotikou_Mathima4_Aplo.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
