@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Μάθημα 2: Ανακάλυψε το μοτίβο - Πληροφορική Β΄ Δημοτικού</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Fredoka', 'Comfortaa', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      font-size: 1.25rem;
+    }
+    .bounce-hover:hover {
+      transform: translateY(-4px) scale(1.02);
+      transition: all 0.2s ease-in-out;
+    }
+    .jiggle {
+      animation: jiggle 0.5s ease-in-out;
+    }
+    @keyframes jiggle {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.08) rotate(-4deg); }
+      75% { transform: scale(1.08) rotate(4deg); }
+    }
+    .pop-in {
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.88); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .bead {
+      display: inline-block;
+      width: 42px;
+      height: 42px;
+      border-radius: 9999px;
+      box-shadow: inset -3px -3px 6px rgba(0,0,0,0.3), 2px 4px 6px rgba(0,0,0,0.15);
+      border: 2px solid rgba(255,255,255,0.7);
+    }
+    @media (min-width: 640px) {
+      .bead {
+        width: 52px;
+        height: 52px;
+      }
+    }
+    .bead-orange { background: radial-gradient(circle at 35% 35%, #fb923c, #ea580c); }
+    .bead-cyan   { background: radial-gradient(circle at 35% 35%, #38bdf8, #0284c7); }
+    .bead-lime   { background: radial-gradient(circle at 35% 35%, #a3e635, #65a30d); }
+    .bead-blue   { background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8); }
+    .bead-pink   { background: radial-gradient(circle at 35% 35%, #f472b6, #db2777); }
+    .bead-yellow { background: radial-gradient(circle at 35% 35%, #fde047, #ca8a04); }
+    .bead-red    { background: radial-gradient(circle at 35% 35%, #f87171, #dc2626); }
+    .bead-purple { background: radial-gradient(circle at 35% 35%, #c084fc, #9333ea); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-sky-100 to-amber-100 min-h-screen text-slate-800 flex flex-col justify-between">
+
+  <!-- ΠΑΝΩ ΜΠΑΡΑ / HEADER -->
+  <header class="bg-white/95 backdrop-blur shadow-md border-b-4 border-pink-400 sticky top-0 z-40 px-4 sm:px-6 py-4">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Τίτλος & Ήρωες -->
+      <div class="flex items-center gap-3">
+        <div class="text-4xl sm:text-5xl">📿 🎨</div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-purple-700 leading-tight">
+            Πληροφορική Β΄ Δημοτικού • Μάθημα 2
+          </h1>
+          <p class="text-base sm:text-lg lg:text-xl font-bold text-pink-600">
+            «Ανακάλυψε το μοτίβο!» με την Υπατία, τον Ήρωνα και τον Τάλω
+          </p>
+        </div>
+      </div>
+
+      <!-- Αστέρια & Κουμπί Κατεβάσματος -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <!-- Σκορ με αστέρια -->
+        <div class="flex items-center gap-2 bg-amber-50 border-3 border-amber-400 px-4 py-2 rounded-full shadow-md">
+          <span class="text-3xl animate-pulse">⭐</span>
+          <span id="star-count" class="font-black text-amber-700 text-2xl sm:text-3xl">0</span>
+          <span class="text-base sm:text-lg font-extrabold text-amber-600">/ 24</span>
+        </div>
+
+        <!-- Download Button -->
+        <button onclick="downloadSelf()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-base sm:text-lg px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-lg transition-all active:scale-95" title="Κατέβασε αυτό το αρχείο στον υπολογιστή σου">
+          <span class="text-2xl">💾</span>
+          <span class="hidden sm:inline">Κατέβασμα HTML</span>
+          <span class="sm:hidden">Αποθήκευση</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ΚΥΡΙΟ ΠΕΡΙΕΧΟΜΕΝΟ -->
+  <main class="max-w-5xl mx-auto p-4 sm:p-6 w-full flex-grow">
+    
+    <!-- ΜΠΑΡΑ ΕΠΙΛΟΓΗΣ 8 ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ -->
+    <div class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-base sm:text-xl font-extrabold uppercase tracking-wide text-purple-900">Διάλεξε Δραστηριότητα (1-8):</span>
+        <span id="activity-badge" class="text-sm sm:text-lg font-black bg-purple-600 text-white px-4 py-1.5 rounded-full shadow-md">
+          Δραστηριότητα 1 από 8
+        </span>
+      </div>
+
+      <!-- Πλέγμα 8 μεγάλων κουμπιών -->
+      <div class="grid grid-cols-4 sm:grid-cols-8 gap-2.5" id="activity-tabs">
+        <!-- Δυναμικά tabs -->
+      </div>
+    </div>
+
+    <!-- ΚΑΡΤΑ ΤΡΕΧΟΥΣΑΣ ΔΡΑΣΤΗΡΙΟΤΗΤΑΣ -->
+    <div class="bg-white rounded-3xl shadow-xl border-4 border-purple-200 overflow-hidden relative">
+      
+      <!-- Τίτλος & Περιγραφή Δραστηριότητας -->
+      <div class="bg-gradient-to-r from-purple-600 to-pink-500 text-white p-5 sm:p-6 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+          <span id="act-icon" class="text-5xl sm:text-6xl drop-shadow">📿</span>
+          <div>
+            <h2 id="act-title" class="text-xl sm:text-3xl font-black">1. Τι είναι το Μοτίβο;</h2>
+            <p id="act-desc" class="text-sm sm:text-lg text-purple-100 font-semibold mt-1">
+              Μαθαίνουμε πώς να ανακαλύπτουμε τα μοτίβα!
+            </p>
+          </div>
+        </div>
+
+        <!-- 3 Βηματικά Κυκλάκια (Sub-tasks 1, 2, 3) -->
+        <div class="flex items-center gap-2 sm:gap-3 bg-white/20 p-2.5 rounded-2xl">
+          <button onclick="setSubTask(0)" id="sub-dot-0" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-amber-400 text-slate-900 shadow">1</button>
+          <button onclick="setSubTask(1)" id="sub-dot-1" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-white/40 text-white">2</button>
+          <button onclick="setSubTask(2)" id="sub-dot-2" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-white/40 text-white">3</button>
+        </div>
+      </div>
+
+      <!-- ΠΕΡΙΟΧΗ ΥΠΟ-ΔΡΑΣΤΗΡΙΟΤΗΤΑΣ -->
+      <div class="p-5 sm:p-8 min-h-[420px] flex flex-col justify-between" id="quiz-area">
+        <!-- Περιεχόμενο ερώτησης / διαδραστικού στοιχείου -->
+      </div>
+
+      <!-- ΜΠΑΡΑ ΠΛΟΗΓΗΣΗΣ ΥΠΟ-ΕΡΩΤΗΣΕΩΝ -->
+      <div class="bg-slate-50 border-t-2 border-slate-200 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+        <button id="prev-sub-btn" onclick="prevSubTask()" class="px-6 py-3 rounded-2xl font-black bg-slate-200 hover:bg-slate-300 text-slate-800 text-base sm:text-lg transition active:scale-95 flex items-center gap-2">
+          ⬅️ Προηγούμενο
+        </button>
+
+        <div id="sub-indicator" class="text-base sm:text-xl font-black text-slate-600">
+          Υπο-δραστηριότητα 1 από 3
+        </div>
+
+        <button id="next-sub-btn" onclick="nextSubTask()" class="px-6 py-3 rounded-2xl font-black bg-purple-600 hover:bg-purple-700 text-white text-base sm:text-lg shadow-md transition active:scale-95 flex items-center gap-2">
+          Επόμενο ➡️
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ΜΗΝΥΜΑ ΟΛΟΚΛΗΡΩΣΗΣ ΟΛΩΝ (MODAL) -->
+    <div id="finish-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-6 sm:p-10 max-w-lg w-full text-center shadow-2xl border-4 border-amber-400 pop-in">
+        <div class="text-7xl mb-4 animate-bounce">🏆 📿 ✨</div>
+        <h3 class="text-2xl sm:text-4xl font-black text-purple-900 mb-3">Είσαι ο Βασιλιάς των Μοτίβων!</h3>
+        <p class="text-slate-700 text-lg sm:text-2xl font-bold mb-8 leading-relaxed">
+          Ολοκλήρωσες και τις <span class="font-black text-pink-600">8 δραστηριότητες</span> του 2ου μαθήματος! Μπορείς πλέον να προβλέπεις κάθε μοτίβο στον κόσμο και στον υπολογιστή!
+        </p>
+        <div class="flex flex-col gap-3">
+          <button onclick="downloadSelf()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl rounded-2xl shadow-lg transition">
+            💾 Κατέβασε το παιχνίδι σου
+          </button>
+          <button onclick="restartAll()" class="w-full py-4 bg-purple-100 hover:bg-purple-200 text-purple-900 font-extrabold text-lg rounded-2xl transition">
+            🔄 Παίξε ξανά από την αρχή
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ΥΠΟΒΑΘΡΟ / FOOTER -->
+  <footer class="bg-white/80 border-t border-slate-200 py-3 text-center text-sm sm:text-base font-semibold text-slate-600">
+    <p>Διαδραστικό Υλικό Πληροφορικής Β΄ Δημοτικού • Μάθημα 2: Ανακάλυψε το μοτίβο • Κατάλληλο για διαδραστικούς πίνακες & τάμπλετ</p>
+  </footer>
+
+  <!-- SCRIPT ΕΦΑΡΜΟΓΗΣ -->
+  <script>
+    // --- ΗΧΗΤΙΚΑ ΕΦΕ ΜΕ WEB AUDIO API ---
+    let audioCtx = null;
+    function playBeep(type) {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'correct') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now); // A4
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.2); // A5
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'fanfare') {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g);
+            g.connect(audioCtx.destination);
+            o.frequency.value = freq;
+            g.gain.setValueAtTime(0.15, now + idx * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+            o.start(now + idx * 0.1);
+            o.stop(now + idx * 0.1 + 0.3);
+          });
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(160, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
+      } catch (e) {}
+    }
+
+    // --- ΔΕΔΟΜΕΝΑ 8 ΔΡΑΣΤΗΡΙΟΤΗΤΩΝ ΓΙΑ ΤΟ ΜΑΘΗΜΑ 2 ---
+    const activities = [
+      {
+        id: 1,
+        title: "1. Τι είναι το Μοτίβο;",
+        icon: "🔍",
+        desc: "Μαθαίνουμε πώς να ανακαλύπτουμε τα μοτίβα που επαναλαμβάνονται!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Πότε λέμε ότι έχουμε ανακαλύψει ένα μοτίβο;",
+            options: [
+              { text: "🔮 Όταν μπορούμε να μαντέψουμε σωστά το επόμενο αντικείμενο!", correct: true, feedback: "Μπράβο! Όπως λέει και το βιβλίο μας, αν προβλέπεις το επόμενο, βρήκες το μοτίβο!" },
+              { text: "🎲 Όταν όλα τα πράγματα είναι εντελώς ανακατεμένα στην τύχη", correct: false, feedback: "Αν είναι στην τύχη, δεν υπάρχει κανένας κανόνας!" },
+              { text: "🙈 Όταν κλείνουμε τα μάτια και δεν βλέπουμε τίποτα", correct: false, feedback: "Πρέπει να παρατηρήσουμε προσεκτικά σε τι μοιάζουν και σε τι διαφέρουν!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Για να βρούμε το μοτίβο, παρατηρούμε σε τι μοιάζουν και σε τι διαφέρουν τα αντικείμενα.",
+            statement: "«Για να ανακαλύψεις ένα μοτίβο, παρατηρείς προσεκτικά τα αντικείμενα που το αποτελούν.»",
+            correctAnswer: true,
+            feedbackTrue: "Σωστά! Η παρατήρηση είναι το μεγάλο μυστικό!",
+            feedbackFalse: "Κι όμως είναι Σωστό! Χρειάζεται καλή παρατήρηση!"
+          },
+          {
+            type: "choice",
+            prompt: "Ποια από τις παρακάτω σειρές ΕΧΕΙ μοτίβο;",
+            options: [
+              { text: "⭐ 💖 ⭐ 💖 ⭐ 💖", correct: true, feedback: "Τέλεια! Επαναλαμβάνεται πάντα: [ Αστέρι, Καρδούλα ]!" },
+              { text: "🚗 🍌 🚀 🐸 🍕 🚲 (όλα τυχαία)", correct: false, feedback: "Εδώ δεν υπάρχει κανένας κανόνας επανάληψης!" },
+              { text: "❓ ❓ ❓ ❓ ❓", correct: false, feedback: "Αυτά είναι μόνο ερωτηματικά!" }
+            ]
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "2. Το Βραχιόλι με τις 3 Χάντρες",
+        icon: "📿",
+        desc: "Το παράδειγμα της Υπατίας και του Ήρωνα με τις πολύχρωμες χάντρες!",
+        subTasks: [
+          {
+            type: "pattern_next",
+            prompt: "Το μοτίβο έχει 3 χάντρες: [ 🟠 Πορτοκαλί, 🔵 Γαλάζιο, 🟢 Λαχανί ]. Ποια χάντρα έρχεται στη θέση του ερωτηματικού ❓ ;",
+            patternVisual: ["bead-orange", "bead-cyan", "bead-lime", "bead-orange", "bead-cyan", "bead-lime", "bead-orange", "bead-cyan"],
+            options: [
+              { text: "🟢 Λαχανί", colorClass: "bead-lime", correct: true, feedback: "Εξαιρετικά! Μετά το γαλάζιο ακολουθεί πάντα η λαχανί χάντρα!" },
+              { text: "🟠 Πορτοκαλί", colorClass: "bead-orange", correct: false, feedback: "Όχι, το πορτοκαλί ξεκινάει την ομάδα, δεν μπαίνει μετά το γαλάζιο!" },
+              { text: "🟣 Μοβ", colorClass: "bead-purple", correct: false, feedback: "Δεν υπάρχει μοβ χάντρα σε αυτό το μοτίβο!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Αν το μοτίβο [ 🟠, 🔵, 🟢 ] (3 χάντρες) το επαναλάβουμε 4 φορές, πόσες χάντρες θα έχει όλο το βραχιόλι;",
+            options: [
+              { text: "✨ 12 χάντρες (3 + 3 + 3 + 3)", correct: true, feedback: "Μπράβο σου! 4 φορές το 3 μας κάνει ακριβώς 12 χάντρες!" },
+              { text: "✨ 7 χάντρες", correct: false, feedback: "Σκέψου: 3 χάντρες x 4 επαναλήψεις!" },
+              { text: "✨ 3 χάντρες", correct: false, feedback: "Αν ήταν 3, θα το είχαμε φτιάξει μόνο 1 φορά!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Στο βραχιόλι των 3 χαντρών, κάθε φορά που τελειώνει η λαχανί χάντρα 🟢, αρχίζει ξανά από την πορτοκαλί 🟠;",
+            statement: "«Μετά από τη λαχανί χάντρα, το μοτίβο ξαναρχίζει από την αρχή με την πορτοκαλί χάντρα.»",
+            correctAnswer: true,
+            feedbackTrue: "Πολύ σωστά! Το μοτίβο ξεκινάει πάλι από την αρχή!",
+            feedbackFalse: "Είναι Σωστό! Αφού το μοτίβο είναι κυκλικό!"
+          }
+        ]
+      },
+      {
+        id: 3,
+        title: "3. Μέτρησε τις Επαναλήψεις!",
+        icon: "🔢",
+        desc: "Βρες πόσες φορές επαναλαμβάνεται το μοτίβο στο βραχιόλι!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Δες το βραχιόλι: [ 🟡, 🔴 ] [ 🟡, 🔴 ] [ 🟡, 🔴 ] [ 🟡, 🔴 ] [ 🟡, 🔴 ]. Πόσες φορές επαναλαμβάνεται το ζευγάρι;",
+            patternVisual: ["bead-yellow", "bead-red", "bead-yellow", "bead-red", "bead-yellow", "bead-red", "bead-yellow", "bead-red", "bead-yellow", "bead-red"],
+            options: [
+              { text: "5 φορές", correct: true, feedback: "Άψογα! Μετράμε 5 φορές το ζευγάρι [ Κίτρινο, Κόκκινο ]!" },
+              { text: "3 φορές", correct: false, feedback: "Μέτρα πιο προσεκτικά τα ζευγάρια!" },
+              { text: "10 φορές", correct: false, feedback: "10 είναι όλες οι χάντρες μαζί, το μοτίβο όμως επαναλαμβάνεται 5 φορές!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Δες το βραχιόλι με 3άδες: [ 🔵, 🔵, 🟢 ] [ 🔵, 🔵, 🟢 ] [ 🔵, 🔵, 🟢 ]. Πόσες επαναλήψεις έχει;",
+            patternVisual: ["bead-cyan", "bead-cyan", "bead-lime", "bead-cyan", "bead-cyan", "bead-lime", "bead-cyan", "bead-cyan", "bead-lime"],
+            options: [
+              { text: "3 επαναλήψεις", correct: true, feedback: "Τέλεια! Υπάρχουν 3 ομάδες των 3 χαντρών!" },
+              { text: "2 επαναλήψεις", correct: false, feedback: "Υπάρχουν 3 ομάδες, όχι 2!" },
+              { text: "9 επαναλήψεις", correct: false, feedback: "9 είναι οι χάντρες, οι επαναλήψεις είναι 3!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Σωστό ή Λάθος: Αν ένα μοτίβο επαναληφθεί 10 φορές, το βραχιόλι θα είναι μεγαλύτερο από το αν επαναληφθεί 2 φορές;",
+            statement: "«Όσες περισσότερες φορές επαναλαμβάνουμε ένα μοτίβο, τόσο πιο μεγάλο γίνεται το βραχιόλι.»",
+            correctAnswer: true,
+            feedbackTrue: "Σωστά! Περισσότερες επαναλήψεις = πιο πολλές χάντρες!",
+            feedbackFalse: "Είναι Σωστό! 10 επαναλήψεις δίνουν πολύ πιο μακρύ βραχιόλι!"
+          }
+        ]
+      },
+      {
+        id: 4,
+        title: "4. Μοτίβα με Σχήματα",
+        icon: "🔺",
+        desc: "Ανακαλύπτουμε τα γεωμετρικά μοτίβα!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Ποιο σχήμα λείπει στο τέλος;  🟩 🟡 🔺 | 🟩 🟡 🔺 | 🟩 🟡 ... ❓",
+            options: [
+              { text: "🔺 Το κόκκινο τρίγωνο", correct: true, feedback: "Μπράβο! Το μοτίβο είναι: Τετράγωνο ➡️ Κύκλος ➡️ Τρίγωνο!" },
+              { text: "🟩 Το πράσινο τετράγωνο", correct: false, feedback: "Το τετράγωνο έρχεται μετά το τρίγωνο!" },
+              { text: "⭐ Ένα αστέρι", correct: false, feedback: "Δεν υπάρχει αστέρι σε αυτή τη σειρά!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Στη σειρά [ 🔶, 🔷, 🔶, 🔷, 🔶, 🔷 ] το μοτίβο αποτελείται από 2 σχήματα;",
+            statement: "«Το μοτίβο που επαναλαμβάνεται είναι [ 🔶, 🔷 ], δηλαδή αποτελείται από 2 ρόμβους.»",
+            correctAnswer: true,
+            feedbackTrue: "Ακριβώς! Είναι ένα μοτίβο 2 στοιχείων που επαναλαμβάνεται 3 φορές!",
+            feedbackFalse: "Είναι Σωστό! 🔶 και 🔷, δύο διαφορετικά σχήματα!"
+          },
+          {
+            type: "choice",
+            prompt: "Ποιο είναι το μοτίβο που επαναλαμβάνεται στη σειρά: 🟢 🟢 🔴 🟢 🟢 🔴 🟢 🟢 🔴 ;",
+            options: [
+              { text: "[ 🟢, 🟢, 🔴 ] (Δύο πράσινοι κύκλοι και ένας κόκκινος)", correct: true, feedback: "Φανταστικά! Αυτή είναι η ομάδα που επαναλαμβάνεται 3 φορές!" },
+              { text: "[ 🟢, 🔴 ] (Ένας πράσινος και ένας κόκκινος)", correct: false, feedback: "Πρόσεξε, οι πράσινοι κύκλοι είναι δύο στη σειρά!" },
+              { text: "[ 🔴, 🔴, 🔴 ]", correct: false, feedback: "Δεν υπάρχουν τρεις κόκκινοι κύκλοι μαζί!" }
+            ]
+          }
+        ]
+      },
+      {
+        id: 5,
+        title: "5. Μοτίβα στον Παρθενώνα!",
+        icon: "🏛️",
+        desc: "Επαναλήψεις στην αρχιτεκτονική και στην ιστορία!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Κοίταξε τον Παρθενώνα στην Ακρόπολη (σελίδα 16 του βιβλίου). Ποιο αρχιτεκτονικό στοιχείο επαναλαμβάνεται στη σειρά;",
+            options: [
+              { text: "🏛️ Οι κολόνες (κίονες) του ναού!", correct: true, feedback: "Μπράβο! Οι κολόνες είναι τοποθετημένες σε ίση απόσταση με υπέροχο μοτίβο!" },
+              { text: "🚗 Τα αυτοκίνητα", correct: false, feedback: "Στον αρχαίο ναό δεν υπήρχαν αυτοκίνητα!" },
+              { text: "📺 Οι τηλεοράσεις", correct: false, feedback: "Όχι, οι αρχαίοι αρχιτέκτονες χρησιμοποίησαν κολόνες με μοτίβο!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Στους αρχαίους ελληνικούς ναούς, οι αρχιτέκτονες έβαζαν τις κολόνες στη σειρά με μοτίβο για να φαίνεται ο ναός αρμονικός και όμορφος;",
+            statement: "«Τα μοτίβα στην αρχιτεκτονική κάνουν τα κτίρια να δείχνουν όμορφα, σταθερά και αρμονικά.»",
+            correctAnswer: true,
+            feedbackTrue: "Σωστά! Η αρχιτεκτονική είναι γεμάτη από πανέμορφα μοτίβα!",
+            feedbackFalse: "Κι όμως είναι Σωστό! Η επανάληψη δίνει τάξη και ομορφιά!"
+          },
+          {
+            type: "choice",
+            prompt: "Αν δούμε μια αρχαία κιονοστοιχία: [ Κολόνα, Κενό, Κολόνα, Κενό, Κολόνα... ], ποιο είναι το μοτίβο;",
+            options: [
+              { text: "Κολόνα ➡️ Κενό", correct: true, feedback: "Τέλεια! Αυτό το μοτίβο επαναλαμβάνεται σε όλο το μήκος του ναού!" },
+              { text: "Πόρτα ➡️ Παράθυρο", correct: false, feedback: "Εδώ μιλάμε για κολόνες και τα κενά ανάμεσά τους!" },
+              { text: "Δεν υπάρχει κανόνας", correct: false, feedback: "Υπάρχει απόλυτη γεωμετρική ακρίβεια!" }
+            ]
+          }
+        ]
+      },
+      {
+        id: 6,
+        title: "6. Η Τέχνη του M.C. Escher",
+        icon: "🐟",
+        desc: "Επαναλήψεις στην τέχνη με τα ιπτάμενα ψάρια!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Στον πίνακα «Ιπτάμενα Ψάρια» του καλλιτέχνη M.C. Escher (σελίδα 16), τι παρατηρείς;",
+            options: [
+              { text: "🎨 Ψάρια και πουλιά που επαναλαμβάνονται και κουμπώνουν σαν παζλ!", correct: true, feedback: "Ακριβώς! Ο Escher έφτιαχνε μαγικά μοτίβα που γεμίζουν όλη την εικόνα!" },
+              { text: "⚽ Μία μόνο μπάλα ποδοσφαίρου", correct: false, feedback: "Δεν υπάρχει μπάλα στον πίνακα!" },
+              { text: "⬜ Μια ολόλευκη άδεια κόλλα χαρτί", correct: false, feedback: "Ο πίνακας είναι γεμάτος με επαναλαμβανόμενα σχέδια!" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Ποια δύο χρώματα εναλλάσσονται στον πίνακα του Escher στο βιβλίο μας;",
+            options: [
+              { text: "🔴 Κόκκινο και ⚪ Άσπρο", correct: true, feedback: "Μπράβο! Κόκκινα και άσπρα σχήματα που εναλλάσσονται σε μοτίβο!" },
+              { text: "🟢 Πράσινο και 🟣 Μοβ", correct: false, feedback: "Κοίταξε καλά τη σελίδα 16: είναι κόκκινο και άσπρο!" },
+              { text: "🟡 Κίτρινο και 🔵 Μπλε", correct: false, feedback: "Τα χρώματα στον πίνακα είναι κόκκινο και λευκό!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Σωστό ή Λάθος: Μπορούμε να φτιάξουμε κι εμείς έργα τέχνης χρησιμοποιώντας μοτίβα και σχήματα που επαναλαμβάνονται;",
+            statement: "«Οι ζωγράφοι και οι σχεδιαστές χρησιμοποιούν πολύ συχνά μοτίβα για να δημιουργήσουν τέχνη.»",
+            correctAnswer: true,
+            feedbackTrue: "Υπέροχα! Ακόμα και στα πλακάκια του σπιτιού υπάρχουν μοτίβα!",
+            feedbackFalse: "Είναι Σωστό! Η τέχνη είναι γεμάτη μοτίβα!"
+          }
+        ]
+      },
+      {
+        id: 7,
+        title: "7. Αντιστοίχισε τα Μοτίβα!",
+        icon: "🧩",
+        desc: "Βρες ποια περιγραφή ταιριάζει σε κάθε μοτίβο!",
+        subTasks: [
+          {
+            type: "match",
+            prompt: "Κάνε κλικ σε ένα στοιχείο από την αριστερή στήλη και μετά στο ταίρι του από τη δεξιά!",
+            pairs: [
+              { left: "🔴 🔵 🔴 🔵", right: "Μοτίβο με 2 χρώματα" },
+              { left: "🔺 🟩 🟡 🔺 🟩 🟡", right: "Μοτίβο με 3 σχήματα" },
+              { left: "🏛️ 🏛️ 🏛️ 🏛️", right: "Επανάληψη 4 φορές" }
+            ]
+          },
+          {
+            type: "choice",
+            prompt: "Ποιο μοτίβο ταιριάζει με τη φράση: «Ένα μεγάλο αστέρι, ένα μικρό αστέρι, ένα μεγάλο αστέρι, ένα μικρό αστέρι»;",
+            options: [
+              { text: "🌟 ⭐ 🌟 ⭐", correct: true, feedback: "Σωστά! Μεγάλο-μικρό σε συνεχή επανάληψη!" },
+              { text: "🌟 🌟 🌟 🌟 (όλα μεγάλα)", correct: false, feedback: "Εδώ δεν υπάρχει εναλλαγή μεγάλου-μικρού!" },
+              { text: "⭐ ⭐ ⭐ ⭐ (όλα μικρά)", correct: false, feedback: "Εδώ είναι όλα ίδια μικρά!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Ένα μοτίβο μπορεί να αλλάζει όχι μόνο χρώμα, αλλά και μέγεθος (μεγάλο - μικρό);",
+            statement: "«Μοτίβο μπορεί να είναι και η εναλλαγή μεγεθών, όπως: Μεγάλο ➡️ Μικρό ➡️ Μεγάλο ➡️ Μικρό.»",
+            correctAnswer: true,
+            feedbackTrue: "Μπράβο! Το μοτίβο μπορεί να βασίζεται σε χρώμα, σχήμα ή μέγεθος!",
+            feedbackFalse: "Είναι Σωστό! Τα μοτίβα έχουν πολλές μορφές!"
+          }
+        ]
+      },
+      {
+        id: 8,
+        title: "8. Ο Τάλως Προγραμματίζει Μοτίβα!",
+        icon: "🤖",
+        desc: "Βοηθάμε το ρομποτάκι να καταλάβει πώς τα μοτίβα γίνονται κώδικας!",
+        subTasks: [
+          {
+            type: "choice",
+            prompt: "Ο Τάλως θέλει να ζωγραφίσει ένα βραχιόλι με το μοτίβο [ 🔵, 🟡 ] επαναλαμβάνοντάς το 6 φορές. Ποια εντολή θα γράψει;",
+            options: [
+              { text: "🔁 Επανάλαβε 6 φορές: [ Βάλε Μπλε, Βάλε Κίτρινο ]", correct: true, feedback: "Σωστά! Πρώτα ορίζουμε το μοτίβο και μετά πόσες φορές θα επαναληφθεί!" },
+              { text: "🔁 Επανάλαβε 1 φορά: [ Βάλε Μπλε ]", correct: false, feedback: "Έτσι θα βάλει μόνο μία μπλε χάντρα!" },
+              { text: "🛑 Μην κάνεις τίποτα", correct: false, feedback: "Θέλουμε να προγραμματίσουμε το ρομποτάκι να δουλέψει!" }
+            ]
+          },
+          {
+            type: "tf",
+            prompt: "Αν ξέρουμε το μοτίβο, μπορούμε να γράψουμε πολύ πιο μικρά και έξυπνα προγράμματα στον υπολογιστή;",
+            statement: "«Όταν ανακαλύπτουμε το μοτίβο ενός προβλήματος, μπορούμε να χρησιμοποιήσουμε την εντολή ΕΠΑΝΑΛΗΨΗΣ!»",
+            correctAnswer: true,
+            feedbackTrue: "Ακριβώς! Αυτός είναι ο βασικός κανόνας της πληροφορικής!",
+            feedbackFalse: "Είναι Σωστό! Το μοτίβο μάς δείχνει τι να βάλουμε μέσα στην επανάληψη!"
+          },
+          {
+            type: "choice",
+            prompt: "Τι έμαθες καλύτερα στο σημερινό μάθημα;",
+            options: [
+              { text: "🚀 Να αναγνωρίζω τα μοτίβα και να προβλέπω το επόμενο!", correct: true, feedback: "Μπράβο σου! Είσαι πλέον ένας σπουδαίος μικρός επιστήμονας της Πληροφορικής!" },
+              { text: "🐢 Ότι όλα είναι τυχαία και δεν υπάρχει τάξη", correct: false, feedback: "Η φύση και η επιστήμη είναι γεμάτες υπέροχα μοτίβα!" },
+              { text: "🎮 Μόνο να παίζω χωρίς να σκέφτομαι", correct: false, feedback: "Σκεφτόμαστε, παρατηρούμε και ανακαλύπτουμε!" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // --- ΚΑΤΑΣΤΑΣΗ ΕΦΑΡΜΟΓΗΣ (STATE) ---
+    let currentActIndex = 0;
+    let currentSubIndex = 0;
+    const completedTasks = Array.from({ length: 8 }, () => [false, false, false]);
+    let currentShuffledOptions = [];
+
+    // Για το matching game
+    let selectedLeftMatch = null;
+    let matchedPairsCount = 0;
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    // Αρχικοποίηση 8 tabs
+    function initActivityTabs() {
+      const container = document.getElementById('activity-tabs');
+      container.innerHTML = '';
+
+      activities.forEach((act, idx) => {
+        const btn = document.createElement('button');
+        btn.id = `tab-btn-${idx}`;
+        btn.className = `p-2 rounded-2xl font-black text-xs sm:text-sm flex flex-col items-center justify-center gap-1 border-2 transition-all shadow-sm ${
+          idx === currentActIndex 
+            ? 'bg-purple-600 text-white border-purple-700 shadow-md scale-105' 
+            : 'bg-white text-slate-700 border-purple-100 hover:bg-purple-50'
+        }`;
+        btn.onclick = () => selectActivity(idx);
+
+        const allDone = completedTasks[idx].every(val => val === true);
+        const starBadge = allDone ? '⭐' : `${idx + 1}`;
+
+        btn.innerHTML = `
+          <span class="text-2xl sm:text-3xl">${act.icon}</span>
+          <span class="leading-none text-sm sm:text-base font-black">${starBadge}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function selectActivity(actIdx) {
+      currentActIndex = actIdx;
+      currentSubIndex = 0;
+      updateHeader();
+      renderSubTask();
+      updateTabsUI();
+    }
+
+    function updateHeader() {
+      const act = activities[currentActIndex];
+      document.getElementById('act-icon').innerText = act.icon;
+      document.getElementById('act-title').innerText = act.title;
+      document.getElementById('act-desc').innerText = act.desc;
+      document.getElementById('activity-badge').innerText = `Δραστηριότητα ${currentActIndex + 1} από 8`;
+      updateSubDotsUI();
+    }
+
+    function updateTabsUI() {
+      activities.forEach((act, idx) => {
+        const btn = document.getElementById(`tab-btn-${idx}`);
+        if (!btn) return;
+        const allDone = completedTasks[idx].every(val => val === true);
+        const starBadge = allDone ? '⭐' : `${idx + 1}`;
+
+        if (idx === currentActIndex) {
+          btn.className = 'p-2 rounded-2xl font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 border-3 transition-all shadow-md scale-105 bg-purple-600 text-white border-purple-700';
+        } else {
+          btn.className = 'p-2 rounded-2xl font-black text-sm sm:text-base flex flex-col items-center justify-center gap-1 border-2 transition-all shadow-sm bg-white text-slate-700 border-purple-100 hover:bg-purple-50';
+        }
+        btn.querySelector('span:last-child').innerText = starBadge;
+      });
+    }
+
+    function updateSubDotsUI() {
+      for (let i = 0; i < 3; i++) {
+        const dot = document.getElementById(`sub-dot-${i}`);
+        const isDone = completedTasks[currentActIndex][i];
+
+        if (i === currentSubIndex) {
+          dot.className = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-amber-400 text-slate-900 ring-4 ring-white shadow';
+        } else if (isDone) {
+          dot.className = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-emerald-400 text-white shadow-sm';
+          dot.innerText = '✓';
+        } else {
+          dot.className = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full font-black text-lg sm:text-xl flex items-center justify-center transition-all bg-white/30 text-white';
+          dot.innerText = `${i + 1}`;
+        }
+      }
+
+      document.getElementById('sub-indicator').innerText = `Υπο-δραστηριότητα ${currentSubIndex + 1} από 3`;
+      document.getElementById('prev-sub-btn').disabled = (currentActIndex === 0 && currentSubIndex === 0);
+    }
+
+    // --- RENDER SUB-TASK ΑΝΑΛΟΓΑ ΜΕ ΤΟΝ ΤΥΠΟ ---
+    function renderSubTask() {
+      updateSubDotsUI();
+      const task = activities[currentActIndex].subTasks[currentSubIndex];
+      const container = document.getElementById('quiz-area');
+
+      // 1. ΤΥΠΟΣ MATCHING (ΑΝΤΙΣΤΟΙΧΙΣΗ)
+      if (task.type === "match") {
+        renderMatchTask(task, container);
+        return;
+      }
+
+      // 2. ΤΥΠΟΣ ΣΩΣΤΟ / ΛΑΘΟΣ (TRUE / FALSE)
+      if (task.type === "tf") {
+        renderTFTask(task, container);
+        return;
+      }
+
+      // 3. ΤΥΠΟΣ ΠΟΛΛΑΠΛΗΣ ΕΠΙΛΟΓΗΣ & ΣΥΜΠΛΗΡΩΣΗ ΜΟΤΙΒΟΥ
+      renderChoiceTask(task, container);
+    }
+
+    // Render True/False
+    function renderTFTask(task, container) {
+      let html = `
+        <div class="pop-in space-y-6">
+          <div class="bg-purple-50 border-3 border-purple-200 p-5 sm:p-6 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-4xl sm:text-5xl">⚖️</span>
+            <div>
+              <span class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-purple-600">Σωστό ή Λάθος; (Ερώτηση ${currentSubIndex + 1}):</span>
+              <p class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 mt-1 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border-2 border-amber-300 p-5 rounded-2xl text-center">
+            <p class="text-xl sm:text-2xl font-bold text-slate-800 italic">${task.statement}</p>
+          </div>
+
+          <!-- Μεγάλα Κουμπιά Σωστό / Λάθος (Shuffle θέσης) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto" id="tf-options">
+      `;
+
+      const tfChoices = shuffleArray([
+        { label: "✅ ΣΩΣΤΟ", val: true },
+        { label: "❌ ΛΑΘΟΣ", val: false }
+      ]);
+
+      tfChoices.forEach((choice, idx) => {
+        const bgColors = choice.val 
+          ? "bg-emerald-50 hover:bg-emerald-100 border-emerald-400 text-emerald-800"
+          : "bg-rose-50 hover:bg-rose-100 border-rose-400 text-rose-800";
+
+        html += `
+          <button onclick="checkTFAnswer(${choice.val}, ${task.correctAnswer})" id="tf-btn-${idx}" class="bounce-hover p-6 rounded-3xl border-3 ${bgColors} font-black text-2xl sm:text-3xl shadow-lg transition-all text-center active:scale-95">
+            ${choice.label}
+          </button>
+        `;
+      });
+
+      html += `
+          </div>
+          <div id="feedback-box" class="hidden p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function checkTFAnswer(userVal, correctVal) {
+      const task = activities[currentActIndex].subTasks[currentSubIndex];
+      const feedbackBox = document.getElementById('feedback-box');
+
+      // disable κουμπιά
+      document.querySelectorAll('#tf-options button').forEach(b => b.onclick = null);
+
+      if (userVal === correctVal) {
+        playBeep('correct');
+        feedbackBox.className = 'p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>🌟</span> <span>${userVal ? task.feedbackTrue : task.feedbackFalse} <b>Προχωράμε αμέσως!</b></span>`;
+        feedbackBox.classList.remove('hidden');
+
+        if (!completedTasks[currentActIndex][currentSubIndex]) {
+          completedTasks[currentActIndex][currentSubIndex] = true;
+          updateTotalStars();
+        }
+        updateSubDotsUI();
+        updateTabsUI();
+
+        setTimeout(() => { autoAdvance(); }, 1100);
+      } else {
+        playBeep('wrong');
+        feedbackBox.className = 'p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl bg-rose-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>💡</span> <span>Δεν πειράζει! Ξανασκέψου το και δοκίμασε ξανά!</span>`;
+        feedbackBox.classList.remove('hidden');
+
+        setTimeout(() => {
+          document.querySelectorAll('#tf-options button').forEach((b, idx) => {
+            const isTrue = b.innerText.includes('ΣΩΣΤΟ');
+            b.onclick = () => checkTFAnswer(isTrue, correctVal);
+          });
+        }, 700);
+      }
+    }
+
+    // Render Choice & Pattern Next
+    function renderChoiceTask(task, container) {
+      currentShuffledOptions = shuffleArray(task.options);
+
+      let visualHtml = '';
+      if (task.patternVisual) {
+        visualHtml = `
+          <div class="bg-purple-100/70 border-2 border-purple-200 p-4 rounded-3xl flex items-center justify-center flex-wrap gap-2 sm:gap-3 shadow-inner my-2">
+            ${task.patternVisual.map(colorClass => `<span class="bead ${colorClass}"></span>`).join('')}
+            <span class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-3 border-dashed border-purple-500 bg-white font-black text-2xl sm:text-3xl text-purple-700 flex items-center justify-center animate-pulse">❓</span>
+          </div>
+        `;
+      }
+
+      let html = `
+        <div class="pop-in space-y-6">
+          <div class="bg-purple-50 border-3 border-purple-200 p-5 sm:p-6 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-4xl sm:text-5xl">❓</span>
+            <div>
+              <span class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-purple-600">Ερώτηση ${currentSubIndex + 1}:</span>
+              <p class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 mt-1 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          ${visualHtml}
+
+          <div class="grid grid-cols-1 gap-4 sm:gap-5 max-w-3xl mx-auto" id="options-box">
+      `;
+
+      currentShuffledOptions.forEach((opt, oIdx) => {
+        let beadSnippet = opt.colorClass ? `<span class="bead ${opt.colorClass} mr-3"></span>` : '';
+        html += `
+          <button onclick="checkChoiceAnswer(${oIdx})" id="opt-btn-${oIdx}" class="bounce-hover w-full text-left p-5 sm:p-6 rounded-3xl border-3 border-slate-200 bg-white hover:border-purple-400 hover:bg-purple-50/60 shadow-md transition-all font-bold text-slate-800 text-lg sm:text-2xl lg:text-[26px] flex items-center justify-between group active:scale-98">
+            <span class="flex items-center gap-4">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-purple-100 text-purple-800 font-black flex items-center justify-center text-base sm:text-xl group-hover:bg-purple-600 group-hover:text-white transition shadow-sm">
+                ${String.fromCharCode(65 + oIdx)}
+              </span>
+              ${beadSnippet}
+              <span class="leading-snug">${opt.text}</span>
+            </span>
+            <span id="opt-status-${oIdx}" class="text-3xl"></span>
+          </button>
+        `;
+      });
+
+      html += `
+          </div>
+          <div id="feedback-box" class="hidden p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function checkChoiceAnswer(chosenIdx) {
+      const opt = currentShuffledOptions[chosenIdx];
+      const feedbackBox = document.getElementById('feedback-box');
+
+      currentShuffledOptions.forEach((_, idx) => {
+        const btn = document.getElementById(`opt-btn-${idx}`);
+        if (btn) btn.onclick = null;
+      });
+
+      if (opt.correct) {
+        playBeep('correct');
+        const chosenBtn = document.getElementById(`opt-btn-${chosenIdx}`);
+        chosenBtn.classList.remove('bg-white', 'border-slate-200');
+        chosenBtn.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-950', 'jiggle');
+        document.getElementById(`opt-status-${chosenIdx}`).innerText = '🎉';
+
+        feedbackBox.className = 'p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>🌟</span> <span>${opt.feedback} <b>Πάμε κατευθείαν στην επόμενη!</b></span>`;
+        feedbackBox.classList.remove('hidden');
+
+        if (!completedTasks[currentActIndex][currentSubIndex]) {
+          completedTasks[currentActIndex][currentSubIndex] = true;
+          updateTotalStars();
+        }
+        updateSubDotsUI();
+        updateTabsUI();
+
+        setTimeout(() => { autoAdvance(); }, 1100);
+
+      } else {
+        playBeep('wrong');
+        const chosenBtn = document.getElementById(`opt-btn-${chosenIdx}`);
+        chosenBtn.classList.remove('bg-white', 'border-slate-200');
+        chosenBtn.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-950');
+        document.getElementById(`opt-status-${chosenIdx}`).innerText = '🤔';
+
+        feedbackBox.className = 'p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl bg-rose-500 text-white flex items-center justify-center gap-3';
+        feedbackBox.innerHTML = `<span>💡</span> <span>${opt.feedback} Προσπάθησε ξανά!</span>`;
+        feedbackBox.classList.remove('hidden');
+
+        setTimeout(() => {
+          currentShuffledOptions.forEach((_, idx) => {
+            const btn = document.getElementById(`opt-btn-${idx}`);
+            if (btn) btn.onclick = () => checkChoiceAnswer(idx);
+          });
+        }, 700);
+      }
+    }
+
+    // Render Matching Task (Click to pair)
+    function renderMatchTask(task, container) {
+      selectedLeftMatch = null;
+      matchedPairsCount = 0;
+
+      const shuffledLeft = shuffleArray(task.pairs.map((p, i) => ({ text: p.left, id: i })));
+      const shuffledRight = shuffleArray(task.pairs.map((p, i) => ({ text: p.right, id: i })));
+
+      let html = `
+        <div class="pop-in space-y-6">
+          <div class="bg-purple-50 border-3 border-purple-200 p-5 sm:p-6 rounded-3xl flex items-start gap-4 shadow-inner">
+            <span class="text-4xl sm:text-5xl">🧩</span>
+            <div>
+              <span class="text-sm sm:text-base font-extrabold uppercase tracking-wider text-purple-600">Παιχνίδι Αντιστοίχισης (Ερώτηση ${currentSubIndex + 1}):</span>
+              <p class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 mt-1 leading-snug">${task.prompt}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            
+            <!-- Αριστερή Στήλη -->
+            <div class="space-y-3">
+              <h4 class="text-center font-black text-purple-700 text-lg uppercase tracking-wider">Στήλη Α</h4>
+              ${shuffledLeft.map(item => `
+                <button onclick="handleMatchClick('left', ${item.id}, this)" id="match-left-${item.id}" class="w-full p-4 sm:p-5 rounded-2xl border-3 border-purple-200 bg-white hover:border-purple-500 font-extrabold text-xl sm:text-2xl text-slate-800 shadow transition text-center">
+                  ${item.text}
+                </button>
+              `).join('')}
+            </div>
+
+            <!-- Δεξιά Στήλη -->
+            <div class="space-y-3">
+              <h4 class="text-center font-black text-pink-700 text-lg uppercase tracking-wider">Στήλη Β</h4>
+              ${shuffledRight.map(item => `
+                <button onclick="handleMatchClick('right', ${item.id}, this)" id="match-right-${item.id}" class="w-full p-4 sm:p-5 rounded-2xl border-3 border-pink-200 bg-white hover:border-pink-500 font-extrabold text-lg sm:text-xl text-slate-800 shadow transition text-center">
+                  ${item.text}
+                </button>
+              `).join('')}
+            </div>
+
+          </div>
+
+          <div id="feedback-box" class="hidden p-5 sm:p-6 rounded-3xl text-center font-black text-lg sm:text-2xl pop-in shadow-xl"></div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function handleMatchClick(side, pairId, btnElem) {
+      if (btnElem.disabled) return;
+
+      if (side === 'left') {
+        // Επιλογή από αριστερά
+        document.querySelectorAll("[id^='match-left-']").forEach(b => {
+          if (!b.disabled) b.classList.remove('ring-4', 'ring-purple-500', 'bg-purple-100');
+        });
+        btnElem.classList.add('ring-4', 'ring-purple-500', 'bg-purple-100');
+        selectedLeftMatch = { id: pairId, btn: btnElem };
+      } else if (side === 'right') {
+        if (!selectedLeftMatch) {
+          playBeep('wrong');
+          const fb = document.getElementById('feedback-box');
+          fb.className = 'p-4 rounded-2xl text-center font-bold text-lg bg-amber-400 text-amber-950 pop-in';
+          fb.innerText = '👆 Διάλεξε πρώτα ένα κουτάκι από τη Στήλη Α!';
+          fb.classList.remove('hidden');
+          return;
+        }
+
+        if (selectedLeftMatch.id === pairId) {
+          // Σωστή αντιστοίχιση!
+          playBeep('correct');
+          selectedLeftMatch.btn.disabled = true;
+          btnElem.disabled = true;
+          selectedLeftMatch.btn.className = 'w-full p-4 sm:p-5 rounded-2xl border-3 border-emerald-500 bg-emerald-100 text-emerald-900 font-extrabold text-xl sm:text-2xl shadow jiggle text-center';
+          btnElem.className = 'w-full p-4 sm:p-5 rounded-2xl border-3 border-emerald-500 bg-emerald-100 text-emerald-900 font-extrabold text-lg sm:text-xl shadow jiggle text-center';
+          selectedLeftMatch = null;
+          matchedPairsCount++;
+
+          if (matchedPairsCount === 3) {
+            // Ολοκληρώθηκαν όλα τα ζευγάρια!
+            const fb = document.getElementById('feedback-box');
+            fb.className = 'p-5 sm:p-6 rounded-3xl text-center font-black text-xl sm:text-2xl pop-in shadow-xl bg-emerald-500 text-white flex items-center justify-center gap-3';
+            fb.innerHTML = `<span>🌟</span> <span>Μπράβο! Βρήκες όλα τα ζευγάρια! <b>Προχωράμε!</b></span>`;
+            fb.classList.remove('hidden');
+
+            if (!completedTasks[currentActIndex][currentSubIndex]) {
+              completedTasks[currentActIndex][currentSubIndex] = true;
+              updateTotalStars();
+            }
+            updateSubDotsUI();
+            updateTabsUI();
+
+            setTimeout(() => { autoAdvance(); }, 1200);
+          }
+        } else {
+          // Λάθος ζευγάρι
+          playBeep('wrong');
+          btnElem.classList.add('bg-rose-100', 'border-rose-400');
+          setTimeout(() => {
+            btnElem.classList.remove('bg-rose-100', 'border-rose-400');
+          }, 500);
+        }
+      }
+    }
+
+    // Αυτόματη προώθηση στο επόμενο βήμα
+    function autoAdvance() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+        renderSubTask();
+      } else if (currentActIndex < 7) {
+        currentActIndex++;
+        currentSubIndex = 0;
+        updateHeader();
+        renderSubTask();
+        updateTabsUI();
+      } else {
+        checkIfAllFinished();
+      }
+    }
+
+    function setSubTask(index) {
+      currentSubIndex = index;
+      renderSubTask();
+    }
+
+    function prevSubTask() {
+      if (currentSubIndex > 0) {
+        currentSubIndex--;
+        renderSubTask();
+      } else if (currentActIndex > 0) {
+        currentActIndex--;
+        currentSubIndex = 2;
+        updateHeader();
+        renderSubTask();
+        updateTabsUI();
+      }
+    }
+
+    function nextSubTask() {
+      if (currentSubIndex < 2) {
+        currentSubIndex++;
+        renderSubTask();
+      } else if (currentActIndex < 7) {
+        currentActIndex++;
+        currentSubIndex = 0;
+        updateHeader();
+        renderSubTask();
+        updateTabsUI();
+      } else {
+        checkIfAllFinished();
+      }
+    }
+
+    function updateTotalStars() {
+      let stars = 0;
+      completedTasks.forEach(act => {
+        act.forEach(done => {
+          if (done) stars++;
+        });
+      });
+      document.getElementById('star-count').innerText = stars;
+
+      if (stars === 24) {
+        setTimeout(() => {
+          playBeep('fanfare');
+          document.getElementById('finish-modal').classList.remove('hidden');
+        }, 800);
+      }
+    }
+
+    function checkIfAllFinished() {
+      let stars = 0;
+      completedTasks.forEach(act => act.forEach(done => { if (done) stars++; }));
+      if (stars === 24) {
+        playBeep('fanfare');
+        document.getElementById('finish-modal').classList.remove('hidden');
+      }
+    }
+
+    function restartAll() {
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 3; j++) {
+          completedTasks[i][j] = false;
+        }
+      }
+      document.getElementById('finish-modal').classList.add('hidden');
+      updateTotalStars();
+      selectActivity(0);
+    }
+
+    // --- ΚΑΤΕΒΑΣΜΑ ΑΡΧΕΙΟΥ HTML (DOWNLOAD SELF) ---
+    function downloadSelf() {
+      const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Pliroforiki_B_Dimotikou_Mathima2_Motiva.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    window.onload = function() {
+      initActivityTabs();
+      updateHeader();
+      renderSubTask();
+    };
+  </script>
+</body>
+</html>
